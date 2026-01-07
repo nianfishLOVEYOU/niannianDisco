@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Love",
+            "type": "lua-local",
+            "request": "launch",
+            "program": {
+                "command": "love"               // 已加入 PATH
+            },
+            "args": [ ".", "debug" ]           // “.” 为当前目录，“debug” 为自定义参数
+        }
+    ]
+}
