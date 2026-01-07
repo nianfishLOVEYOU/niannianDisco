@@ -25,7 +25,12 @@ function normalize(x, y)
     return x / standard, y / standard
 end
 
---默认 static
+bodyType={
+    dynamic="dynamic",
+    static="static"
+}
+
+--默认 static 可以自己定义为
 function setBody(x, y, w, h, anchorX, anchorY, bodyInfo)
     bodyInfo          = bodyInfo or {}
     bodyInfo.x        = x or 0

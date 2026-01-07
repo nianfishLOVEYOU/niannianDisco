@@ -4,7 +4,7 @@ local class = require "src.common.class"
 local RemotePlayer = player:extend()
 
 
-function RemotePlayer:init(x, y, speed, imgPath)
+function RemotePlayer:init(x, y, w, h, imgPath, bodyInfo)
     print("--------------remote",x,y)
     self.type="remotePlayer"
 end

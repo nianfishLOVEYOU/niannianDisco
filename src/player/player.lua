@@ -6,9 +6,11 @@ function player:init(x, y, w, h, imgPath, bodyInfo)
     print("--------------local")
     self.type = "player"
 
-    self.speed = 200
-    self:setBody(w / 2, 10)
+    self:setImage(imgPath)
+    self:setBody(self.w / 2, 10,0,-0.5,{type="dynamic"})
 
+    
+    self.speed = 200
     self.direct = 1
     self.ismove = false
     self.animationAttribute = {
@@ -40,17 +42,9 @@ function player:gotoPos(x, y)
     self.moveToTarget = true
 end
 
-function player:getPos()
-    return self.body:getPosition()
-end
-
-function player:setPos(x, y, z)
-    self.body:setPosition(x, y)
-    self.z = z or 0
-end
 
 -- 尝试移动，若与阻挡物体相撞则阻止该方向的位移
-function player:move(dx, dy, obstacles)
+function player:move(dx, dy)
     self.body:setLinearVelocity(dx, dy)
 end
 
@@ -62,7 +56,6 @@ end
 function player:update(dt)
     --父类的方法执行
     player.super.update(self, dt)
-
     local vx, vy = 0, 0
     -- 鼠标操作：按住左键直接人工控制，优先级高于目标点移动
     if self.moveToTarget and self.targetX and self.targetY then

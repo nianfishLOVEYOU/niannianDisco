@@ -3,7 +3,7 @@ local remotePlayer = require("src.player.remotePlayer")
 local playerControl = require("src.player.playerControl")
 
 local PlayerManager = {
-    name = "",
+    name = "我!",
     player = nil,
     remotePlayers = {}
 }
@@ -26,14 +26,16 @@ function PlayerManager:addPlayer(x,y)
     if self.player then
         return
     end
-    local player = player:new(x,y, 200, "res/image/player1.png")
+    local player = player:new(x,y,0,0, "res/image/player1.png")
+    player:setName(self.name)
     self.player = player
 end
 
 function PlayerManager:addRemotePlayer(id, name, x, y)
     if not self.remotePlayers[id] then
         print("[creat remote player ]:" .. id, name)
-        local rplayer = remotePlayer:new(x, y, 200, "res/image/player1.png", name)
+        local rplayer = remotePlayer:new(x, y, 0,0, "res/image/player1.png")
+        rplayer:setName(name)
         self.remotePlayers[id] = rplayer
     end
 end

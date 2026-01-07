@@ -10,14 +10,7 @@ function bodyItem:init(x, y, w, h, imgPath, bodyInfo)
 end
 
 function bodyItem:setBody(w,h,AnchorX, AnchorY,bodyInfo)
-    if self.body then
-        self.body:destroy()
-    end
-
-    -- 2. 释放 shape
-    if self.shape then
-        self.shape:release()
-    end
+    self:destoryBody()
     w=w or self.w
     h=h or self.h
     AnchorX=AnchorX or 0
@@ -31,16 +24,16 @@ function bodyItem:setPos(x, y, z)
 end
 
 function bodyItem:getPos()
-    return self.body:getPosition()
+    local x,y =self.body:getPosition()
+    return x,y,self.z
 end
 
 function bodyItem:update(dt)
     self.x, self.y = self:getPos()
 end
 
--- 确保没有被引用了
-function bodyItem:destroy()
-    if self.body then
+function bodyItem:destoryBody()
+        if self.body then
         self.body:destroy()
     end
 
@@ -52,6 +45,11 @@ function bodyItem:destroy()
     self.body=nil
     self.fixture =nil
     self.shape =nil
+end
+
+-- 确保没有被引用了
+function bodyItem:destroy()
+    self:destoryBody()
 end
 
 return bodyItem
