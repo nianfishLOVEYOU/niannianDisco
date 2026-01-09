@@ -127,14 +127,15 @@ function PlaylistUI:draw()
 
     -- 拖拽区域图片
     self.inputImage:draw()
-    local x, y = love.mouse.getPosition()
-    local isInUI = x > self.inputImage.x and x < self.inputImage.x + self.inputImage.width and y > self.inputImage.y and
-                       y < self.inputImage.y + self.inputImage.height
-    if isInUI then
-        love.graphics.setColor(1, 1, 0)
-        love.graphics.rectangle("line", self.inputImage.x, self.inputImage.y, self.inputImage.width,
-            self.inputImage.height)
-    end
+    
+    -- local x, y = love.mouse.getPosition()
+    -- local isInUI = x > self.inputImage.x and x < self.inputImage.x + self.inputImage.w and y > self.inputImage.y and
+    --                    y < self.inputImage.y + self.inputImage.h
+    -- if isInUI then
+    --     love.graphics.setColor(1, 1, 0)
+    --     love.graphics.rectangle("line", self.inputImage.x, self.inputImage.y, self.inputImage.w,
+    --         self.inputImage.h)
+    -- end
 end
 
 function PlaylistUI:wheelmoved(x, y)

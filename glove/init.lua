@@ -1,3 +1,4 @@
+--管理ui组件功能
 local love = require "love"
 local colors = require "glove/colors"
 require "glove/string-extensions"
@@ -29,8 +30,8 @@ local widgets = {
 
 Glove = {
   clickables = {},
-  mousemoveables={},
-  mousereleaseables={},
+  mousemoveables = {},
+  mousereleaseables = {},
 
   getAvailableHeight = function()
     return g.getHeight() - Glove.margin * 2
@@ -48,19 +49,31 @@ Glove = {
     return widget == focusedWidget
   end,
 
-  mousePressed = function(x, y, button)
+  mousePressed = function(mouseX, mouseY, button)
+    --按照渲染顺序点击
+    --按照z轴前后点击
     if button ~= 1 then return end
+    local clickWidget=nil
     for _, widget in pairs(Glove.clickables) do
-      
-      if widget.visible then widget:handleClick(x, y) end
+      if widget.visible then
+        local x, y, _ = widget:getPos()
+        local width, height = self:getSize()
+        if x <= mouseX and mouseX <= x + width and
+            y <= mouseY and mouseY <= y + height then
+          if clickWidget==nil or widget.z>=clickWidget.z then
+            clickWidget=widget
+          end
+        end
+      end
     end
+    clickWidget:handleClick(mouseX, mouseY)
   end,
 
   mousemoved = function(x, y, dx, dy)
     for _, widget in pairs(Glove.mousemoveables) do
       if widget.visible then widget:mousemoved(x, y, dx, dy) end
     end
-  end,  
+  end,
 
   mousereleased = function(x, y, button)
     if button ~= 1 then return end
@@ -77,6 +90,7 @@ Glove = {
   end
 }
 
+
 for _, module in ipairs(utilities) do
   Glove[module] = require("glove/" .. module)
 end
@@ -89,7 +103,7 @@ mouseManager:mousepressed_regester(function(x, y, button)
   Glove.mousePressed(x, y, button)
 end)
 
-mouseManager:mouseMoved_regester(function (x, y, dx, dy)
+mouseManager:mouseMoved_regester(function(x, y, dx, dy)
   Glove.mousemoved(x, y, dx, dy)
 end)
 

@@ -1,3 +1,4 @@
+--管理ui页面对象
 local uiManager={
     uiTable={}
 }

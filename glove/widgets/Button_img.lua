@@ -1,125 +1,79 @@
 local colors = require "glove/colors"
 local love = require "love"
+local widget = require "glove.widgets.widget"
+local image = require "src.common.aUIImage"
 
 local g = love.graphics
 local padding = 10
-local mt = {
-    __index = {
-        draw = function(self, parentX, parentY)
-            local x = parentX + self.x
-            local y = parentY + self.y
-            local rotation = 0
-            self.actualX = x
-            self.actualY = y
-            -- 如果有自动尺寸则用自动尺寸，否则用
 
-            love.graphics.setColor(1, 1, 1)
-            if self:isOver(love.mouse.getPosition()) and not love.mouse.isDown(1) then
-                local offsetx = padding / 2
-                local offsety = padding / 2
-                g.draw(self.image, x - offsetx, y - offsety, rotation, (self.width + padding) / self.image:getWidth(),
-                    (self.height + padding) / self.image:getHeight())
-            else
-                g.draw(self.image, x, y, rotation, self.width / self.image:getWidth(),
-                    self.height / self.image:getHeight())
-            end
+local Button_img = widget:extend()
 
-            -- 字
-            g.setColor(self.labelColor)
-            g.setFont(self.font)
-            g.print(self.label, x + self.width / 2, y + self.height / 2)
-        end,
 
-        getHeight = function(self)
-            return self.width
-        end,
+function Button_img:init(x, y, w, h, label, imagepath, func)
+    local font = g.getFont()
+    self.type = "Button"
+    self.font = font
+    self.label = label
+    self.labelColor = colors.black
+    self.clickFunc = func
 
-        getWidth = function(self)
-            return self.height
-        end,
+    self.image = image:new(imagepath, 0, 0, 0, 0)
+    self.w,self.h = self.image:getSize()
+end
 
-        handleClick = function(self, clickX, clickY)
-            local clicked = self:isOver(clickX, clickY)
-            if clicked then
-                --print("by clicked -----------------")
-                Glove.setFocus(self)
-                if self.onClick then
-                    self.onClick()
-                end
-            end
-            return clicked
-        end,
+function Button_img:draw()
+    local cornerRadius = padding
 
-        isOver = function(self, mouseX, mouseY)
-            local x = self.actualX
-            local y = self.actualY
-            if not x or not y then
-                return false
-            end
-
-            local width = self:getWidth()
-            local height = self:getHeight()
-            return x <= mouseX and mouseX <= x + width and y <= mouseY and mouseY <= y + height
-        end,
-
-        destroy = function(self)
-            if self.__destroyed then return end
-            self.__destroyed = true
-            if self.onDestroy then
-                self.onDestroy()
-            end
-        end,
-    }
-}
-
---[[
-This widget is a clickable button.
-
-The parameters are:
-
-- text to display on the button
-- table of options
-
-The supported options are:
-
-- `buttonColor`: background color of the button; defaults to white
-- `font`: font used for the button label
-- `labelColor`: color of the label; defaults to black
-- `onClick`: function called when the button is clicked
---]]
-local function Button_img(label, imagepath, options)
-    options = options or {}
-    assert(type(options) == "table", "Button options must be a table.")
-
-    local font = options.font or g.getFont()
-    local instance = options
-    instance.kind = "Button_img"
-    instance.font = font
-    instance.label = label
-    instance.image = resourceManager.loadImage(imagepath)
-    instance.visible = true
-    instance.labelColor = instance.labelColor or colors.black
-    instance.buttonColor = instance.buttonColor or colors.white
-    instance.x = 0
-    instance.y = 0
-
-    local scale = options.scale or 1
-    --如果没有填尺寸就默认
-    local imagew, imageh = instance.image:getDimensions()
-    if not options.width or not options.height then
-        instance.width = scale * imagew
-        instance.height = scale * imageh
+    --先显示图片
+    love.graphics.setColor(self.color)
+    if self:isOver(love.mouse.getPosition()) and not love.mouse.isDown(1) then
+        local offsetx = padding / 2
+        local offsety = padding / 2
+        self.image:setPos(self.x - offsetx,self.y - offsety)
+        self.image:setSize( (self.width + padding),(self.height + padding))
+        self.image:draw()
+    else
+        self.image:setPos(self.x,self.y)
+        self.image:setScale(1,1)
+        self.image:draw()
     end
 
-    setmetatable(instance, mt)
+    g.setColor(self.labelColor)
+    g.setFont(self.font)
 
-    Glove.clickables[instance] = instance
+    --减去字体宽度
+    local fw, fh = self:getFontSize()
 
-    instance.onDestroy = function()
-        Glove.clickables[instance] = nil
-    end
+    g.print(self.label, self.x + self.w / 2 - fw / 2 + padding,
+        self.y + self.h / 2 - fh / 2 + padding)
+end
 
-    return instance
+function Button_img:setText(text)
+    self.label = text
+    Button_img:setSize(0, 0)
+end
+
+function Button_img:getFontSize()
+    local labelWidth = self.font:getWidth(self.label) + padding * 2
+    local labelHeight = self.font:getHeight() + padding * 2
+    return labelWidth, labelHeight
+end
+
+function Button_img:setSize(w, h)
+    self.image:setSize(w,h)
+    self.w = w
+    self.h = h
+end
+
+function Button_img:onClick(x, y, button)
+    self.clickFunc()
+end
+
+function Button_img:destroy()
+    if self.__destroyed then return end
+    self.__destroyed = true
+    Glove.clickables[self] = nil
 end
 
 return Button_img
+
