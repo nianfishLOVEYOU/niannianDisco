@@ -1,68 +1,26 @@
-local love = require "love"
-local g = love.graphics
 
-local mt = {
-  __index = {
-    draw = function(self, parentX, parentY)
-      if self.x and self.y then
-        local rotation = 0
+local image = require "src.common.aUIImage"
+local widget = require "glove.widgets.widget"
 
-        local imagew, imageh = self.image:getDimensions()
-          g.draw(
-            self.image,
-            parentX + self.x,
-            parentY + self.y,
-            rotation,
-            self.width/imagew,
-            self.height/imageh
-          )
+local Image = widget:extend()
 
-        
-      end
-    end,
+function Image:init(x, y, w, h, imagepath)
+  self.type = "Image"
+  self.image = image:new(imagepath, 0, 0, 0, 0)
+  self.w,self.h = self.image:getSize()
+end
 
-    getHeight = function(self)
-      return self.height
-    end,
+function Image:draw()
+    self.image:setPos(self.x,self.y)
+    self.image:setScale(1,1)
+    self.image:draw()
+end
 
-    getWidth = function(self)
-      return self.width
-    end
-  }
-}
 
---[[
-This widget displays an image.
-
-The parameters are:
-
-- filePath: path to the image file
-- table of options
-
-The supported options are:
-
-- `height`: of the image (aspect ratio is preserved)
---]]
-local function Image(filePath, options)
-  local to = type(options)
-  assert(to == "table" or to == "nil", "Image options must be a table.")
-
-  local image = resourceManager.loadImage(filePath)
-
-  local instance = options or {}
-  instance.kind = "Image"
-  instance.filePath = filePath
-  instance.image = image
-  local scale = options.scale or 1
-  --如果没有填尺寸就默认
-  local imagew, imageh = image:getDimensions()
-  if not options.width or not options.height then
-    instance.width =scale*imagew
-    instance.height=scale*imageh
-  end
-
-  setmetatable(instance, mt)
-  return instance
+function Image:setSize(w, h)
+  self.image:setSize(w,h)
+  self.w = w
+  self.h = h
 end
 
 return Image

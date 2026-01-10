@@ -21,8 +21,13 @@ function item:init(x, y, w, h)
     local id = globleManager:guid()
     self:setId(id)
     self.w, self.h = w, h
+    --点击边界缩放
+    self.overPadding = 0
+    --尺寸缩放
     self.scaleW, self.scaleH = 1, 1
+    --自身颜色
     self.color = { 1, 1, 1 }
+    --组件
     self.component = {}
     self.visiable = true
     --父对象
@@ -87,7 +92,7 @@ end
 
 function item:isOver(mouseX, mouseY)
     local width, height = self:getSize()
-    return self.x <= mouseX and mouseX <= self.x + width and
+    return self.x-self.overPadding <= mouseX and mouseX <= self.x + width and
         self.y <= mouseY and mouseY <= self.y + height
 end
 

@@ -69,11 +69,6 @@ function Button_img:onClick(x, y, button)
     self.clickFunc()
 end
 
-function Button_img:destroy()
-    if self.__destroyed then return end
-    self.__destroyed = true
-    Glove.clickables[self] = nil
-end
 
 return Button_img
 

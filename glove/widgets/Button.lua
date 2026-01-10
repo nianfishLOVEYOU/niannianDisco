@@ -48,7 +48,7 @@ end
 
 function Button:setText(text)
   self.label = text
-  Button:setSize(0, 0)
+  self:setSize(0, 0)
 end
 
 function Button:getFontSize()
@@ -58,8 +58,7 @@ function Button:getFontSize()
 end
 
 function Button:setSize(w, h)
-  local labelWidth = self.font:getWidth(self.label) + padding * 2
-  local labelHeight = self.font:getHeight() + padding * 2
+  local labelWidth,labelHeight =self:getFontSize()
   self.w = labelWidth > w and labelWidth or w
   self.h = labelHeight > h and labelHeight or h
 end
@@ -68,10 +67,5 @@ function Button:onClick(x, y, button)
   self.clickFunc()
 end
 
-function Button:destroy()
-  if self.__destroyed then return end
-  self.__destroyed = true
-  Glove.clickables[self] = nil
-end
 
 return Button
