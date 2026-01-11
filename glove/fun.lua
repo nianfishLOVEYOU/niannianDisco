@@ -79,8 +79,8 @@ function M.reduce(t, fn, initial)
   return acc
 end
 
--- Returns a boolean indicating whether
--- some item in a given table matches a predicate.
+  -- Returns a boolean indicating whether
+  -- some item in a given table matches a predicate.
 function M.some(t, predicate)
   for i, v in ipairs(t) do
     if predicate(v, i) then return true end

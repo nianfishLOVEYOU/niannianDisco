@@ -10,7 +10,7 @@ function Text:init(x, y, w, h, text)
   self.type = "Text"
   local font = g.getFont()
   self.font = font
-  self.text = text
+  self:setText(text)
 end
 
 --设置字符
@@ -43,6 +43,7 @@ function Text:getText()
   else
     value = self.text
   end
+
   return value
 end
 

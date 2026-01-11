@@ -152,7 +152,7 @@ local function RadioButtons(choices, t, key, options)
   local font = options.font or g.getFont()
 
   local instance = options
-  instance.kind = "RadioButtons"
+  instance.type = "RadioButtons"
   instance.choices = choices
   instance.color = instance.color or colors.white
   instance.font = font
@@ -185,7 +185,7 @@ local function RadioButtons(choices, t, key, options)
 
   setmetatable(instance, mt)
 
-  table.insert(Glove.clickables, instance)
+  table.insert(Glove.widgets, instance)
 
   return instance
 end

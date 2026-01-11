@@ -93,6 +93,20 @@ function printCol()
     end
 end
 
+
+function printUi()
+    love.graphics.setLineWidth(2)
+
+    for _, widget in pairs(Glove.widgets) do
+        
+        love.graphics.setColor(0, 1, 0,0.3) -- 白色轮廓
+        if widget.type == "VStack" then love.graphics.setColor(1, 1, 0,0.5) end
+        if widget.type == "HStack" then love.graphics.setColor(0, 1, 1,0.3) end
+
+        love.graphics.rectangle("line",widget.x,widget.y,widget.w,widget.h)
+    end
+end
+
 -- 辅助函数：兼容低版本Lua的math.random（可选）
 function math.random(min, max)
     if min and max then

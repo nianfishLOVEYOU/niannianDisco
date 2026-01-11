@@ -30,32 +30,32 @@ local function layout(self)
     local height = child:getHeight()
 
     if align == "center" then
-      child.x = centerX - width / 2
-      child.y = centerY - height / 2
-    elseif align == "north" then
-      child.x = centerX - width / 2
-      child.y = 0
-    elseif align == "south" then
-      child.x = centerX - width / 2
-      child.y = maxHeight - height
-    elseif align == "east" then
-      child.x = maxWidth - width
-      child.y = centerY - height / 2
-    elseif align == "west" then
-      child.x = 0
-      child.y = centerY - height / 2
-    elseif align == "northeast" then
-      child.x = maxWidth - width
-      child.y = 0
-    elseif align == "southeast" then
-      child.x = maxWidth - width
-      child.y = maxHeight - height
-    elseif align == "southwest" then
-      child.x = 0
-      child.y = maxHeight - height
-    else -- assume northwest
-      child.x = 0
-      child.y = 0
+      child.localX = centerX - width / 2
+      child.localY = centerY - height / 2
+    elseif align == "up" then
+      child.localX = centerX - width / 2
+      child.localY = 0
+    elseif align == "down" then
+      child.localX = centerX - width / 2
+      child.localY = maxHeight - height
+    elseif align == "right" then
+      child.localX = maxWidth - width
+      child.localY = centerY - height / 2
+    elseif align == "left" then
+      child.localX = 0
+      child.localY = centerY - height / 2
+    elseif align == "rightup" then
+      child.localX = maxWidth - width
+      child.localY = 0
+    elseif align == "rightdown" then
+      child.localX = maxWidth - width
+      child.localY = maxHeight - height
+    elseif align == "leftdown" then
+      child.localX = 0
+      child.localY = maxHeight - height
+    else -- assume leftup
+      child.localX = 0
+      child.localY = 0
     end
   end
 
@@ -118,7 +118,7 @@ local function ZStack(options, childrenTB)
   assert(to == "table" or to == "nil", "ZStack options must be a table.")
 
   local instance = options
-  instance.kind = "ZStack"
+  instance.type = "ZStack"
   instance.children = childrenTB
   instance.x = 0
   instance.y = 0

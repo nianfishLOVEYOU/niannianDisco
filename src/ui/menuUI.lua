@@ -3,10 +3,8 @@ local enet = require "enet"
 local ui = require "src.ui.ui"
 
 local MenuUI = {
-    state = {
-        code = "0000",
-        playername = "小比噶"
-    }
+    code = "0000",
+    playername = "小比噶"
 }
 MenuUI.__index = MenuUI
 setmetatable(MenuUI, {
@@ -44,6 +42,7 @@ function MenuUI:refresh()
         self.stack:destroy()
     end
     self.stack = self:getvstack()
+    self.stack:setPos(self.posx, self.posy)
 end
 
 function MenuUI:update(dt)
@@ -61,65 +60,52 @@ function MenuUI:draw()
     love.graphics.setColor(0, 0, 0, 0.8)
     love.graphics.rectangle('fill', self.posx - 20, self.posy - 20, 200, 200)
     if self.stack then
-        self.stack:draw(self.posx, self.posy)
+        self.stack:draw()
     end
 end
 
 function MenuUI:getvstack()
     local vstackchild = {}
 
-    local linkButton = Glove.Button("link", {
-        buttonColor = colors.red,
-        labelColor = colors.yellow,
-        onClick = function()
-            print("got click")
-            if (string.len(self.state.code) == 4 and self.state.playername ~= "") then
-                -- 转游戏进程
-                print("menu code =", self.state.code)
-                network:startNetThread(self.state.code)
+    local linkButton = Glove.Button:new(0, 0, 0, 0, "link", function()
+        print("got click")
+        if (string.len(self.code) == 4 and self.playername ~= "") then
+            -- 转游戏进程
+            print("menu code =", self.code)
+            network:startNetThread(self.code)
 
-                playerManager.name = self.state.playername
-                local waitingUI = require("src.ui.waitingUI"):new()
-                uiManager:addUI("waitingUI", waitingUI)
-            end
+            playerManager.name = self.playername
+            local waitingUI = require("src.ui.waitingUI"):new()
+            uiManager:addUI("waitingUI", waitingUI)
         end
-    })
+    end)
 
-    local inputCode = Glove.Input(self.state, "code", {
-        width = 100
-    })
+    local inputCode = Glove.Input:new(0, 0, 100, 20, self.code, function(input)
+        self.code = input
+    end)
 
-    local inputPlayerName = Glove.Input(self.state, "playername", {
-        width = 100
-    })
+    local inputPlayerName = Glove.Input:new(0, 0, 100, 20, self.playername, function(input)
+        self.playername = input
+    end)
+
     -- 房间号输入
-    local first = Glove.HStack({
-        align = "start",
-        spacing = 0
-    }, {Glove.Text("输入cod:", {
-        color = colors.red
-    }), inputCode})
+    local first = Glove.HStack:new(0, 0, 0, 0, {Glove.Text:new(0, 0, 0, 0, "输入cod:"), inputCode})
+
     -- 名字输入
-    local second = Glove.HStack({
-        align = "start",
-        spacing = 0
-    }, {Glove.Text("输入name:", {
-        color = colors.red
-    }), inputPlayerName})
+    local second = Glove.HStack:new(0, 0, 0, 0, {Glove.Text:new(0, 0, 0, 0, "输入name:"), inputPlayerName})
 
-    local bt = Glove.HStack({
-        align = "start",
-        spacing = 0
-    }, {linkButton})
+    local slider = Glove.Slider:new(0, 0, 200, 20, 0, function(input)
+        self.code = input
+    end)
+    local bt = Glove.HStack:new(0, 0, 0, 0, {linkButton,slider})
 
+    
     table.insert(vstackchild, first)
     table.insert(vstackchild, second)
     table.insert(vstackchild, bt)
 
-    local stack = Glove.VStack({
-        spacing = 30
-    }, vstackchild -- Glove.Spacer()
-    )
+    local stack = Glove.VStack:new(0, 0, 0, 0, vstackchild)
+    stack.spacing=10
     return stack
 end
 

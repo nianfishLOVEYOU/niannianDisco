@@ -2,7 +2,7 @@
 local class = require "src.common.class"
 local item = class:extend()
 
---gc执行句柄
+-- gc执行句柄
 item.__gc = function(u)
     print("Cleaning up resources for", u)
 end
@@ -14,38 +14,39 @@ function item:init(x, y, w, h)
     self.x, self.y = x, y
     self.z = 0
 
-    self.localX, self.localY = 0, 0 --和父母的相对位置，用来区别普通位置
+    self.localX, self.localY = 0, 0 -- 和父母的相对位置，用来区别普通位置
     self.localZ = 0
 
     self.layer = 0.2
     local id = globleManager:guid()
     self:setId(id)
     self.w, self.h = w, h
-    --点击边界缩放
+    -- 点击边界缩放
     self.overPadding = 0
-    --尺寸缩放
+    -- 尺寸缩放
     self.scaleW, self.scaleH = 1, 1
-    --自身颜色
-    self.color = { 1, 1, 1 }
-    --组件
+    -- 自身颜色
+    self.color = {1, 1, 1}
+    -- 组件
     self.component = {}
     self.visiable = true
-    --父对象
+    -- 父对象
     self.parent = nil
-    --子对象
+    -- 子对象
     self.children = {}
 
-    --清理方法
+    -- 清理方法
 end
 
-function item:setParent(parent)
-    self.parent = parent
-    self.localX = self.x - parent.x
-    self.localY = self.y - parent.y
+function item:setParentInit()
+    self.localX = self.x - self.parent.x
+    self.localY = self.y - self.parent.y
 end
 
 function item:addChild(child)
     self.children[child.id] = child
+    child.parent = self
+    child:setParentInit()
 end
 
 function item:removeChild(id)
@@ -60,17 +61,17 @@ function item:removeComponent(name)
 
 end
 
---点击事件
+-- 点击事件
 function item:onClick(x, y, button)
 
 end
 
---被拖拽
+-- 被拖拽
 function item:onDrag(x, y, dx, dy)
 
 end
 
---悬停
+-- 悬停
 function item:onHold(x, y)
 
 end
@@ -80,23 +81,38 @@ function item:setId(id)
 end
 
 function item:setLocalPos(x, y, z)
-    if self.parent then
-        local px, py, pz = self.parent:getPos()
-        self.x, self.y = px + x, py + y
-        self.z = z and pz + z or self.z + pz
 
+    if self.parent then
         self.localX, self.localY = x, y
         self.localZ = z or 0
+        self:localPosRefresh()
+    else
+        self:setPos(x, y, z)
+    end
+end
+
+function item:getLocalPos()
+    return self.localX, self.localY, self.localZ
+end
+
+-- 刷新本地位置
+function item:localPosRefresh()
+    if self.parent then
+        local px, py, pz = self.parent:getPos()
+        self.x, self.y, self.z = px + self.localX, py + self.localY, pz + self.localZ
     end
 end
 
 function item:isOver(mouseX, mouseY)
     local width, height = self:getSize()
-    return self.x-self.overPadding <= mouseX and mouseX <= self.x + width and
-        self.y <= mouseY and mouseY <= self.y + height
+    return self.x - self.overPadding <= mouseX and mouseX <= self.x + width and self.y <= mouseY and mouseY <= self.y +
+               height
 end
 
 function item:setPos(x, y, z)
+    if self.parent then
+        self:localPosRefresh()
+    end
     self.x, self.y = x, y
     self.z = z or self.z
 end
@@ -124,7 +140,7 @@ function item:getSize()
 end
 
 function item:update(dt)
-
+    self:localPosRefresh()
 end
 
 function item:draw()
@@ -136,7 +152,9 @@ end
 
 -- 确保没有被引用了
 function item:destroy()
-    if self.__destroyed then return end
+    if self.__destroyed then
+        return
+    end
     self.__destroyed = true
 end
 

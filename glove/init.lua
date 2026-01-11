@@ -13,25 +13,25 @@ local widgets = {
   "Button",
   "Button_img",
   "Slider",
-  "Checkbox",
-  "FPS",
+  --"Checkbox",
+  --"FPS",
   "HStack",
   "Image",
   "Input",
-  "RadioButtons",
-  "Select",
+  --"RadioButtons",
+  --"Select",
   "Spacer",
-  "Tabs",
+  --"Tabs",
   "Text",
   "Toggle",
   "VStack",
-  "ZStack"
+  --"ZStack"
 }
 
+local mouseIsDown1=false
+
 Glove = {
-  clickables = {},
-  mousemoveables = {},
-  mousereleaseables = {},
+  widgets = {},
 
   getAvailableHeight = function()
     return g.getHeight() - Glove.margin * 2
@@ -53,11 +53,28 @@ Glove = {
     --按照渲染顺序点击
     --按照z轴前后点击
     if button ~= 1 then return end
+    mouseIsDown1 =true
+    local clickWidget=Glove.getFirstWidget(mouseX,mouseY)
+    if clickWidget then 
+      clickWidget:onClick(mouseX, mouseY)
+      Glove.setFocus(clickWidget)
+      print(clickWidget.type)
+    else 
+      print("nil")
+      --移除焦点
+      Glove.setFocus(nil)
+    end
+  end,
+
+    -- 获得排序最后最上的ui
+  getFirstWidget = function(mouseX,mouseY)
     local clickWidget=nil
-    for _, widget in pairs(Glove.clickables) do
-      if widget.visible then
+    for _, widget in pairs(Glove.widgets) do
+      if widget.type =="HStack" or widget.type =="VStack" then
+      
+      elseif widget.visible then
         local x, y, _ = widget:getPos()
-        local width, height = self:getSize()
+        local width, height = widget:getSize()
         if x <= mouseX and mouseX <= x + width and
             y <= mouseY and mouseY <= y + height then
           if clickWidget==nil or widget.z>=clickWidget.z then
@@ -66,19 +83,31 @@ Glove = {
         end
       end
     end
-    clickWidget:handleClick(mouseX, mouseY)
+    return clickWidget
   end,
 
   mousemoved = function(x, y, dx, dy)
-    for _, widget in pairs(Glove.mousemoveables) do
-      if widget.visible then widget:mousemoved(x, y, dx, dy) end
+    if mouseIsDown1 then
+      local clickWidget=Glove.getFirstWidget(x,y)
+      if focusedWidget and focusedWidget ==clickWidget then
+        clickWidget:onDrag(x, y,dx,dy)
+      end
+    else
+      local clickWidget=Glove.getFirstWidget(x,y)
+      if clickWidget then
+        clickWidget:onHold(x, y)
+      end
     end
   end,
 
   mousereleased = function(x, y, button)
     if button ~= 1 then return end
-    for _, widget in pairs(Glove.mousereleaseables) do
-      if widget.visible then widget:mousereleased(x, y) end
+    mouseIsDown1 =false
+  end,
+
+  keypressed = function(key)
+    if focusedWidget and focusedWidget.keypressed then
+      focusedWidget:keypressed(key)
     end
   end,
 
@@ -87,7 +116,7 @@ Glove = {
       focusedWidget:removeFocus()
     end
     focusedWidget = widget
-  end
+  end,
 }
 
 
@@ -96,8 +125,13 @@ for _, module in ipairs(utilities) do
 end
 
 for _, module in ipairs(widgets) do
+  print("init ui "..module)
   Glove[module] = require("glove/widgets/" .. module)
 end
+
+keybordManager:keypressed_regester(function (key)
+  Glove.keypressed(key)
+end)
 
 mouseManager:mousepressed_regester(function(x, y, button)
   Glove.mousePressed(x, y, button)

@@ -8,6 +8,7 @@ else
     -- package.path = package.path .. ";lib/?.lua;lib/?/init.lua;src/?.lua"
 end
 
+
 nianTool = require "lib.nianTool"
 nianDraw = require "lib.nianDraw"
 animation = require "src.animation"
@@ -83,6 +84,7 @@ end
 world:setCallbacks(beginContact, endContact)
 
 local function loadMap()
+    love.keyboard.setTextInput(true, 50, 50, 400, 30) 
     local MapLoader = require "src.map.mapLoader"
     -- 读取已有地图（若不存在则手动指定背景）
     local mapPath = "res/maps/edited.json"
@@ -194,6 +196,9 @@ function love.draw()
 
     -- 绘制UI等覆盖内容
     systemManager:draw()
+
+    --绘制uidebug
+    printUi()
 
     love.graphics.setColor(1, 0, 0)
     love.graphics.print("localmod " .. tostring(openlocalMod), 100, 10)

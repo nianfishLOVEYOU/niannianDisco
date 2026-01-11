@@ -6,7 +6,7 @@ local g = love.graphics
 local lk = love.keyboard
 local padding = 4
 --输入变量
-local inputCursor, inputKey, inputTable
+local inputCursor
 
 local Input = widget:extend()
 
@@ -15,9 +15,7 @@ function Input:init(x, y, w, h, text, onInput)
   local font = g.getFont()
   self.font = font
 
-  self.kind = "Input"
-  self.table = inputTable
-  self.key = inputKey
+  self.type = "Input"
 
   self.text = text
   self.onInput = onInput
@@ -62,8 +60,10 @@ function Input:draw()
   g.setFont(font)
   g.print(substr, x, y)
 
+  local printCursor=love.timer.getTime()%2>1
+
   --显示输入光标
-  if Glove.isFocused(self) then
+  if Glove.isFocused(self) and printCursor then
     if inputCursor then
       -- Draw vertical cursor line.
       local height = font:getHeight()
@@ -72,19 +72,15 @@ function Input:draw()
       g.line(cursorX, y, cursorX, y + height)
     end
   end
+  
 end
 
 --输入框被点击
 function Input:onClick(clickX, clickY, button)
   Glove.setFocus(self)
-
+  print("select input")
   -- Enable keyboard.
   -- TODO: Is this needed? Maybe only on mobile devices.
-  love.keyboard.setTextInput(
-    true,
-    self.x, self.y,
-    self.w, self.h
-  )
 
   local value = self.text or ""
   inputCursor = #value

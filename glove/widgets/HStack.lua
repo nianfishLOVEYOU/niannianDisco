@@ -1,18 +1,66 @@
 local fun = require "glove/fun"
+local widget = require "glove.widgets.widget"
 
-local function layout(self)
-  local align = self.align or "top"
+local aligtype={"top","center,buttom"}
+
+local HStack = widget:extend()
+
+function HStack:init(x, y, w, h,childrenTB,spacing, align)
+  self.type = "HStack"
+
+  self.align = align or "top"
+  
+  self.w=0
+  self.h = 0 -- computed in layout method
+  self.children = childrenTB
+  self.haveSpacer = fun.some(childrenTB, isSpacerWithoutSize)
+  self.spacing=spacing or 10
+  for i, child in ipairs(childrenTB) do
+    self:addChild(child)
+  end
+  self:layout()
+end
+
+function HStack:draw()
+  for _, child in ipairs(self.children) do
+    child:draw()
+  end
+
+  for _, child in ipairs(self.children) do
+    if child.drawLater then child:drawLater(x, y) end
+  end
+end
+
+function HStack:setSize(w, h)
+  --self.w = w
+  self.h = h
+end
+
+function HStack:getSize()
+  -- If there is a Spacer child then use screen width.
+  if self.haveSpacer then return Glove.getAvailableWidth() end
+
+  -- Compute height based on children.
+  local children = self.children
+  local lastChild = children[#children]
+ --如果有宽度用自己的宽度，不然就用孩子的
+  local w, h = self.w or lastChild.x + lastChild.w- self.x, self.h
+  return w, h
+end
+
+function HStack:layout()
   local children = self.children
   local spacerWidth = 0
   local spacing = self.spacing or 0
-  local x = self.x or 0
-  local y = self.y or 0
+  local x = self.localX or 0
+  local y = self.localY or 0
 
   -- Get height of tallest child.
-  self.maxHeight = fun.max(
+  self.h = fun.max(
     children,
-    function(child) return child:getHeight() or 0 end
+    function(child) return child.h or 0 end
   )
+  print(self.type .."  ".. self.h)
 
   -- Count spacers with no size.
   local spacerCount = fun.count(children, isSpacerWithoutSize)
@@ -23,7 +71,7 @@ local function layout(self)
     local childrenWidth = fun.sumFn(
       children,
       function(child)
-        return isSpacerWithoutSize(child) and 0 or child:getWidth()
+        return isSpacerWithoutSize(child) and 0 or child.h
       end
     )
 
@@ -32,9 +80,9 @@ local function layout(self)
     local gapCount = fun.count(
       children,
       function(child, i)
-        if child.kind == "Spacer" then return false end
+        if child.type == "Spacer" then return false end
         local prevChild = children[i - 1]
-        return prevChild and prevChild.kind ~= "Spacer"
+        return prevChild and prevChild.type ~= "Spacer"
       end
     )
 
@@ -49,112 +97,50 @@ local function layout(self)
 
   -- Set the x and y keys of each non-spacer child.
   for i, child in ipairs(children) do
-    if child.kind == "Spacer" then
+    if child.type == "Spacer" then
       x = x + (child.size or spacerWidth)
     else
-      child.x = x
-
-      local prevChild = children[i - 1]
-      if prevChild and prevChild.kind ~= "Spacer" then
-        child.x = child.x + spacing
-      end
 
       if align == "center" then
-        child.y = y + (self.maxHeight - child:getHeight()) / 2
+        child:setLocalPos(x,y + (self.h - child.h) / 2)
       elseif align == "bottom" then
-        child.y = y + self.maxHeight - child:getHeight()
+        child:setLocalPos(x,y + self.h - child.h)
       else -- assume "top"
-        child.y = y
+        child:setLocalPos(x,y)
       end
 
-      x = child.x + child:getWidth()
+      local prevChild = children[i - 1]
+      if prevChild and prevChild.type ~= "Spacer" then
+        child.localX = child.localX + spacing
+      end
+
+      x = child.localX + child.w
     end
   end
+
+  
+  local lastChild = self.children[#children]
+  self.w = lastChild.x + lastChild.w- self.x
 end
 
-local mt = {
-  __index = {
-    draw = function(self, parentX, parentY)
-      parentX = parentX or Glove.margin
-      parentY = parentY or Glove.margin
-      local x = parentX + self.x
-      local y = parentY + self.y
+function HStack:setLocalPos(x,y,z)
+  HStack.super.setLocalPos(self,x,y,z)
+  self:layout()
+end
 
-      for _, child in ipairs(self.children) do
-        child:draw(x, y)
-      end
 
-      for _, child in ipairs(self.children) do
-        if child.drawLater then child:drawLater(x, y) end
-      end
-    end,
+function HStack:setPos(x,y,z)
+  HStack.super.setPos(self,x,y,z)
+  self:layout()
+end
 
-    getHeight = function(self)
-      return self.maxHeight
-    end,
 
-    getWidth = function(self)
-      if self.width then return self.width end
-
-      -- If there is a Spacer child then use screen width.
-      if self.haveSpacer then return Glove.getAvailableWidth() end
-
-      -- Compute height based on children.
-      local children = self.children
-      local lastChild = children[#children]
-      return lastChild.x + lastChild:getWidth() - self.x
-    end,
-
-    destroy = function(self)
-      if self.__destroyed then return end
-      self.__destroyed = true
-      --孩子调用destroy
-      for _, child in ipairs(self.children) do
-        if child.destroy then child:destroy() end
-      end
-      if self.onDestroy then
-        self.onDestroy()
-      end
-    end,
-  }
-}
-
---[[
-This arranges widgets horizontally.
-
-By default there is no space between the widgets.
-To add space, specify the `spacing` option.
-
-To vertically align the widgets, specify the `align` option
-with a value of `"top"` (default), `"center"`, or `"bottom"`.
-
-The parameters are:
-
-- table of options
-- child widgets as individual arguments
-
-The supported options are:
-
-- `align`: "top" (default), "center", or "bottom"
-- `spacing`: positive integer to add space between non-spacer children
---]]
-local function HStack(options, childrenTB)
-  local to = type(options)
-  assert(to == "table" or to == "nil", "HStack options must be a table.")
-
-  local instance = options
-  instance.kind = "HStack"
-  instance.maxHeight = 0 -- computed in layout method
-  local children = childrenTB
-  instance.children = children
-  instance.haveSpacer = fun.some(children, isSpacerWithoutSize)
-  instance.visible = true
-  instance.x = 0
-  instance.y = 0
-
-  setmetatable(instance, mt)
-  layout(instance)
-  return instance
+function HStack:destroy()
+  for _, child in ipairs(self.children) do
+    if child.destroy then child:destroy() end
+  end
+  --父类删除
+  HStack.super.destroy(self)
 end
 
 return HStack

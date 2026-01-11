@@ -15,7 +15,6 @@ function Button:init(x, y, w, h, label, func)
   self.label = label
   self.labelColor = colors.black
   self.clickFunc = func
-
   self:setSize(w, h)
 end
 

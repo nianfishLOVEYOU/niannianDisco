@@ -1,16 +1,12 @@
 function isSpacerWithoutSize(child)
-  return child.kind == "Spacer" and not child.size
+  return child.type == "Spacer" and not child.size
 end
 
-local mt = {
-  __index = {
-    draw = function(self, parentX, parentY)
-      -- do nothing
-    end,
-    getHeight = function(self) return 0 end,
-    getWidth = function(self) return 0 end
-  }
-}
+
+local Spacer = require "src.common.aUIImage"
+local widget = require "glove.widgets.widget"
+
+local Spacer = widget:extend()
 
 --[[
 This widget adds space inside an `HStack` or `VStack`.
@@ -29,13 +25,20 @@ Any number of `Spacer` widgets can be added to a table of widgets.
 The amount of space consumed by each is computed by
 dividing the unused space by the number of `Spacer` widgets.
 --]]
-local function Spacer(size)
+function Spacer:init(x, y, w, h, size)
+  self.type = "Spacer"
+
   local to = type(size)
   assert(to == "number" or to == "nil", "Spacer size must be a number or nil.")
+  self.size = size
+end
 
-  local instance = { kind = "Spacer", size = size }
-  setmetatable(instance, mt)
-  return instance
+function Spacer:draw()
+end
+
+
+function Spacer:getSize(w, h)
+  return 0,0
 end
 
 return Spacer

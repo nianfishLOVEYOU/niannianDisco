@@ -166,7 +166,7 @@ local function Tabs(tabs, options)
   end
 
   local instance = options
-  instance.kind = "Tabs"
+  instance.type = "Tabs"
   instance.color = instance.color or colors.white
   instance.font = options.font or g.getFont()
   instance.selectedTabIndex = 1
@@ -177,7 +177,7 @@ local function Tabs(tabs, options)
 
   setmetatable(instance, mt)
 
-  table.insert(Glove.clickables, instance)
+  table.insert(Glove.widgets, instance)
 
   return instance
 end
