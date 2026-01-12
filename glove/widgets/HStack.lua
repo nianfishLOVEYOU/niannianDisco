@@ -101,10 +101,11 @@ function HStack:layout()
       x = x + (child.size or spacerWidth)
     else
 
-      if align == "center" then
-        child:setLocalPos(x,y + (self.h - child.h) / 2)
-      elseif align == "bottom" then
-        child:setLocalPos(x,y + self.h - child.h)
+      local cw,ch =child:getSize()
+      if self.align == "center" then
+        child:setLocalPos(x,y + (self.h - ch) / 2)
+      elseif self.align == "bottom" then
+        child:setLocalPos(x,y + self.h - ch)
       else -- assume "top"
         child:setLocalPos(x,y)
       end
@@ -113,8 +114,7 @@ function HStack:layout()
       if prevChild and prevChild.type ~= "Spacer" then
         child.localX = child.localX + spacing
       end
-
-      x = child.localX + child.w
+      x = child.localX + ch
     end
   end
 

@@ -7,9 +7,9 @@ local PlaylistUI = {}
 PlaylistUI.__index = PlaylistUI
 setmetatable(PlaylistUI, {
     __index = ui
-}) -- 子类继承父类
+})                                -- 子类继承父类
 function PlaylistUI:new(...)
-    local obj = ui:new(...) -- 先走父类构造
+    local obj = ui:new(...)       -- 先走父类构造
     setmetatable(obj, PlaylistUI) -- 再把实例的元表改为子类
     -- 初始化子类特有属性
     local width = love.graphics.getWidth()
@@ -56,7 +56,6 @@ local musicInput = function(file, name, fullname, extend)
     local music = love.audio.newSource(tmpPath, "stream")
     audio:addPlayMusic(tmpPath, music:getDuration(), name)
     music = nil
-
 end
 
 function PlaylistUI:refresh()
@@ -84,34 +83,19 @@ end
 function PlaylistUI:getvstack()
     local vstackchild = {}
 
-    local title = Glove.HStack({
-        align = "start",
-        spacing = 0
-    }, {Glove.Text("播放列表:", {
-        color = colors.white
-    })})
+    local title = Glove.HStack:new(0, 0, 0, 0, { Glove.Text:new(0, 0, 0, 0, "播放列表:") })
     table.insert(vstackchild, title)
 
     for i, v in ipairs(audio.playlist) do
-        local name = Glove.Text((i == audio.currentIndex and "[播放中]" or "") .. v.name, {
-            color = colors.white
-        })
-        local hstack = Glove.HStack({
-            align = "start",
-            spacing = 0
-        }, -- glove.Spacer(), --把剩下的部件推到右边
-        {name})
+        local name = Glove.Text:new(0, 0, 0, 0, (i == audio.currentIndex and "[播放中]" or "") .. v.name)
+        local hstack = Glove.HStack:new(0, 0, 0, 0, { name })
         table.insert(vstackchild, hstack)
     end
-    local vstack = Glove.VStack({
-        spacing = 30
-    }, vstackchild -- Glove.Spacer()
-    )
+    local vstack = Glove.VStack:new(0, 0, 0, 0, vstackchild, 30)
     return vstack
 end
 
 function PlaylistUI:draw()
-
     local pass = 10
     local scissorX = self.posx
     local scissorY = self.posy
@@ -127,7 +111,7 @@ function PlaylistUI:draw()
 
     -- 拖拽区域图片
     self.inputImage:draw()
-    
+
     -- local x, y = love.mouse.getPosition()
     -- local isInUI = x > self.inputImage.x and x < self.inputImage.x + self.inputImage.w and y > self.inputImage.y and
     --                    y < self.inputImage.y + self.inputImage.h

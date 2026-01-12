@@ -6,7 +6,8 @@ local Audio = {
     playlist = {},
     currentMusicName = "",
     currentIndex = 0,
-    volume = 0.3
+    volume = 0.3,
+    stuck = false
 }
 
 systemManager:update_regester(function(dt)
@@ -54,6 +55,7 @@ function Audio:loadMusic(path)
         self.currentSource = source
         self.currentMusicName = path
         self.currentSource:setVolume(self.volume)
+        self.stuck = false
         return true, source
     end
     print("loadMusic error")
@@ -97,30 +99,27 @@ function Audio:next(index)
     if self.currentIndex == index then return end
 
     -- 播放时去顶播下一首
-    audio:stop()
-    print("next -- ", index)
-    ---是自己提交的音乐,播放下一首且广播
-    if self.playlist[index].userid == network.userid then
-        self.currentIndex = index
-        print("-next-", network.userid, self.playlist[index].path)
-        self:sendUpdatePlayList()
-        uiManager:refresh("playlistUI")
-    end
+    print("next -- ", index, self.playlist[index].userid)
+    self.currentIndex = index
+    self:sendUpdatePlayList()
+    uiManager:refresh("playlistUI")
+
     local msg = {
         type = "tonext",
         index = index,
         uerid = self.playlist[index].userid
     }
     network:send_Broadcast(msg)
-end
 
---尝试下一步
-function Audio:testNext(index)
+    
     --询问下一首是否缺少资源
     local musicname = audio.playlist[index].name
-    local tmpPath = "tmp/" .. musicname
-    if fileManager:fileIsExsit(tmpPath) then
-        audio:next(index)
+    local path = fileManager:getFilePathByName(musicname)
+    if path then
+        --播放
+        self:loadMusic(path)
+        self:play(0)
+        uiManager:refresh("playlistUI")
     else
         local uerid = audio.playlist[index].uerid
         local msg = {
@@ -128,6 +127,32 @@ function Audio:testNext(index)
             index = index
         }
         network:send_unicast(uerid, msg) --相拥有资源的人请求
+        self.stuck = true
+    end
+end
+
+--接收到消息，检查并播放下一首
+function Audio:receiveToNext(index)
+    if self.currentIndex == index then return end
+
+    self.currentIndex = index
+
+    --询问下一首是否缺少资源
+    local musicname = audio.playlist[index].name
+    local path = fileManager:getFilePathByName(musicname)
+    if path then
+        --播放
+        self:loadMusic(path)
+        self:play(0)
+        uiManager:refresh("playlistUI")
+    else
+        local uerid = audio.playlist[index].uerid
+        local msg = {
+            type = "requestFile",
+            index = index
+        }
+        network:send_unicast(uerid, msg) --相拥有资源的人请求
+        self.stuck = true
     end
 end
 
@@ -157,6 +182,14 @@ function Audio:update(dt)
 
     if self:isOvered() then
         self:next(((audio.currentIndex) % #audio.playlist) + 1)
+    end
+
+    if self.stuck then
+        local musicpath = fileManager:getFilePathByName(self.playlist[self.currentIndex].name)
+        if musicpath then
+            self:loadMusic(musicpath)
+            self:play(0)
+        end
     end
 
     if #self.playlist ~= 0 and not self:isPlaying() then

@@ -12,8 +12,13 @@ end
 
 function Image:draw()
     self.image:setPos(self.x,self.y)
-    self.image:setScale(1,1)
+    self.image.color = self.color
     self.image:draw()
+end
+
+function Image:setScale(w,h)
+    Image.super.setScale(self,w,h)
+    self.image:setScale(w,h)
 end
 
 

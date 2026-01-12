@@ -11,6 +11,7 @@ local width = size * 1.8
 
 -- 开关表，开关关键key，开关状态改变事件
 function Toggle:init(x, y, w, h, t, key, onChange)
+  local font = g.getFont()
   self.type = "Toggle"
 
   self:setSize(width, size)

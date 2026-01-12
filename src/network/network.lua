@@ -3,7 +3,7 @@ local Network = {
     userid = 0,
     connects = {},
     peers = {},
-    musicTransfering = false,
+    musicTransfering = 0,
     enterRoom = false
 }
 
@@ -90,7 +90,7 @@ function Network:broadcast_mp3(path, name)
         path = path,
         name = name,
     }
-    self.musicTransfering = true
+    self.musicTransfering = self.musicTransfering + 1
 end
 
 function Network:unicast_mp3(id, path, name)
@@ -100,7 +100,7 @@ function Network:unicast_mp3(id, path, name)
         name = name,
         peer_id = id
     }
-    self.musicTransfering = true
+    self.musicTransfering = self.musicTransfering + 1
 end
 
 function Network:info()
@@ -109,14 +109,13 @@ function Network:info()
         -- print("pktCh type : "..pktCh.type )
         if pktCh.type == "audioOk" then
             -- 预缓冲 200ms，确保同步
-            audio:loadMusic(pktCh.path)
-            audio:play(0)
-            self.musicTransfering = false
+            -- audio:loadMusic(pktCh.path)
+            -- audio:play(0)
         elseif pktCh.type == "sendAudioOk" then
             -- 预缓冲 200ms，确保同步
-            audio:loadMusic(pktCh.path)
-            audio:play(0)
-            self.musicTransfering = false
+            -- audio:loadMusic(pktCh.path)
+            -- audio:play(0)
+            self.musicTransfering = self.musicTransfering - 1
         elseif pktCh.type == "getPeers" then
             print("getPeers out")
             self.peers = pktCh.peers
@@ -185,11 +184,8 @@ function Network:handleMessage(message, address)
         audio.currentIndex = message.index
     elseif message.type == "tonext" then
         --通知下一首 客通知主->要准备下一首的资源
-        if message.uerid == self.userid then
-            audio:next(message.index)
-        else
-            audio:testNext(message.index)
-        end
+
+        audio:receiveToNext(message.index)
     elseif message.type == "requestFile" then
         --缺少资源请求发送
         local userid = self:getPeersId(address)

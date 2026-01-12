@@ -5,9 +5,9 @@ local PlayerUI = {}
 PlayerUI.__index = PlayerUI
 setmetatable(PlayerUI, {
     __index = ui
-}) -- 子类继承父类
+})                              -- 子类继承父类
 function PlayerUI:new(...)
-    local obj = ui:new(...) -- 先走父类构造
+    local obj = ui:new(...)     -- 先走父类构造
     setmetatable(obj, PlayerUI) -- 再把实例的元表改为子类
     -- 初始化子类特有属性
     return obj
@@ -20,6 +20,7 @@ end
 
 -- 更新播放列表显示
 function PlayerUI:refresh()
+    local width, height = love.graphics.getDimensions()
     -- 创建本地列表
     if self.stack then
         self.stack:destroy()
@@ -27,15 +28,15 @@ function PlayerUI:refresh()
     self.stack = self:getvstack()
     local c = {}
     for i = 1, 12, 1 do
-        table.insert(c, Glove.Image("res/image/ui/blackdrag.png", {
-            height = 100,
-            width = 50
-        }))
+        local ima = Glove.Image:new(0,0,50,100,"res/image/ui/blackdrag.png")
+        ima:setSize(50,100)
+        table.insert(c,ima)
     end
     if self.backstuck then
         self.backstuck:destroy()
     end
-    self.backstuck = Glove.HStack({}, c)
+    self.backstuck = Glove.HStack:new(0,0,0,0,c,0)
+    self.backstuck:setPos(0, height - 100)
 end
 
 local click = function()
@@ -54,7 +55,7 @@ local next = function()
     if #audio.playlist == 0 then
         return
     end
-    if not network.musicTransfering then
+    if not network.musicTransfering>0  then
         print("-music next-")
         audio:next(((audio.currentIndex) % #audio.playlist) + 1)
     else
@@ -66,7 +67,7 @@ local per = function()
     if #audio.playlist == 0 then
         return
     end
-    if not network.musicTransfering then
+    if not network.musicTransfering>0  then
         print("-music next-")
         local index = audio.currentIndex - 1
         if index < 1 then
@@ -89,45 +90,27 @@ local list = function()
 end
 
 function PlayerUI:getvstack()
-
     local playimg = audio.isPlaying and "res/image/ui/resume.png" or "res/image/ui/pase.png"
-    local playButton = Glove.Button_img("", playimg, {
-        scale = 2,
-        onClick = click
-    })
-
-    local nextButton = Glove.Button_img("", "res/image/ui/next.png", {
-        scale = 2,
-        onClick = next
-    })
-
-    local perButton = Glove.Button_img("", "res/image/ui/per.png", {
-        scale = 2,
-        onClick = per
-    })
-    local listButton = Glove.Button_img("", "res/image/ui/listbutton.png", {
-        scale = 2,
-        onClick = list
-    })
-
+    local playButton = Glove.Button_img:new(0, 0, 0, 0, "", playimg, click)
+    playButton:setScale(2,2)
+    local nextButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/next.png", next)
+    nextButton:setScale(2,2)
+    local perButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/per.png", per)
+    perButton:setScale(2,2)
+    local listButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/listbutton.png", list)
+    listButton:setScale(2,2)
     local hight = love.graphics.getHeight()
 
-    local stack = Glove.VStack({
-        spacing = hight - 100
-    }, {Glove.HStack({
-        align = "center",
-        spacing = 20
-    }, -- glove.Spacer(), --把剩下的部件推到右边
-    {perButton, playButton, nextButton, listButton})})
+    local hstack = Glove.HStack:new(0, 0, 0, 0, { perButton, playButton, nextButton, listButton }, 0,"center")
+    local stack = Glove.VStack:new(0, 0, 0, 0, { hstack })
 
     return stack
 end
 
 function PlayerUI:draw()
-
     local width, height = love.graphics.getDimensions()
 
-    self.backstuck:draw(0, height - 100)
+    self.backstuck:draw()
 
     -- 播放器控制区域
     -- love.graphics.setColor(0.2, 0.2, 0.2, 0.9)
@@ -136,7 +119,6 @@ function PlayerUI:draw()
     -- 当前播放信息
     local currentTrack = audio:getCurrentTrack()
     if currentTrack then
-
         local duration = audio:getCurrentDuration()
         love.graphics.setColor(1, 1, 1)
         love.graphics.print("正在播放: " .. currentTrack.name, 20, height - 90)
@@ -177,13 +159,15 @@ function PlayerUI:draw()
     love.graphics.setColor(0.2, 0.6, 1)
     love.graphics.rectangle("fill", width - 120, height - 80, 100 * audio.volume, 10)
 
-    self.stack:draw(width / 2 - self.stack:getWidth() / 2, height - 50)
+    local sw,sh =self.stack:getSize()
+    self.stack:setPos(width / 2 - sh / 2, height - 50)
+    self.stack:draw()
 
-    if network.musicTransfering then
-        love.graphics.setColor(0.2, 0.2, 0.2,0.5)
-        love.graphics.rectangle("fill", 0,  height - 100,width,100)
-        love.graphics.setColor(1,1,1)
-        love.graphics.print("正在传输",width / 2 -20, height - 70)
+    if network.musicTransfering>0 then
+        love.graphics.setColor(0.2, 0.2, 0.2, 0.5)
+        love.graphics.rectangle("fill", 0, height - 100, width, 100)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print("正在传输", width / 2 - 20, height - 70)
     end
 end
 

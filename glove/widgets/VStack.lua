@@ -98,9 +98,9 @@ function VStack:layout()
     else
 
 
-      if align == "center" then
+      if self.align == "center" then
         child:setLocalPos(x + (self.w - child.h) / 2,y)
-      elseif align == "end" then
+      elseif self.align == "end" then
         child:setLocalPos(x + self.w - child.h,y)
       else -- assume "start"
         child:setLocalPos(x,y)

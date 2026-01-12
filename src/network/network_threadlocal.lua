@@ -129,7 +129,7 @@ local function fileBroadcastTask(cmd,id)
     end
 
     infoNetworkCh:push {
-        type = "audioOk",
+        type = "sendAudioOk",
         path = cmd.path,
         ts   = os.time(),
         name = cmd.name
@@ -174,7 +174,7 @@ local function fileUnicastTask(cmd,id)
         })
 
         infoNetworkCh:push {
-            type = "audioOk",
+            type = "sendAudioOk",
             path = cmd.path,
             ts = os.time(),
             name = cmd.name

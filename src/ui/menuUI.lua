@@ -94,10 +94,10 @@ function MenuUI:getvstack()
     -- 名字输入
     local second = Glove.HStack:new(0, 0, 0, 0, {Glove.Text:new(0, 0, 0, 0, "输入name:"), inputPlayerName})
 
-    local slider = Glove.Slider:new(0, 0, 200, 20, 0, function(input)
-        self.code = input
-    end)
-    local bt = Glove.HStack:new(0, 0, 0, 0, {linkButton,slider})
+    -- local slider = Glove.Slider:new(0, 0, 200, 20, 0, function(input)
+    --     self.code = input
+    -- end)
+    local bt = Glove.HStack:new(0, 0, 0, 0, {linkButton})
 
     
     table.insert(vstackchild, first)
