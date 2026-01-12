@@ -73,35 +73,29 @@ function Audio:play(position)
 end
 
 -- 暂停
-function Audio:pause(isBroadcast)
+function Audio:pause()
     if self.currentSource then
         self.currentSource:pause()
-        if isBroadcast then
-            self:sendUpdatePlayStatus()
-        end
     end
 end
 
 -- 继续播放
-function Audio:resume(isBroadcast)
+function Audio:resume()
     if self.currentSource and not self:isPlaying() then
         self.currentSource:play()
-        if isBroadcast then
-            self:sendUpdatePlayStatus()
-        end
     end
 end
 
-function Audio:stop(isBroadcast)
+function Audio:stop()
     if self.currentSource then
         self.currentSource:stop()
-        if isBroadcast then
-            self:sendUpdatePlayStatus()
-        end
     end
 end
 
+--按钮按下，进入下一首
 function Audio:next(index)
+    if self.currentIndex == index then return end
+
     -- 播放时去顶播下一首
     audio:stop()
     print("next -- ", index)
@@ -109,31 +103,48 @@ function Audio:next(index)
     if self.playlist[index].userid == network.userid then
         self.currentIndex = index
         print("-next-", network.userid, self.playlist[index].path)
-        -- 发送音乐
-        network:broadcast_mp3(self.playlist[index].path, self.playlist[index].name)
         self:sendUpdatePlayList()
         uiManager:refresh("playlistUI")
-        eventManager:emit("event_playListUpdate")
+    end
+    local msg = {
+        type = "tonext",
+        index = index,
+        uerid = self.playlist[index].userid
+    }
+    network:send_Broadcast(msg)
+end
+
+--尝试下一步
+function Audio:testNext(index)
+    --询问下一首是否缺少资源
+    local musicname = audio.playlist[index].name
+    local tmpPath = "tmp/" .. musicname
+    if fileManager:fileIsExsit(tmpPath) then
+        audio:next(index)
     else
+        local uerid = audio.playlist[index].uerid
         local msg = {
-            type = "tonext",
+            type = "requestFile",
             index = index
         }
-        network:send_unicast(msg)
+        network:send_unicast(uerid, msg) --相拥有资源的人请求
     end
 end
 
-function Audio:seek(position, isBroadcast)
+--发送回去
+function Audio:fileRequestAllow(userid, index)
+    network:unicast_mp3(userid, audio.playlist[index].path, audio.playlist[index].name)
+end
+
+function Audio:seek(position)
     if self.currentSource then
         self.currentSource:seek(position)
-        if isBroadcast then
-            self:sendUpdatePlayStatus()
-        end
     end
 end
 
 local waittime = os.time()
 function Audio:update(dt)
+    --如果没有音乐资源就等待，直到下载好
     if os.time() - waittime > 0.5 then
         waittime = os.time()
     else
@@ -187,7 +198,6 @@ function Audio:addPlayMusic(path, duration, name)
     self:sendUpdatePlayList()
 
     uiManager:refresh("playlistUI")
-    eventManager:emit("event_playListUpdate")
 end
 
 --发送列表信息

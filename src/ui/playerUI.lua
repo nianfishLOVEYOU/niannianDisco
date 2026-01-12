@@ -41,10 +41,12 @@ end
 local click = function()
     if audio:isPlaying() then
         print("-music pause-")
-        audio:pause(true)
+        audio:pause()
+        audio:sendUpdatePlayStatus()
     else
         print("-music play-")
-        audio:resume(true)
+        audio:resume()
+        audio:sendUpdatePlayStatus()
     end
 end
 
@@ -224,7 +226,8 @@ function PlayerUI:dragProgress(x)
     progress = math.max(0, math.min(1, progress))
     local duration = audio:getCurrentDuration()
     local newPosition = progress * duration
-    audio:seek(newPosition, true)
+    audio:seek(newPosition)
+    audio:sendUpdatePlayStatus()
 end
 
 return PlayerUI

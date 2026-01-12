@@ -3,7 +3,7 @@ package.path        = package.path .. ";?.lua;?/init.lua"
 
 local socket        = require "socket"
 local enet          = require "enet"
-local json          = require "lib.json"      -- 任意轻量 JSON 库
+local json          = require "lib.json"             -- 任意轻量 JSON 库
 local stun          = require "src.network.nianStun" -- ← 仍保留引用，后面不再使用
 
 local ctrlNetworkCh = love.thread.getChannel("ctrlNetwork")
@@ -31,8 +31,8 @@ end
 -- 2️⃣ 本机地址（不再走 STUN）
 --------------------------------------------------------------------
 local myAddr = {
-    ip        = "127.0.0.1",
-    port      = nil, -- 稍后由 ENet 主机获取
+    ip         = "127.0.0.1",
+    port       = nil, -- 稍后由 ENet 主机获取
     remotePort = nil --远程的
 }
 local a5002 = false
@@ -48,7 +48,7 @@ if not host then
 end
 
 -- 取得系统分配的端口，填入 myAddr
-myAddr.port      = a5002 and 5002 or 5001 -- 提取端口号字符串
+myAddr.port       = a5002 and 5002 or 5001 -- 提取端口号字符串
 myAddr.remotePort = a5002 and 5001 or 5002
 print(string.format("ENet 本机监听：%s:%d", myAddr.ip, myAddr.port))
 
@@ -59,12 +59,12 @@ local peers = {} -- {id = {ip = "...", port = ..., enet = enetPeer}}
 
 -- table.insert(peers, {
 --     ip   = "127.0.0.1",
---     port =myAddr.port 
+--     port =myAddr.port
 -- })
 table.insert(peers, {
-    ip   = "127.0.0.1",
-    port =myAddr.remotePort ,
-    address = "127.0.0.1"..":"..myAddr.remotePort
+    ip      = "127.0.0.1",
+    port    = myAddr.remotePort,
+    address = "127.0.0.1" .. ":" .. myAddr.remotePort
 })
 
 
@@ -85,8 +85,10 @@ end
 --------------------------------------------------------------------
 -- 6️⃣ 文件广播协程（保持原实现，仅改动少量变量名）
 --------------------------------------------------------------------
+local fileBroadcastTaskId=0
 local fileBroadcastTasks = {}
-local function fileBroadcastTask(cmd)
+local function fileBroadcastTask(cmd,id)
+    local taskId = id
     coroutine.yield()
     local info, err = love.filesystem.getInfo(cmd.path)
     local size = info.size
@@ -132,15 +134,17 @@ local function fileBroadcastTask(cmd)
         ts   = os.time(),
         name = cmd.name
     }
-    print("[INFO] 文件发送完毕，已发送 FIN，退出")
-    table.remove(fileBroadcastTasks, 1)
+    print("[INFO] 文件发送完毕，已发送 FIN，退出", "任务：" .. taskId)
+    fileBroadcastTasks[taskId]=nil
 end
 
 --------------------------------------------------------------------
 -- 7️⃣ 文件单播协程（保持原实现）
 --------------------------------------------------------------------
+local fileUnicastTaskId=0
 local fileUnicastTasks = {}
-local function fileUnicastTask(cmd)
+local function fileUnicastTask(cmd,id)
+    local taskId =id
     coroutine.yield()
     local p = peers[cmd.peer_id]
     if p and p.enet then
@@ -168,8 +172,15 @@ local function fileUnicastTask(cmd)
             ts        = os.time(),
             musicname = cmd.name
         })
-        print("[INFO] 单播文件发送完毕，已发送 FIN")
-        table.remove(fileUnicastTasks, 1)
+
+        infoNetworkCh:push {
+            type = "audioOk",
+            path = cmd.path,
+            ts = os.time(),
+            name = cmd.name
+        }
+        print("[INFO] 文件发送完毕，已发送 FIN，退出 "..taskId)
+        fileUnicastTasks[taskId]=nil
     end
 end
 
@@ -230,12 +241,12 @@ while true do
             return
         elseif cmd.cmd == "broadcast_mp3" then
             local task = coroutine.create(fileBroadcastTask)
-            table.insert(fileBroadcastTasks, task)
-            coroutine.resume(task, cmd)
+            fileBroadcastTasks[fileBroadcastTaskId]=task
+            coroutine.resume(task, cmd,fileBroadcastTaskId)
         elseif cmd.cmd == "unicast_mp3" then
             local task = coroutine.create(fileUnicastTask)
-            table.insert(fileUnicastTasks, task)
-            coroutine.resume(task, cmd)
+            fileUnicastTasks[fileUnicastTaskId]= task
+            coroutine.resume(task, cmd,fileUnicastTaskId)
         elseif cmd.cmd == "send_Broadcast" then
             print("[Sand] >> " .. cmd.msg.type)
             local msg = json.encode(cmd.msg)
@@ -252,23 +263,29 @@ while true do
 
     ----------------------------------------------------------------
     -- ③ 继续执行挂起的广播 / 单播 协程
-    ----------------------------------------------------------------
-    if fileBroadcastTasks[1] then
-        if coroutine.status(fileBroadcastTasks[1]) == "dead" then
-            table.remove(fileBroadcastTasks, 1)
+    ----------------------------------------------------------------    
+    for taskId, task in pairs(fileBroadcastTasks) do
+        if coroutine.status(task) == "dead" then
+            print("! fileBroadcastTasks ! isdead "..taskId)
         else
-            coroutine.resume(fileBroadcastTasks[1])
+            local ok, err = coroutine.resume(task)
+            if not ok then
+                print("Tasks ERROR:", err) -- 输出：捕获到错误: 这里出错了
+            end
         end
     end
 
-    if fileUnicastTasks[1] then
-        if coroutine.status(fileUnicastTasks[1]) == "dead" then
-            table.remove(fileUnicastTasks, 1)
+    ---单播resume
+    for taskId, task in pairs(fileUnicastTasks) do
+        if coroutine.status(task) == "dead" then
+            print("! fileUnicastTasks ! isdead "..taskId)
         else
-            coroutine.resume(fileUnicastTasks[1])
+            local ok, err = coroutine.resume(task)
+            if not ok then
+                print("Tasks ERROR:", err) -- 输出：捕获到错误: 这里出错了
+            end
         end
     end
-
     ----------------------------------------------------------------
     -- ④ ENet 事件处理（接收、连接、断开）
     ----------------------------------------------------------------
@@ -285,7 +302,6 @@ while true do
                 type    = "connectedPeer",
                 address = tostring(event.peer)
             }
-            
         elseif event.type == "receive" then
             local msg = json.decode(event.data)
 
@@ -307,7 +323,7 @@ while true do
                     address = address,
                     ip      = ip,
                     port    = port,
-                    msg     = msg
+                    msg     = msg,
                 }
                 print("[networkHandle] << over")
             end

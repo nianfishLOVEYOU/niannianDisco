@@ -43,6 +43,15 @@ function FileManager:fileIsExsit(path)
     return true -- 直接返回字节数
 end
 
+function FileManager:fileIsExsitByName(name)
+    local path = "tmp/" .. name
+    local info = love.filesystem.getInfo(path)
+    if not info then
+        return false
+    end
+    return true -- 直接返回字节数
+end
+
 local function getFileSize_love(path)
     local info = love.filesystem.getInfo(path)
     if not info then

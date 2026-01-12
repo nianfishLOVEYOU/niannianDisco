@@ -95,8 +95,10 @@ local function connectPeers()
 end
 
 ---文件广播---
+local fileBroadcastTaskId=0
 local fileBroadcastTasks = {}
-local function fileBroadcastTask(cmd)
+local function fileBroadcastTask(cmd,id)
+    local taskId = id
     coroutine.yield()
     local info, err = love.filesystem.getInfo(cmd.path)
     local size = info.size -- 直接返回字节数
@@ -112,6 +114,8 @@ local function fileBroadcastTask(cmd)
         seq = seq + 1
         local date = love.data.encode("string", "base64", chunk)
         for k, p in pairs(peers) do
+            --检查是否跳过已经拥有
+
             if p and p.enet then
                 local pkt = json.encode {
                     type = "audio",
@@ -142,18 +146,20 @@ local function fileBroadcastTask(cmd)
         end
     end
     infoNetworkCh:push {
-        type = "audioOk",
+        type = "sendAudioOk",
         path = cmd.path,
         ts = os.time(),
         name = cmd.name
     }
-    print("[INFO] 文件发送完毕，已发送 FIN，退出", "还有任务：" .. #fileBroadcastTasks)
-    table.remove(fileBroadcastTasks, 1)
+    print("[INFO] 文件发送完毕，已发送 FIN，退出", "任务：" .. taskId)
+    fileBroadcastTasks[taskId]=nil
 end
 
 ---文件单播---
+local fileUnicastTaskId=0
 local fileUnicastTasks = {}
-local function fileUnicastTask(cmd)
+local function fileUnicastTask(cmd,id)
+    local taskId =id
     coroutine.yield()
     local p = peers[cmd.peer_id]
     if p and p.enet then
@@ -182,13 +188,20 @@ local function fileUnicastTask(cmd)
     end
     f:close()
     -- 结束
-    p.enet:send(son.encode {
+    p.enet:send(json.encode {
         type = "AUDIOFIN",
         ts = os.time(),
         musicname = cmd.name
     })
-    print("[INFO] 文件发送完毕，已发送 FIN，退出")
-    table.remove(fileUnicastTasks, 1)
+
+    infoNetworkCh:push {
+        type = "sendAudioOk",
+        path = cmd.path,
+        ts = os.time(),
+        name = cmd.name
+    }
+    print("[INFO] 文件发送完毕，已发送 FIN，退出 "..taskId)
+    fileUnicastTasks[taskId]=nil
 end
 
 
@@ -259,20 +272,24 @@ while true do
             print("##  Sender start ")
             -- 注册发送携程--避免阻断
             local task = coroutine.create(fileBroadcastTask)
-            table.insert(fileBroadcastTasks, task)
-            local ok, err = coroutine.resume(task, cmd)
-            if not ok then
-                print("ERROR:", err)         -- 输出：捕获到错误: 这里出错了
-            end
-        elseif cmd.cmd == "unicast_mp3" then -- 单播音乐
-            print("##  Sender start  uni")
-            -- 注册发送携程--避免阻断
-            local task = coroutine.create(fileUnicastTask)
-            table.insert(fileUnicastTasks, task)
-            local ok, err = coroutine.resume(task, cmd)
+            fileBroadcastTasks[fileBroadcastTaskId]=task
+            local ok, err = coroutine.resume(task, cmd,fileBroadcastTaskId)
             if not ok then
                 print("ERROR:", err) -- 输出：捕获到错误: 这里出错了
             end
+            -- 加id
+            fileBroadcastTaskId =fileBroadcastTaskId+1
+        elseif cmd.cmd == "unicast_mp3" then -- 单播音乐
+            print("##  Sender start  uni")
+            -- 注册发送携程--避免阻断--可以并列注册
+            local task = coroutine.create(fileUnicastTask)
+            fileUnicastTasks[fileUnicastTaskId]= task
+            local ok, err = coroutine.resume(task, cmd,fileUnicastTaskId)
+            if not ok then
+                print("ERROR:", err) -- 输出：捕获到错误: 这里出错了
+            end
+            -- 加id
+            fileUnicastTaskId=fileUnicastTaskId+1
         elseif cmd.cmd == "send_Broadcast" then
             local msg = json.encode(cmd.msg)
             print("[Sand] >> " .. cmd.msg.type)
@@ -292,25 +309,26 @@ while true do
     end
 
     ---广播resume
-    if (fileBroadcastTasks[1]) then
-        if coroutine.status(fileBroadcastTasks[1]) == "dead" then
-            table.remove(fileUnicastTasks, 1)
+    
+    for taskId, task in pairs(fileBroadcastTasks) do
+        if coroutine.status(task) == "dead" then
+            print("! fileBroadcastTasks ! isdead "..taskId)
         else
-            local ok, err = coroutine.resume(fileBroadcastTasks[1])
+            local ok, err = coroutine.resume(task)
             if not ok then
-                print("ERROR:", #fileBroadcastTasks, coroutine.status(fileBroadcastTasks[1]) == "dead", err) -- 输出：捕获到错误: 这里出错了
+                print("Tasks ERROR:", err) -- 输出：捕获到错误: 这里出错了
             end
         end
     end
 
     ---单播resume
-    if (fileUnicastTasks[1]) then
-        if coroutine.status(fileBroadcastTasks[1]) == "dead" then
-            table.remove(fileUnicastTasks, 1)
+    for taskId, task in pairs(fileUnicastTasks) do
+        if coroutine.status(task) == "dead" then
+            print("! fileUnicastTasks ! isdead "..taskId)
         else
-            local ok, err = coroutine.resume(fileUnicastTasks[1])
+            local ok, err = coroutine.resume(task)
             if not ok then
-                print("ERROR:", err) -- 输出：捕获到错误: 这里出错了
+                print("Tasks ERROR:", err) -- 输出：捕获到错误: 这里出错了
             end
         end
     end
