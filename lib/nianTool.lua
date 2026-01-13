@@ -25,9 +25,9 @@ function normalize(x, y)
     return x / standard, y / standard
 end
 
-bodyType={
-    dynamic="dynamic",
-    static="static"
+bodyType = {
+    dynamic = "dynamic",
+    static = "static"
 }
 
 --默认 static 可以自己定义为
@@ -35,7 +35,7 @@ function setBody(x, y, w, h, anchorX, anchorY, bodyInfo)
     bodyInfo          = bodyInfo or {}
     bodyInfo.x        = x or 0
     bodyInfo.y        = y or 0
-    bodyInfo.w        = bodyInfo.w or w 
+    bodyInfo.w        = bodyInfo.w or w
     bodyInfo.h        = bodyInfo.h or h
     bodyInfo.anchorX  = bodyInfo.anchorX or anchorX or 0
     bodyInfo.anchorY  = bodyInfo.anchorY or anchorY or 0
@@ -44,11 +44,11 @@ function setBody(x, y, w, h, anchorX, anchorY, bodyInfo)
     bodyInfo.friction = bodyInfo.friction or 0
     bodyInfo.sensor   = not not bodyInfo.sensor
     -- 物理
-    local body        = love.physics.newBody(world, bodyInfo.x, bodyInfo.y, bodyInfo.type)                                         -- 世界, 位置, 类型
+    local body        = love.physics.newBody(world, bodyInfo.x, bodyInfo.y, bodyInfo.type) -- 世界, 位置, 类型
     local shape       = love.physics.newRectangleShape(bodyInfo.w * bodyInfo.anchorX, bodyInfo.h * bodyInfo.anchorY,
-        bodyInfo.w, bodyInfo.h)                                                                                                    -- 相对刚体的偏移和尺寸
-    local fixture     = love.physics.newFixture(body, shape, 1)                                                                    -- 刚体, 形状, 密度
-    fixture:setFriction(bodyInfo.friction)                                                                                         --摩擦力
+        bodyInfo.w, bodyInfo.h)                                                            -- 相对刚体的偏移和尺寸
+    local fixture     = love.physics.newFixture(body, shape, 1)                            -- 刚体, 形状, 密度
+    fixture:setFriction(bodyInfo.friction)                                                 --摩擦力
     body:setPosition(bodyInfo.x, bodyInfo.y)
     body:setFixedRotation(true)
     fixture:setSensor(bodyInfo.sensor)
@@ -93,17 +93,17 @@ function printCol()
     end
 end
 
-
 function printUi()
     love.graphics.setLineWidth(2)
 
     for _, widget in pairs(Glove.widgets) do
-        
-        love.graphics.setColor(0, 1, 0,0.3) -- 白色轮廓
-        if widget.type == "VStack" then love.graphics.setColor(1, 1, 0,0.5) end
-        if widget.type == "HStack" then love.graphics.setColor(0, 1, 1,0.3) end
+        love.graphics.setColor(0, 1, 0, 0.3) -- 白色轮廓
+        if widget.type == "VStack" then love.graphics.setColor(1, 1, 0, 0.5) end
+        if widget.type == "HStack" then love.graphics.setColor(0, 1, 1, 0.3) end
+        local x, y = widget:getPos()
+        local w, h = widget:getSize()
 
-        love.graphics.rectangle("line",widget.x,widget.y,widget.w,widget.h)
+        love.graphics.rectangle("line", x, y, w, h)
     end
 end
 
@@ -116,4 +116,20 @@ function math.random(min, max)
     else
         return love.math.random()
     end
+end
+
+-- 打印完整的调用堆栈（模仿报错格式）
+function printStackTrace(message)
+    -- 如果传入了自定义消息，先打印消息
+    if message then
+        print("=== 调用堆栈信息: " .. message .. " ===")
+    else
+        print("=== 调用堆栈信息 ===")
+    end
+
+    -- 获取完整堆栈信息（skip=2 跳过当前函数本身，让堆栈从调用者开始）
+    local stackTrace = debug.traceback("", 2)
+    -- 打印堆栈（和LÖVE2D原生报错格式完全一致）
+    print(stackTrace)
+    print("=======================")
 end

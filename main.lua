@@ -199,7 +199,7 @@ function love.draw()
     systemManager:draw()
 
     --绘制uidebug
-    printUi()
+    --printUi()
 
     love.graphics.setColor(1, 0, 0)
     love.graphics.print("localmod " .. tostring(openlocalMod), 100, 10)

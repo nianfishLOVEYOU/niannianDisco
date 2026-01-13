@@ -26,6 +26,10 @@ function PlayerUI:refresh()
         self.stack:destroy()
     end
     self.stack = self:getvstack()
+    local sw,sh =self.stack:getSize()
+    self.stack:setPos(width / 2 - sw / 2, height - 50)
+
+    --背景
     local c = {}
     for i = 1, 12, 1 do
         local ima = Glove.Image:new(0,0,50,100,"res/image/ui/blackdrag.png")
@@ -37,6 +41,7 @@ function PlayerUI:refresh()
     end
     self.backstuck = Glove.HStack:new(0,0,0,0,c,0)
     self.backstuck:setPos(0, height - 100)
+
 end
 
 local click = function()
@@ -79,13 +84,15 @@ local per = function()
     end
 end
 
-function PlayerUI:list()
+local list = function()
     print("list")
-    if not self.playlistUI then
-        self.playlistUI = require("src.ui.playlistUI"):new()
+    if not uiManager:getUI("playlistUI") then
+        local playlistUI = require("src.ui.playlistUI"):new()
         uiManager:addUI("playlistUI", playlistUI)
+        print("1")
     else
         uiManager:removeUI("playlistUI")
+        print("2")
     end
 end
 
@@ -97,9 +104,7 @@ function PlayerUI:getvstack()
     nextButton:setScale(2,2)
     local perButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/per.png", per)
     perButton:setScale(2,2)
-    local listButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/listbutton.png", function ()
-        self:list()
-    end)
+    local listButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/listbutton.png",list)
     listButton:setScale(2,2)
     local hight = love.graphics.getHeight()
 
@@ -156,8 +161,6 @@ function PlayerUI:draw()
     love.graphics.setColor(0.2, 0.6, 1)
     love.graphics.rectangle("fill", width - 120, height - 80, 100 * audio.volume, 10)
 
-    local sw,sh =self.stack:getSize()
-    self.stack:setPos(width / 2 - sh / 2, height - 50)
     self.stack:draw()
 
     if network.musicTransfering>0 then

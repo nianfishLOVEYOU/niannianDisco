@@ -44,8 +44,6 @@ function Button_img:draw()
     --减去字体宽度
     local fw, fh = self:getFontSize()
 
-    g.print(self.label, self.x + self.w / 2 - fw / 2 + padding,
-        self.y + self.h / 2 - fh / 2 + padding)
 end
 
 function Button_img:setText(text)

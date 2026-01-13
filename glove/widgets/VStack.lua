@@ -20,17 +20,13 @@ end
 
 function VStack:draw()
   for _, child in ipairs(self.children) do
-    child:draw(x, y)
-  end
-
-  for _, child in ipairs(self.children) do
-    if child.drawLater then child:drawLater(x, y) end
+    child:draw()
   end
 end
 
 function VStack:setSize(w, h)
   self.w = w
-  --self.h = h
+  self.h = h
 end
 
 function VStack:getSize()
@@ -96,6 +92,7 @@ function VStack:layout()
     if child.type == "Spacer" then
       y = y + (child.size or spacerWidth)
     else
+      local cw, ch = child:getSize()
       if self.align == "center" then
         child:setLocalPos(x + (self.w - child.h) / 2, y)
       elseif self.align == "end" then
@@ -109,15 +106,19 @@ function VStack:layout()
         child.localY = child.localY + spacing
       end
 
-      y = child.localY + child.h
+      y = child.localY + ch
     end
   end
-  print("!!! layout")
   -- Compute height based on children.
   local children = self.children
-  local lastChild = children[#children]
-  self.h = lastChild.y + lastChild.h - self.y
-  print("VS  " .. self.w .. "  " .. self.h)
+  if #children > 0 then
+    local lastChild = children[#children]
+    self.h = lastChild.y + lastChild.h - self.y
+  else
+    self.h = 0
+  end
+
+  --print("VS layout " .. self.w .. "  " .. self.h)
 end
 
 function VStack:setLocalPos(x, y, z)

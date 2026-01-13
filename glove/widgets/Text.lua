@@ -33,7 +33,6 @@ end
 
 function Text:draw()
   g.setColor(self.color)
-  g.print(self:getText(), self.x, self.y)
 end
 
 function Text:getText()

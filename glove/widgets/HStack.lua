@@ -18,27 +18,23 @@ function HStack:init(x, y, w, h, childrenTB, spacing, align)
     self:addChild(child)
   end
   self:layout()
-  
 end
 
 function HStack:draw()
   for _, child in ipairs(self.children) do
     child:draw()
   end
-
-  for _, child in ipairs(self.children) do
-    if child.drawLater then child:drawLater(x, y) end
-  end
 end
 
 function HStack:setSize(w, h)
-  --self.w = w
+  self.w = w
   self.h = h
 end
 
 function HStack:getSize()
   -- If there is a Spacer child then use screen width.
   if self.haveSpacer then return Glove.getAvailableWidth() end
+
   return self.w, self.h
 end
 
@@ -92,7 +88,6 @@ function HStack:layout()
     -- Compute the size of each zero width Spacer.
     spacerWidth = (availableWidth - childrenWidth) / spacerCount
   end
-
   -- Set the x and y keys of each non-spacer child.
   for i, child in ipairs(children) do
     if child.type == "Spacer" then
@@ -111,17 +106,20 @@ function HStack:layout()
       if prevChild and prevChild.type ~= "Spacer" then
         child.localX = child.localX + spacing
       end
-      x = child.localX + ch
+      x = child.localX + cw
     end
   end
 
   -- 设置自己的size
   local children = self.children
-  local lastChild = children[#children]
-  --如果有宽度用自己的宽度，不然就用孩子的
-  self.w = lastChild.x + lastChild.w - self.x
+  if #children > 0 then
+    local lastChild = children[#children]
+    self.w = lastChild.x + lastChild.w - self.x
+  else
+    self.w = 0
+  end
 
-  print(self.type .. "  " .. self.h)
+  --print("VS layout " .. self.w .. "  " .. self.h)
 end
 
 function HStack:setLocalPos(x, y, z)

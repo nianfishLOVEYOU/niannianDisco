@@ -38,6 +38,7 @@ function uiManager:addUI(name,ui,options)
         local instance={name =name ,ui= ui,options=options }
         ui:init()
         table.insert(self.uiTable,instance)
+        print("add ui ",name)
     else
         print("!  ui is have !",name)
         --replaceUI(name,ui)
@@ -66,6 +67,7 @@ function uiManager:removeUI(name)
     if removeIndex~=-1 then
         self.uiTable[removeIndex].ui:destroy()
         table.remove(self.uiTable,removeIndex)
+        print("remove ui ",name)
     else
         print("uimanager no : ",name)
     end
@@ -74,7 +76,7 @@ end
 
 function uiManager:refresh(name)
     for i, v in ipairs(self.uiTable) do
-        if v.name == name then
+        if v.name == name and v.options.visiable then
             v.ui:refresh()
         end
     end
@@ -82,7 +84,7 @@ end
 
 function uiManager:update(dt)
     for k, v in pairs(self.uiTable) do
-        if v.ui.update then
+        if v.ui.update and v.options.visiable then
             v.ui:update(dt)
         end
     end

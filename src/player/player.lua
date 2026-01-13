@@ -137,7 +137,6 @@ function player:draw()
     love.graphics.rectangle('fill', self.x - self.w / 2, self.y - self.h - 30, self.w, 20)
 
     love.graphics.setColor(1, 1, 1)
-    love.graphics.print(self.name, self.x + 20 - self.w / 2, self.y - self.h - 30)
 
 end
 

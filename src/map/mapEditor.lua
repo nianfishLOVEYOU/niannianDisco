@@ -105,7 +105,6 @@ function mapEditor:mousepressed(x, y, button)
             if(itemTypes[ItemIndex]=="startPoint") then
                 self.map.startPoint.x=floorToPixSize(worldX) 
                 self.map.startPoint.y=floorToPixSize(worldY)
-                print(self.map.startPoint)
             end
         end
     elseif button == 3 then

@@ -24,7 +24,7 @@ function item:init(x, y, w, h)
     -- 点击边界缩放
     self.overPadding = 0
     -- 自身颜色
-    self.color = {1, 1, 1}
+    self.color = { 1, 1, 1 }
     -- 组件
     self.component = {}
     self.visiable = true
@@ -42,18 +42,27 @@ function item:setParentInit()
 end
 
 function item:addChild(child)
-    table.insert(self.children,child)
+    table.insert(self.children, child)
     --self.children[child.id] = child
     child.parent = self
     child:setParentInit()
 end
 
 function item:removeChild(child)
-    if #self.children ==0 then return end
+    if #self.children == 0 then return end
     for i = #self.children, 1, -1 do
         if self.children[i] == child then
-            table.remove(self.children,i)
+            table.remove(self.children, i)
+            child.parent = nil
         end
+    end
+end
+
+function item:clearChild()
+    if #self.children == 0 then return end
+    for i = #self.children, 1, -1 do
+        self.children[i].parent = nil
+        table.remove(self.children, i)
     end
 end
 
@@ -85,7 +94,6 @@ function item:setId(id)
 end
 
 function item:setLocalPos(x, y, z)
-
     if self.parent then
         self.localX, self.localY = x, y
         self.localZ = z or 0
@@ -110,7 +118,7 @@ end
 function item:isOver(mouseX, mouseY)
     local width, height = self:getSize()
     return self.x - self.overPadding <= mouseX and mouseX <= self.x + width and self.y <= mouseY and mouseY <= self.y +
-               height
+        height
 end
 
 function item:setPos(x, y, z)
@@ -137,7 +145,7 @@ function item:setSize(w, h)
 end
 
 function item:getSize()
-    return self.w , self.h
+    return self.w, self.h
 end
 
 function item:update(dt)
@@ -147,8 +155,8 @@ end
 function item:draw()
     local x, y = self:getPos()
     love.graphics.setColor(self.color)
-    love.graphics.rectangle('fill', x - self.w / 2, y - self.h  / 2, self.w ,
-        self.h )
+    love.graphics.rectangle('fill', x - self.w / 2, y - self.h / 2, self.w,
+        self.h)
 end
 
 -- 确保没有被引用了

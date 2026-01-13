@@ -58,7 +58,7 @@ Glove = {
     if clickWidget then 
       clickWidget:onClick(mouseX, mouseY)
       Glove.setFocus(clickWidget)
-      print(clickWidget.type)
+      print("clickUI",clickWidget.type,clickWidget.name)
     else 
       print("nil")
       --移除焦点

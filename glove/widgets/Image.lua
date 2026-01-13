@@ -17,8 +17,8 @@ function Image:draw()
 end
 
 function Image:setScale(w,h)
-    Image.super.setScale(self,w,h)
     self.image:setScale(w,h)
+    self.w,self.h=self.image:getSize()
 end
 
 

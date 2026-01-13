@@ -60,16 +60,16 @@ end
 
 function PlaylistUI:refresh()
     -- 创建本地列表
-    -- print("##playlist UpdateUi")
-    self:updateList()
-    self.stack:layout()
+    if self.stack then
+        self.stack:destroy()
+    end
+    self.stack = self:getvstack()
 end
 
 function PlaylistUI:init()
     eventManager:on("fileDrop", musicInput)
     self.scrollPosition = 0
     self.itemHeight = 30
-    self.stack = self:getvstack()
     self:refresh()
 end
 
@@ -78,23 +78,21 @@ function PlaylistUI:update(dt)
 
 end
 
-function PlaylistUI:updateList()
+-- 获得播放列表ui
+function PlaylistUI:getvstack()
+    local title = Glove.HStack:new(0, 0, 0, 0, { Glove.Text:new(0, 0, 0, 0, "播放列表:") })
+
+    self.listVstack = Glove.VStack:new(0, 0, 0, 0, {}, 30)
+    self.listVstack:clearChild()
     for i, v in ipairs(audio.playlist) do
         local name = Glove.Text:new(0, 0, 0, 0, (i == audio.currentIndex and "[播放中]" or "") .. v.name)
         local hstack = Glove.HStack:new(0, 0, 0, 0, { name })
-        self.listVstack:addChild(hstack) 
+        self.listVstack:addChild(hstack)
     end
-end
+    self.listVstack:layout()
 
--- 获得播放列表ui
-function PlaylistUI:getvstack()
-
-    local title = Glove.HStack:new(0, 0, 0, 0, { Glove.Text:new(0, 0, 0, 0, "播放列表:") })
-
-    self.listVstack=Glove.VStack:new(0, 0, 0, 0, {}, 30)
-    
-    local vstack = Glove.VStack:new(0, 0, 0, 0, {title,self.listVstack}, 30)
-   
+    local vstack = Glove.VStack:new(0, 0, 0, 0, { title, self.listVstack }, 30)
+    vstack:setPos(self.posx, self.posy)
     return vstack
 end
 
@@ -108,7 +106,7 @@ function PlaylistUI:draw()
     love.graphics.rectangle('fill', scissorX - pass, scissorY - pass, scissorW + pass * 2, scissorH + pass * 2)
     love.graphics.setScissor(scissorX, scissorY, scissorW, scissorH) -- 开启剪裁
     -- 裁剪内容
-    self.stack:draw(self.posx, self.posy)
+    self.stack:draw()
 
     love.graphics.setScissor() -- 关闭剪裁
 

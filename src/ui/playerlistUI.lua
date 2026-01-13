@@ -23,6 +23,7 @@ local waittime = os.time()
 function PlayerlistUI:update(dt)
     if os.time() - waittime > 1 then
         PlayerlistUI:refresh()
+        waittime=os.time()
     end
 end
 ---------------播放列表------------

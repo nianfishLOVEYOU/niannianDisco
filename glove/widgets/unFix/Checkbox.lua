@@ -35,7 +35,6 @@ local mt = {
       g.setFont(font)
       local height = font:getHeight()
       local dy = (size - height) / 2
-      g.print(self.label, x + size + spacing, y + dy)
 
       if self.debug then
         g.setColor(colors.red)
