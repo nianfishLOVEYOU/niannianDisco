@@ -23,8 +23,6 @@ function item:init(x, y, w, h)
     self.w, self.h = w, h
     -- 点击边界缩放
     self.overPadding = 0
-    -- 尺寸缩放
-    self.scaleW, self.scaleH = 1, 1
     -- 自身颜色
     self.color = {1, 1, 1}
     -- 组件
@@ -139,7 +137,7 @@ function item:setSize(w, h)
 end
 
 function item:getSize()
-    return self.w , self.h * self.scaleH
+    return self.w , self.h
 end
 
 function item:update(dt)

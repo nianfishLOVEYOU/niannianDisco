@@ -30,12 +30,11 @@ function Button_img:draw()
         local offsetx = padding / 2
         local offsety = padding / 2
         self.image:setPos(self.x - offsetx,self.y - offsety)
-        local w,h =self:getSize()
-        self.image:setSize( (w + padding),(h + padding))
+        self.image:setSize(self.w+ padding,self.h+ padding)
         self.image:draw()
     else
         self.image:setPos(self.x,self.y)
-        self.image:setScale(self.scaleW,self.scaleH)
+        self.image:setSize(self.w,self.h)
         self.image:draw()
     end
 
@@ -62,11 +61,12 @@ end
 
 function Button_img:setSize(w, h)
     self.image:setSize(w,h)
+    self.w ,self.h=self.image:getSize()
 end
 
 function Button_img:setScale(w,h)
     Button_img.super.setScale(self,w,h)
-    self.image:setScale(w,h)
+    self.image:setSize(w,h)
 end
 
 function Button_img:onClick(x, y, button)
