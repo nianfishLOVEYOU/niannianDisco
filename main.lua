@@ -110,6 +110,7 @@ function love.load()
     shaderManager:addEffect(require("src.shader.lightPointEffect").getshader(), 1)
     
     systemManager:init()
+
     if openMapEditorMode then
         statusManager:statusChange("editor")
     else

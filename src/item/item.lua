@@ -147,8 +147,8 @@ end
 function item:draw()
     local x, y = self:getPos()
     love.graphics.setColor(self.color)
-    love.graphics.rectangle('fill', x - self.w * self.scaleW / 2, y - self.h * self.scaleW / 2, self.w * self.scaleW,
-        self.h * self.scaleW)
+    love.graphics.rectangle('fill', x - self.w / 2, y - self.h  / 2, self.w ,
+        self.h )
 end
 
 -- 确保没有被引用了

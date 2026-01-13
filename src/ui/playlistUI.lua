@@ -61,16 +61,15 @@ end
 function PlaylistUI:refresh()
     -- 创建本地列表
     -- print("##playlist UpdateUi")
-    if self.stack then
-        self.stack:destroy()
-    end
-    self.stack = self:getvstack()
+    self:updateList()
+    self.stack:layout()
 end
 
 function PlaylistUI:init()
     eventManager:on("fileDrop", musicInput)
     self.scrollPosition = 0
     self.itemHeight = 30
+    self.stack = self:getvstack()
     self:refresh()
 end
 
@@ -79,19 +78,23 @@ function PlaylistUI:update(dt)
 
 end
 
--- 获得播放列表ui
-function PlaylistUI:getvstack()
-    local vstackchild = {}
-
-    local title = Glove.HStack:new(0, 0, 0, 0, { Glove.Text:new(0, 0, 0, 0, "播放列表:") })
-    table.insert(vstackchild, title)
-
+function PlaylistUI:updateList()
     for i, v in ipairs(audio.playlist) do
         local name = Glove.Text:new(0, 0, 0, 0, (i == audio.currentIndex and "[播放中]" or "") .. v.name)
         local hstack = Glove.HStack:new(0, 0, 0, 0, { name })
-        table.insert(vstackchild, hstack)
+        self.listVstack:addChild(hstack) 
     end
-    local vstack = Glove.VStack:new(0, 0, 0, 0, vstackchild, 30)
+end
+
+-- 获得播放列表ui
+function PlaylistUI:getvstack()
+
+    local title = Glove.HStack:new(0, 0, 0, 0, { Glove.Text:new(0, 0, 0, 0, "播放列表:") })
+
+    self.listVstack=Glove.VStack:new(0, 0, 0, 0, {}, 30)
+    
+    local vstack = Glove.VStack:new(0, 0, 0, 0, {title,self.listVstack}, 30)
+   
     return vstack
 end
 
@@ -128,8 +131,6 @@ end
 
 function PlaylistUI:destroy()
     eventManager:off("fileDrop", musicInput)
-    self.scrollPosition = 0
-    self.itemHeight = 30
     self.stack:destroy()
 end
 

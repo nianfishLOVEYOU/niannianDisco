@@ -12,13 +12,13 @@ function HStack:init(x, y, w, h, childrenTB, spacing, align)
 
   self.w = 0
   self.h = 0 -- computed in layout method
-  self.children = childrenTB
   self.haveSpacer = fun.some(childrenTB, isSpacerWithoutSize)
   self.spacing = spacing or 10
   for i, child in ipairs(childrenTB) do
     self:addChild(child)
   end
   self:layout()
+  
 end
 
 function HStack:draw()

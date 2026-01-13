@@ -79,10 +79,10 @@ local per = function()
     end
 end
 
-local list = function()
+function PlayerUI:list()
     print("list")
-    if not uiManager:getUI("playlistUI") then
-        local playlistUI = require("src.ui.playlistUI"):new()
+    if not self.playlistUI then
+        self.playlistUI = require("src.ui.playlistUI"):new()
         uiManager:addUI("playlistUI", playlistUI)
     else
         uiManager:removeUI("playlistUI")
@@ -97,7 +97,9 @@ function PlayerUI:getvstack()
     nextButton:setScale(2,2)
     local perButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/per.png", per)
     perButton:setScale(2,2)
-    local listButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/listbutton.png", list)
+    local listButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/listbutton.png", function ()
+        self:list()
+    end)
     listButton:setScale(2,2)
     local hight = love.graphics.getHeight()
 
@@ -111,11 +113,6 @@ function PlayerUI:draw()
     local width, height = love.graphics.getDimensions()
 
     self.backstuck:draw()
-
-    -- 播放器控制区域
-    -- love.graphics.setColor(0.2, 0.2, 0.2, 0.9)
-    -- love.graphics.rectangle("fill", 0, height - 100, width, 100)
-
     -- 当前播放信息
     local currentTrack = audio:getCurrentTrack()
     if currentTrack then
@@ -212,6 +209,11 @@ function PlayerUI:dragProgress(x)
     local newPosition = progress * duration
     audio:seek(newPosition)
     audio:sendUpdatePlayStatus()
+end
+
+function PlayerUI:destroy()
+    uiManager:removeUI("playlistUI")
+    self.stack:destroy()
 end
 
 return PlayerUI

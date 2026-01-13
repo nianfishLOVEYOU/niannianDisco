@@ -10,7 +10,6 @@ function VStack:init(x, y, w, h, childrenTB, spacing, align)
   self.align = align or "start"
   self.w = 0 -- computed in layout method
   self.h = 0
-  self.children = childrenTB
   self.haveSpacer = fun.some(childrenTB, isSpacerWithoutSize)
   self.spacing = spacing or 10
   for i, child in ipairs(childrenTB) do

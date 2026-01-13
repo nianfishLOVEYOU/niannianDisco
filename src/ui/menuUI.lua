@@ -46,6 +46,7 @@ function MenuUI:refresh()
 end
 
 function MenuUI:update(dt)
+    print("121212")
     local waitingUI = uiManager:getUI("waitingUI")
     if waitingUI then
         -- 超出等待上限
@@ -67,6 +68,7 @@ end
 function MenuUI:getvstack()
     local vstackchild = {}
 
+    print("1")
     local linkButton = Glove.Button:new(0, 0, 0, 0, "link", function()
         print("got click")
         if (string.len(self.code) == 4 and self.playername ~= "") then
