@@ -1,18 +1,18 @@
 local fun = require "glove/fun"
 local widget = require "glove.widgets.widget"
 
-local aligtype={"start","center,end"}
+local aligtype = { "start", "center,end" }
 local VStack = widget:extend()
 
-function VStack:init(x, y, w, h, childrenTB,spacing, align)
+function VStack:init(x, y, w, h, childrenTB, spacing, align)
   self.type = "HStack"
 
   self.align = align or "start"
   self.w = 0 -- computed in layout method
-  self.h=0
+  self.h = 0
   self.children = childrenTB
   self.haveSpacer = fun.some(childrenTB, isSpacerWithoutSize)
-  self.spacing=spacing or 10
+  self.spacing = spacing or 10
   for i, child in ipairs(childrenTB) do
     self:addChild(child)
   end
@@ -37,12 +37,7 @@ end
 function VStack:getSize()
   -- If there is a Spacer child then use screen height.
   if self.haveSpacer then return Glove.getAvailableHeight() end
-
-  -- Compute height based on children.
-  local children = self.children
-  local lastChild = children[#children]
-  local w, h = self.w , lastChild.y + lastChild.h - self.y
-  return w, h
+  return self.w, self.h
 end
 
 function VStack:layout()
@@ -51,6 +46,12 @@ function VStack:layout()
   local spacing = self.spacing or 0
   local x = self.localX or 0
   local y = self.localY or 0
+
+  for i, child in ipairs(children) do
+    if child.type == "VStack" or child.type == "HStack" then
+      child:layout()
+    end
+  end
 
   -- Get width of widest child.
   self.w = fun.max(
@@ -96,14 +97,12 @@ function VStack:layout()
     if child.type == "Spacer" then
       y = y + (child.size or spacerWidth)
     else
-
-
       if self.align == "center" then
-        child:setLocalPos(x + (self.w - child.h) / 2,y)
+        child:setLocalPos(x + (self.w - child.h) / 2, y)
       elseif self.align == "end" then
-        child:setLocalPos(x + self.w - child.h,y)
+        child:setLocalPos(x + self.w - child.h, y)
       else -- assume "start"
-        child:setLocalPos(x,y)
+        child:setLocalPos(x, y)
       end
 
       local prevChild = children[i - 1]
@@ -115,19 +114,20 @@ function VStack:layout()
     end
   end
   print("!!! layout")
-  local lastChild = self.children[#children]
-  self.h=lastChild.y + lastChild.h- self.y
-  print("VS  "..self.w.."  "..self.h)
+  -- Compute height based on children.
+  local children = self.children
+  local lastChild = children[#children]
+  self.h = lastChild.y + lastChild.h - self.y
+  print("VS  " .. self.w .. "  " .. self.h)
 end
 
-function VStack:setLocalPos(x,y,z)
-  VStack.super.setLocalPos(self,x,y,z)
+function VStack:setLocalPos(x, y, z)
+  VStack.super.setLocalPos(self, x, y, z)
   self:layout()
 end
 
-
-function VStack:setPos(x,y,z)
-  VStack.super.setPos(self,x,y,z)
+function VStack:setPos(x, y, z)
+  VStack.super.setPos(self, x, y, z)
   self:layout()
 end
 

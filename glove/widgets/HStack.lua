@@ -1,20 +1,20 @@
 local fun = require "glove/fun"
 local widget = require "glove.widgets.widget"
 
-local aligtype={"top","center,buttom"}
+local aligtype = { "top", "center,buttom" }
 
 local HStack = widget:extend()
 
-function HStack:init(x, y, w, h,childrenTB,spacing, align)
+function HStack:init(x, y, w, h, childrenTB, spacing, align)
   self.type = "HStack"
 
   self.align = align or "top"
-  
-  self.w=0
+
+  self.w = 0
   self.h = 0 -- computed in layout method
   self.children = childrenTB
   self.haveSpacer = fun.some(childrenTB, isSpacerWithoutSize)
-  self.spacing=spacing or 10
+  self.spacing = spacing or 10
   for i, child in ipairs(childrenTB) do
     self:addChild(child)
   end
@@ -39,13 +39,7 @@ end
 function HStack:getSize()
   -- If there is a Spacer child then use screen width.
   if self.haveSpacer then return Glove.getAvailableWidth() end
-
-  -- Compute height based on children.
-  local children = self.children
-  local lastChild = children[#children]
- --如果有宽度用自己的宽度，不然就用孩子的
-  local w, h = self.w or lastChild.x + lastChild.w- self.x, self.h
-  return w, h
+  return self.w, self.h
 end
 
 function HStack:layout()
@@ -55,12 +49,16 @@ function HStack:layout()
   local x = self.localX or 0
   local y = self.localY or 0
 
-  -- Get height of tallest child.
+  for i, child in ipairs(children) do
+    if child.type == "VStack" or child.type == "HStack" then
+      child:layout()
+    end
+  end
+
   self.h = fun.max(
     children,
     function(child) return child.h or 0 end
   )
-  print(self.type .."  ".. self.h)
 
   -- Count spacers with no size.
   local spacerCount = fun.count(children, isSpacerWithoutSize)
@@ -89,7 +87,7 @@ function HStack:layout()
     -- Account for requested gaps between children.
     childrenWidth = childrenWidth + spacing * gapCount
 
-    local availableWidth = self:getWidth()
+    local availableWidth, _ = self:getSize()
 
     -- Compute the size of each zero width Spacer.
     spacerWidth = (availableWidth - childrenWidth) / spacerCount
@@ -100,14 +98,13 @@ function HStack:layout()
     if child.type == "Spacer" then
       x = x + (child.size or spacerWidth)
     else
-
-      local cw,ch =child:getSize()
+      local cw, ch = child:getSize()
       if self.align == "center" then
-        child:setLocalPos(x,y + (self.h - ch) / 2)
+        child:setLocalPos(x, y + (self.h - ch) / 2)
       elseif self.align == "bottom" then
-        child:setLocalPos(x,y + self.h - ch)
+        child:setLocalPos(x, y + self.h - ch)
       else -- assume "top"
-        child:setLocalPos(x,y)
+        child:setLocalPos(x, y)
       end
 
       local prevChild = children[i - 1]
@@ -118,22 +115,24 @@ function HStack:layout()
     end
   end
 
-  
-  local lastChild = self.children[#children]
-  self.w = lastChild.x + lastChild.w- self.x
+  -- 设置自己的size
+  local children = self.children
+  local lastChild = children[#children]
+  --如果有宽度用自己的宽度，不然就用孩子的
+  self.w = lastChild.x + lastChild.w - self.x
+
+  print(self.type .. "  " .. self.h)
 end
 
-function HStack:setLocalPos(x,y,z)
-  HStack.super.setLocalPos(self,x,y,z)
+function HStack:setLocalPos(x, y, z)
+  HStack.super.setLocalPos(self, x, y, z)
   self:layout()
 end
 
-
-function HStack:setPos(x,y,z)
-  HStack.super.setPos(self,x,y,z)
+function HStack:setPos(x, y, z)
+  HStack.super.setPos(self, x, y, z)
   self:layout()
 end
-
 
 function HStack:destroy()
   for _, child in ipairs(self.children) do

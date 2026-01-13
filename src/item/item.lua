@@ -44,13 +44,19 @@ function item:setParentInit()
 end
 
 function item:addChild(child)
-    self.children[child.id] = child
+    table.insert(self.children,child)
+    --self.children[child.id] = child
     child.parent = self
     child:setParentInit()
 end
 
-function item:removeChild(id)
-    self.children[id] = nil
+function item:removeChild(child)
+    if #self.children ==0 then return end
+    for i = #self.children, 1, -1 do
+        if self.children[i] == child then
+            table.remove(self.children,i)
+        end
+    end
 end
 
 function item:addComponent(name)
@@ -121,12 +127,9 @@ function item:getPos()
     return self.x, self.y, self.z
 end
 
-function item:getScale()
-    return self.scaleW, self.scaleH
-end
-
 function item:setScale(scaleW, scaleH)
-    self.scaleW, self.scaleH = scaleW, scaleH
+    self.w = self.w * scaleW
+    self.h = self.h * scaleH
 end
 
 -- 设置尺寸（缩放时锚点位置不变）
@@ -136,7 +139,7 @@ function item:setSize(w, h)
 end
 
 function item:getSize()
-    return self.w * self.scaleW, self.h * self.scaleH
+    return self.w , self.h * self.scaleH
 end
 
 function item:update(dt)
