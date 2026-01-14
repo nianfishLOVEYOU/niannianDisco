@@ -2,7 +2,6 @@ local mouseManager={}
 
 ---注册---
 function mouseManager:mousepressed_regester(func)
-    print("press regester")
     eventManager:on("event_mousePressed",func)
 end
 

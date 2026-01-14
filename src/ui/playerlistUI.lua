@@ -42,7 +42,6 @@ function PlayerlistUI:getvstack()
     local stack = Glove.VStack:new(vstackchild ,30)
 
     stack:setPos(50,30,self.z)
-    print("asas", stack)
     return stack
 end
 

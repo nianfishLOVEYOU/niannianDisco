@@ -103,8 +103,7 @@ function printUi()
         local x, y = widget:getPos()
         local w, h = widget:getSize()
         if not w or not h then 
-            --print("!!!!!!" ,widget.type)
-            return
+            --print("!!!!!!" ,widget.type,widget.name,widget.x,widget.y,widget.w,widget.h)
         end
         love.graphics.rectangle("line", x, y, w, h)
     end

@@ -78,7 +78,6 @@ end
 --输入框被点击
 function Input:onClick(clickX, clickY, button)
   Glove.setFocus(self)
-  print("select input")
   -- Enable keyboard.
   -- TODO: Is this needed? Maybe only on mobile devices.
 

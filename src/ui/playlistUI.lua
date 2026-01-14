@@ -63,19 +63,19 @@ end
 -- 获得播放列表ui
 function PlaylistUI:getvstack()
     local title = Glove.HStack:new({ Glove.Text:new("播放列表:") })
+    title:setName("title") 
 
-    self.listVstack = Glove.VStack:new({}, 30)
-    self.listVstack:clearChild()
+    local listVstack = Glove.VStack:new({}, 30)
     for i, v in ipairs(audio.playlist) do
         local name = Glove.Text:new((i == audio.currentIndex and "[播放中]" or "") .. v.name)
         local hstack = Glove.HStack:new({ name })
-        self.listVstack:addChild(hstack)
+        hstack:setName( name)
+        listVstack:addChild(hstack)
     end
-    self.listVstack:layout()
+    listVstack:layout()
 
-
-    local vstack = Glove.VStack:new({ title, self.listVstack }, 30)
-
+    local vstack = Glove.VStack:new({ title,listVstack }, 30)
+    vstack:setName( "playerlistui vstack")
     vstack:setPos(self.posx,self.posy,self.z)
     return vstack
 end

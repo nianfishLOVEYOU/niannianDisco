@@ -14,7 +14,6 @@ end)
 
 function Editor:init()
     self.editor = require "src.map.mapEditor"
-    print("12112121s")
     self.editor:init()
 end
 

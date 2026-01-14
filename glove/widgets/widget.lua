@@ -4,7 +4,6 @@ local widget = item:extend()
 
 -- is widget
 function widget:init()
-  self.name="n_name"
   Glove.widgets[self] = self
   self.visible = true
 end

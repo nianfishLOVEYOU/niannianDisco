@@ -8,6 +8,7 @@ item.__gc = function(u)
 end
 
 function item:init()
+    self.name="n_name"
     self.id = ""
     self.type = "item"
 
@@ -36,6 +37,10 @@ function item:init()
     -- 清理方法
 end
 
+function item:setName(name)
+    self.name=name
+end
+
 function item:setParentInit()
     self.localX = self.x - self.parent.x
     self.localY = self.y - self.parent.y
@@ -45,7 +50,6 @@ function item:addChild(child)
     table.insert(self.children, child)
     --self.children[child.id] = child
     child.parent = self
-    print(child.type)
     child:setParentInit()
 end
 

@@ -81,10 +81,8 @@ local list = function()
     if not uiManager:getUI("playlistUI") then
         local playlistUI = require("src.ui.playlistUI"):new()
         uiManager:addUI("playlistUI", playlistUI)
-        print("1")
     else
         uiManager:removeUI("playlistUI")
-        print("2")
     end
 end
 
