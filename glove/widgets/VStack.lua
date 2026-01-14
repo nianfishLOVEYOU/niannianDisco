@@ -107,6 +107,7 @@ function VStack:layout()
       end
 
       y = child.localY + ch
+      print("type",child.type,ch)
     end
   end
   -- Compute height based on children.
