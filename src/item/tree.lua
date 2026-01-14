@@ -2,10 +2,10 @@ local bodyItem = require "src.item.bodyItem"
 
 local tree = bodyItem:extend()
 
-function tree:init(x, y, w, h, imgPath, bodyInfo)
+function tree:init( imgPath, bodyInfo)
     self.type="tree"
     self:setImage("res/image/tree.png")
-    self:setBody(w/2,10)
+    self:setBody(self.w/2,10)
 end
 
 function tree:animation()

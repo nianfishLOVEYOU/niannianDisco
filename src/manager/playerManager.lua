@@ -16,17 +16,17 @@ systemManager:camdraw_regester(function()
 end)
 keybordManager:keypressed_regester(function(key)
     PlayerManager:keypressed(key)
-        
 end)
 mouseManager:mousepressed_regester(function(x, y, button)
     PlayerManager:mousePressed(x, y, button)
 end)
 
-function PlayerManager:addPlayer(x,y)
+function PlayerManager:addPlayer(x, y)
     if self.player then
         return
     end
-    local player = player:new(x,y,0,0, "res/image/player1.png")
+    local player = player:new( "res/image/player1.png")
+    player:setPos(x, y)
     player:setName(self.name)
     self.player = player
 end
@@ -34,7 +34,8 @@ end
 function PlayerManager:addRemotePlayer(id, name, x, y)
     if not self.remotePlayers[id] then
         print("[creat remote player ]:" .. id, name)
-        local rplayer = remotePlayer:new(x, y, 0,0, "res/image/player1.png")
+        local rplayer = remotePlayer:new("res/image/player1.png")
+        rplayer:setPos(x, y)
         rplayer:setName(name)
         self.remotePlayers[id] = rplayer
     end

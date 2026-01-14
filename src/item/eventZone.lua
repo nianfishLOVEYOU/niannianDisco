@@ -1,22 +1,13 @@
-local item = require "src.item.bodyItem"
+local bodyItem = require "src.item.bodyItem"
 
-local EventZone = {}
-EventZone.__index = EventZone
-setmetatable(EventZone, {
-    __index = item
-}) -- 子类继承父类
-function EventZone:new(x,y,sizew,sizeh, imgPath, onInteract)
-    local obj = item:new(x , y , 200, 200, "res/image/ui/add.png",{sensor=true}) -- 先走父类构造
-    setmetatable(obj, EventZone) -- 再把实例的元表改为子类
+local EventZone = bodyItem:extend() -- 子类继承父类
+function EventZone:init( imgPath, onInteract)
+    self:setSize(100,100)
     -- 初始化子类特有属性
-    obj.type="eventZone"
-    obj.color = {1,1,1} 
-    obj:setInteract(function ()
-        EventZone:openMusicUI()
-    end)
-    obj.image.depth=0
-    obj.image.depthByY=false
-    return obj
+    self.type="eventZone"
+    
+    self.image.depth=0
+    self.image.depthByY=false
 end
 
 --打开拖入ui

@@ -10,10 +10,10 @@ local halfSize = size / 2
 local width = size * 1.8
 
 -- 开关表，开关关键key，开关状态改变事件
-function Toggle:init(x, y, w, h, t, key, onChange)
+function Toggle:init( t, key, onChange)
   local font = g.getFont()
   self.type = "Toggle"
-
+  
   self:setSize(width, size)
   self.font = font
   self.table = t
@@ -25,14 +25,14 @@ function Toggle:draw()
   local over = self:isOver(love.mouse.getPosition())
   g.setColor(over and Glove.hoverColor or self.color)
   g.setFont(self.font)
-  g.rectangle("line", x, y, width, size, halfSize, halfSize)
+  g.rectangle("line", self.x, self.y, width, size, halfSize, halfSize)
 
   g.setColor(self.color)
 
   local checked = self.table[self.key]
   local circleRadius = size / 2 - padding
-  local circleX = checked and x + width - padding - circleRadius or x + padding + circleRadius
-  local circleY = y + padding + circleRadius
+  local circleX = checked and self.x + width - padding - circleRadius or self.x + padding + circleRadius
+  local circleY = self.y + padding + circleRadius
   g.circle("fill", circleX, circleY, circleRadius)
 end
 

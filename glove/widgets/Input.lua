@@ -11,7 +11,7 @@ local inputCursor
 local Input = widget:extend()
 
 -- inputTable：控制的输入对象需要包含到
-function Input:init(x, y, w, h, text, onInput)
+function Input:init( text, onInput)
   local font = g.getFont()
   self.font = font
 
@@ -23,7 +23,7 @@ function Input:init(x, y, w, h, text, onInput)
     self.onInput(self.text)
   end
 
-  self:setSize(w, h)
+  self:setSize(40, 20)
 end
 
 function Input:draw()

@@ -102,7 +102,10 @@ function printUi()
         if widget.type == "HStack" then love.graphics.setColor(0, 1, 1, 0.3) end
         local x, y = widget:getPos()
         local w, h = widget:getSize()
-
+        if not w or not h then 
+            --print("!!!!!!" ,widget.type)
+            return
+        end
         love.graphics.rectangle("line", x, y, w, h)
     end
 end

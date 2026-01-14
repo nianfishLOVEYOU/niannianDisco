@@ -25,7 +25,7 @@ Any number of `Spacer` widgets can be added to a table of widgets.
 The amount of space consumed by each is computed by
 dividing the unused space by the number of `Spacer` widgets.
 --]]
-function Spacer:init(x, y, w, h, size)
+function Spacer:init( size)
   self.type = "Spacer"
 
   local to = type(size)

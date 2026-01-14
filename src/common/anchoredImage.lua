@@ -18,6 +18,7 @@ function AnchoredImage:init(path, x, y, anchorX, anchorY)
     self.img = resourceManager.loadImage(path)
     if not self.img then 
         print("!ERROR non path ! : "..path)
+        return 
     end
     self.quad = nil
     -- 原始尺寸

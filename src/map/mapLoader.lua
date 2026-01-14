@@ -40,14 +40,15 @@ function MapLoader.load(mapFile)
     for _, it in ipairs(data.items) do
         print("mapLoad:", it.type)
         if itemnews[it.type] then
-            local item = itemnews[it.type]:new(it.x, it.y, it.w, it.h)
+            local item = itemnews[it.type]:new()
+            item:setSize(it.w, it.h)
             item:setPos(it.x, it.y,it.z)
             table.insert(map.items, item)
         else
-            local item=Item:new(it.x, it.y, it.w, it.h)
+            local item=Item:new()
+            item:setSize(it.w, it.h)
             item:setPos(it.x, it.y,it.z)
             table.insert(map.items, item)
-            item.color={1,0,0}
         end
     end
 

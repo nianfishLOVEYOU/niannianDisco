@@ -2,7 +2,7 @@ local imageItem = require "src.item.imageItem"
 
 local floor = imageItem:extend()
 
-function floor:init(x, y, w, h, imgPath)
+function floor:init( imgPath)
 
     self:setImage("res/image/map01.png")
     -- 初始化子类特有属性

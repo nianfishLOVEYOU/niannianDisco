@@ -5,7 +5,7 @@ local aligtype = { "top", "center,buttom" }
 
 local HStack = widget:extend()
 
-function HStack:init(x, y, w, h, childrenTB, spacing, align)
+function HStack:init(childrenTB, spacing, align)
   self.type = "HStack"
 
   self.align = align or "top"
@@ -33,8 +33,14 @@ end
 
 function HStack:getSize()
   -- If there is a Spacer child then use screen width.
-  if self.haveSpacer then return Glove.getAvailableWidth() end
+  if self.haveSpacer then
+    print("haveSpacer!!!")
+    return Glove.getAvailableWidth() ,self.h
+  end
 
+  if not self.w then 
+    print("ui inside not w!!!")
+  end
   return self.w, self.h
 end
 
@@ -53,7 +59,9 @@ function HStack:layout()
 
   self.h = fun.max(
     children,
-    function(child) return child.h or 0 end
+    function(child,i) 
+      local _,h =child:getSize()
+      return h or 0 end
   )
 
   -- Count spacers with no size.

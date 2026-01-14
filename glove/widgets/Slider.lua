@@ -7,15 +7,15 @@ local g = love.graphics
 local Slider = widget:extend()
 local padding = 3
 
-function Slider:init(x, y, w, h, progress,onSet)
+function Slider:init( progress,onSet)
     self.type = "Slider"
     self.progress = progress or 0
     self.color =  { 0.2, 0.6, 1 }
     self.backColor = { 0.5, 0.5, 0.5 }
     self.onSet=onSet
 
-    self.w = w==0 and 60 or w
-    self.h = h==0 and 10 or h
+    self.w = 60 
+    self.h = 10 
 
 end
 

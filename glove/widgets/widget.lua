@@ -3,7 +3,7 @@ local item = require "src.item.item"
 local widget = item:extend()
 
 -- is widget
-function widget:init(x,y,w,h)
+function widget:init()
   self.name="n_name"
   Glove.widgets[self] = self
   self.visible = true

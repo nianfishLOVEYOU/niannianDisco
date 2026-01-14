@@ -1,17 +1,17 @@
 -- Item.lua
-local class = require "src.common.class"
-local item = class:extend()
+local object = require "src.common.object"
+local item = object:extend()
 
 -- gc执行句柄
 item.__gc = function(u)
     print("Cleaning up resources for", u)
 end
 
-function item:init(x, y, w, h)
+function item:init()
     self.id = ""
     self.type = "item"
 
-    self.x, self.y = x, y
+    self.x, self.y = 10, 10
     self.z = 0
 
     self.localX, self.localY = 0, 0 -- 和父母的相对位置，用来区别普通位置
@@ -20,7 +20,7 @@ function item:init(x, y, w, h)
     self.layer = 0.2
     local id = globleManager:guid()
     self:setId(id)
-    self.w, self.h = w, h
+    self.w, self.h = 100, 100
     -- 点击边界缩放
     self.overPadding = 0
     -- 自身颜色
@@ -45,6 +45,7 @@ function item:addChild(child)
     table.insert(self.children, child)
     --self.children[child.id] = child
     child.parent = self
+    print(child.type)
     child:setParentInit()
 end
 
@@ -95,8 +96,9 @@ end
 
 function item:setLocalPos(x, y, z)
     if self.parent then
-        self.localX, self.localY = x, y
-        self.localZ = z or 0
+        self.localX = x or self.localX
+        self.localY = y or self.localY
+        self.localZ = z or self.localZ
         self:localPosRefresh()
     else
         self:setPos(x, y, z)
@@ -125,7 +127,9 @@ function item:setPos(x, y, z)
     if self.parent then
         self:localPosRefresh()
     end
-    self.x, self.y = x, y
+
+    self.x = x or self.x
+    self.y = y or self.y
     self.z = z or self.z
 end
 
@@ -161,10 +165,7 @@ end
 
 -- 确保没有被引用了
 function item:destroy()
-    if self.__destroyed then
-        return
-    end
-    self.__destroyed = true
+    item.super.destroy(self)
 end
 
 return item

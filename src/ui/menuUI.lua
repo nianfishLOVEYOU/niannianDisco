@@ -2,20 +2,7 @@ local colors = require "glove/colors"
 local enet = require "enet"
 local ui = require "src.ui.ui"
 
-local MenuUI = {
-    code = "0000",
-    playername = "小比噶"
-}
-MenuUI.__index = MenuUI
-setmetatable(MenuUI, {
-    __index = ui
-}) -- 子类继承父类
-function MenuUI:new(...)
-    local obj = ui:new(...) -- 先走父类构造
-    setmetatable(obj, MenuUI) -- 再把实例的元表改为子类
-    -- 初始化子类特有属性
-    return obj
-end
+local MenuUI = ui:extend()
 
 local connectFail = function()
     uiManager:removeUI("waitingUI")
@@ -26,9 +13,11 @@ local connectSeccess = function()
 end
 
 function MenuUI:init()
-    MenuUI.posx = 100
-    MenuUI.posy = 100
-    MenuUI:refresh()
+    self.code = "0000"
+    self.playername = "小比噶"
+    self.posx = 100
+    self.posy = 100
+    self:refresh()
     eventManager:on("connectFail", connectFail)
     eventManager:on("connectSeccess", connectSeccess)
 end
@@ -38,11 +27,9 @@ end
 -- 更新播放列表显示
 function MenuUI:refresh()
     -- 创建本地列表
-    if self.stack then
-        self.stack:destroy()
-    end
-    self.stack = self:getvstack()
-    self.stack:setPos(self.posx, self.posy)
+
+    self:clearStacks()
+    self:addStack(self:getvstack())
 end
 
 function MenuUI:update(dt)
@@ -59,16 +46,11 @@ end
 function MenuUI:draw()
     love.graphics.setColor(0, 0, 0, 0.8)
     love.graphics.rectangle('fill', self.posx - 20, self.posy - 20, 200, 200)
-    if self.stack then
-        self.stack:draw()
-    end
+    MenuUI.super.draw(self)
 end
 
 function MenuUI:getvstack()
-    local vstackchild = {}
-
-    print("1")
-    local linkButton = Glove.Button:new(0, 0, 0, 0, "link", function()
+    local linkButton = Glove.Button:new("link", function()
         print("got click")
         if (string.len(self.code) == 4 and self.playername ~= "") then
             -- 转游戏进程
@@ -81,40 +63,42 @@ function MenuUI:getvstack()
         end
     end)
 
-    local inputCode = Glove.Input:new(0, 0, 100, 20, self.code, function(input)
+    local inputCode = Glove.Input:new(self.code, function(input)
         self.code = input
     end)
+    inputCode:setSize(100, 20)
 
-    local inputPlayerName = Glove.Input:new(0, 0, 100, 20, self.playername, function(input)
+    local inputPlayerName = Glove.Input:new(self.playername, function(input)
         self.playername = input
     end)
+    inputPlayerName:setSize(100, 20)
+
 
     -- 房间号输入
-    local first = Glove.HStack:new(0, 0, 0, 0, {Glove.Text:new(0, 0, 0, 0, "输入cod:"), inputCode})
-
+    local first = Glove.HStack:new({ Glove.Text:new("输入cod:"), inputCode })
+    
     -- 名字输入
-    local second = Glove.HStack:new(0, 0, 0, 0, {Glove.Text:new(0, 0, 0, 0, "输入name:"), inputPlayerName})
+    local second = Glove.HStack:new({ Glove.Text:new("输入name:"), inputPlayerName })
 
     -- local slider = Glove.Slider:new(0, 0, 200, 20, 0, function(input)
     --     self.code = input
     -- end)
-    local bt = Glove.HStack:new(0, 0, 0, 0, {linkButton})
+    local bt = Glove.HStack:new({ linkButton })
 
-    
-    table.insert(vstackchild, first)
-    table.insert(vstackchild, second)
-    table.insert(vstackchild, bt)
 
-    local stack = Glove.VStack:new(0, 0, 0, 0, vstackchild)
-    stack.spacing=10
+
+    local stack = Glove.VStack:new({first,second,bt},0)
+    stack.spacing = 10
+
+    stack:setPos(self.posx, self.posy,self.z)
     return stack
 end
 
 function MenuUI:destroy()
+    MenuUI.super.destroy(self)
     eventManager:off("connectFail", connectFail)
     eventManager:off("connectSeccess", connectSeccess)
     uiManager:removeUI("waitingUI")
-    self.stack:destroy()
 end
 
 return MenuUI

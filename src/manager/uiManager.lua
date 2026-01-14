@@ -36,8 +36,8 @@ function uiManager:addUI(name,ui,options)
         local options=options or {}
         options.visiable= true
         local instance={name =name ,ui= ui,options=options }
-        ui:init()
         table.insert(self.uiTable,instance)
+        ui.z=#self.uiTable
         print("add ui ",name)
     else
         print("!  ui is have !",name)

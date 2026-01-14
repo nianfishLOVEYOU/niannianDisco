@@ -4,7 +4,7 @@ local widget = require "glove.widgets.widget"
 local aligtype = { "start", "center,end" }
 local VStack = widget:extend()
 
-function VStack:init(x, y, w, h, childrenTB, spacing, align)
+function VStack:init( childrenTB, spacing, align)
   self.type = "HStack"
 
   self.align = align or "start"
@@ -31,7 +31,7 @@ end
 
 function VStack:getSize()
   -- If there is a Spacer child then use screen height.
-  if self.haveSpacer then return Glove.getAvailableHeight() end
+  if self.haveSpacer then return self.w,Glove.getAvailableHeight() end
   return self.w, self.h
 end
 

@@ -1,25 +1,27 @@
-local UI = {
-    posx = 0,
-    posy = 0,
-    scalex = 1, -- 缩放倍数
-    scaley = 1, -- 缩放倍数
-    stack = nil
-}
-
-UI.__index = UI
-function UI:new(...)
-    local obj = setmetatable({}, UI)
-    -- 初始化父类属性
-    return obj
-end
+local object = require "src.common.object"
+local UI = object:extend()
 
 function UI:init()
-
+    self.scalex = 1 -- 缩放倍数
+    self.scaley = 1 -- 缩放倍数
+    self.stacks = {}
+    self.z = 0
 end
 
 function UI:refresh()
-    if self.stack then
-        self.stack:destroy()
+
+end
+
+function UI:addStack(stack)
+   
+    table.insert(self.stacks, stack)
+end
+
+function UI:clearStacks()
+    if #self.stacks == 0 then return end
+    for i = #self.stacks, 1, -1 do
+        self.stacks[i]:destroy()
+        table.remove(self.stacks, i)
     end
 end
 
@@ -31,10 +33,11 @@ function UI:draw()
     love.graphics.push()
     love.graphics.scale(self.scalex, self.scaley)
     -- 这里绘制所有 UI 元素
-    if (self.stack) then
-        self.stack:draw(self.posx, self.posy)
+    if (#self.stacks > 0) then
+        for i, stack in ipairs(self.stacks) do
+            stack:draw()
+        end
     end
-
     love.graphics.pop()
 end
 
@@ -55,9 +58,8 @@ function UI:wheelmoved(x, y)
 end
 
 function UI:destroy()
-    if (self.stack) then
-        self.stack:destroy()
-    end
+    UI.super.destroy(self)
+    self:clearStacks()
 end
 
 -- local Child = {}

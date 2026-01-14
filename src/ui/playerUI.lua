@@ -1,17 +1,7 @@
 local json = require "lib.json"
 local ui = require "src.ui.ui"
 
-local PlayerUI = {}
-PlayerUI.__index = PlayerUI
-setmetatable(PlayerUI, {
-    __index = ui
-})                              -- 子类继承父类
-function PlayerUI:new(...)
-    local obj = ui:new(...)     -- 先走父类构造
-    setmetatable(obj, PlayerUI) -- 再把实例的元表改为子类
-    -- 初始化子类特有属性
-    return obj
-end
+local PlayerUI = ui:extend()
 
 function PlayerUI:init()
     self.isDragging = false
@@ -20,28 +10,30 @@ end
 
 -- 更新播放列表显示
 function PlayerUI:refresh()
+    
     local width, height = love.graphics.getDimensions()
     -- 创建本地列表
     if self.stack then
         self.stack:destroy()
     end
     self.stack = self:getvstack()
-    local sw,sh =self.stack:getSize()
+    local sw, sh = self.stack:getSize()
     self.stack:setPos(width / 2 - sw / 2, height - 50)
 
     --背景
     local c = {}
     for i = 1, 12, 1 do
-        local ima = Glove.Image:new(0,0,50,100,"res/image/ui/blackdrag.png")
-        ima:setSize(50,100)
-        table.insert(c,ima)
+        local ima = Glove.Image:new("res/image/ui/blackdrag.png")
+        ima:setSize(50, 100)
+        table.insert(c, ima)
     end
     if self.backstuck then
         self.backstuck:destroy()
     end
-    self.backstuck = Glove.HStack:new(0,0,0,0,c,0)
+    self.backstuck = Glove.HStack:new(c, 0)
     self.backstuck:setPos(0, height - 100)
 
+    self.backstuck:setLocalPos(nil, nil, -1)
 end
 
 local click = function()
@@ -60,7 +52,7 @@ local next = function()
     if #audio.playlist == 0 then
         return
     end
-    if not network.musicTransfering>0  then
+    if not network.musicTransfering > 0 then
         print("-music next-")
         audio:next(((audio.currentIndex) % #audio.playlist) + 1)
     else
@@ -72,7 +64,7 @@ local per = function()
     if #audio.playlist == 0 then
         return
     end
-    if not network.musicTransfering>0  then
+    if not network.musicTransfering > 0 then
         print("-music next-")
         local index = audio.currentIndex - 1
         if index < 1 then
@@ -98,18 +90,18 @@ end
 
 function PlayerUI:getvstack()
     local playimg = audio.isPlaying and "res/image/ui/resume.png" or "res/image/ui/pase.png"
-    local playButton = Glove.Button_img:new(0, 0, 0, 0, "", playimg, click)
-    playButton:setScale(2,2)
-    local nextButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/next.png", next)
-    nextButton:setScale(2,2)
-    local perButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/per.png", per)
-    perButton:setScale(2,2)
-    local listButton = Glove.Button_img:new(0, 0, 0, 0, "", "res/image/ui/listbutton.png",list)
-    listButton:setScale(2,2)
+    local playButton = Glove.Button_img:new("", playimg, click)
+    playButton:setScale(2, 2)
+    local nextButton = Glove.Button_img:new("", "res/image/ui/next.png", next)
+    nextButton:setScale(2, 2)
+    local perButton = Glove.Button_img:new("", "res/image/ui/per.png", per)
+    perButton:setScale(2, 2)
+    local listButton = Glove.Button_img:new("", "res/image/ui/listbutton.png", list)
+    listButton:setScale(2, 2)
     local hight = love.graphics.getHeight()
 
-    local hstack = Glove.HStack:new(0, 0, 0, 0, { perButton, playButton, nextButton, listButton }, 0,"center")
-    local stack = Glove.VStack:new(0, 0, 0, 0, { hstack })
+    local hstack = Glove.HStack:new({ perButton, playButton, nextButton, listButton }, 0, "center")
+    local stack = Glove.VStack:new({ hstack })
 
     return stack
 end
@@ -163,7 +155,7 @@ function PlayerUI:draw()
 
     self.stack:draw()
 
-    if network.musicTransfering>0 then
+    if network.musicTransfering > 0 then
         love.graphics.setColor(0.2, 0.2, 0.2, 0.5)
         love.graphics.rectangle("fill", 0, height - 100, width, 100)
         love.graphics.setColor(1, 1, 1)
@@ -215,8 +207,8 @@ function PlayerUI:dragProgress(x)
 end
 
 function PlayerUI:destroy()
+    PlayerUI.super.destroy(self)
     uiManager:removeUI("playlistUI")
-    self.stack:destroy()
 end
 
 return PlayerUI

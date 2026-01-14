@@ -2,7 +2,7 @@
 local bodyItem = require "src.item.bodyItem"
 local player = bodyItem:extend()
 
-function player:init(x, y, w, h, imgPath, bodyInfo)
+function player:init( imgPath, bodyInfo)
     print("--------------local")
     self.type = "player"
 

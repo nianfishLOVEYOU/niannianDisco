@@ -4,7 +4,7 @@ local item = require "src.item.item"
 
 local imageItem = item:extend();
 
-function imageItem:init(x, y, w, h, imgPath)
+function imageItem:init(imgPath)
     -- 初始化子类特有属性
     self.type = "imageItem"
     --是否切片 是否动画
@@ -12,7 +12,7 @@ function imageItem:init(x, y, w, h, imgPath)
     self.isQuidAnimation = false
     -- 加载自定义图片 用动画播放图片，随时可转图片
     if imgPath and imgPath ~= "" then
-        self.image = spriteAnimation:new(imgPath, x, y, 0.5, 1)
+        self.image = spriteAnimation:new(imgPath, 0, 0, 0.5, 1)
         -- 如果w h都为0则使用图片尺寸
         if self.w == 0 then
             self.w = self.image.originalW * pixSize
@@ -23,18 +23,29 @@ function imageItem:init(x, y, w, h, imgPath)
     end
 end
 
+function imageItem:setSize(w,h)
+    if self.isQuid then
+        return 
+    end
+    self.image:setSize(w,h)
+    self.w = w
+    self.h = h
+end
+
 function imageItem:setAnchor(AnchorX, AnchorY)
     self.image:setAnchor(AnchorX, AnchorY)
 end
 
 -- 初始化动画
 function imageItem:setQuadAnimation(frameW, frameH, frameCount, frameDuration)
+    self.isQuid=true
     self.image:setQuadAnimation(frameW, frameH, frameCount, frameDuration)
     self.w = self.image.frameWidth * pixSize
     self.h = self.image.frameHeight * pixSize
 end
 
 function imageItem:setImage(imgPath, w, h)
+    self.isQuid=false
     if imgPath ~= "" then
         self.image = spriteAnimation:new(imgPath, self.x, self.y, 0.5, 1)
         self.w = w or self.image.originalW * pixSize

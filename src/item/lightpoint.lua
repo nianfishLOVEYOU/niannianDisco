@@ -2,7 +2,7 @@ local item = require "src.item.item"
 local lightShader=require("src.shader.lightPointEffect")
 local LightPoint = item:extend()
 
-function LightPoint:init(x, y, w, h)
+function LightPoint:init(x, y)
     -- 初始化子类特有属性
     self.type = "lightpoint"
     if lightShader.isCreatShader then

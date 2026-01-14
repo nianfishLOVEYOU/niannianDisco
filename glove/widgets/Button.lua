@@ -8,29 +8,20 @@ local padding = 10
 local Button = widget:extend()
 
 
-function Button:init(x, y, w, h, label, func)
+function Button:init(label, func)
   local font = g.getFont()
   self.type = "Button"
   self.font = font
   self.label = label
   self.labelColor = colors.black
   self.clickFunc = func
-  self:setSize(w, h)
+  self:setSize(40, 20)
 end
 
 function Button:draw()
   local cornerRadius = padding
 
-  if self:isOver(love.mouse.getPosition()) then
-    local op = 3 -- outline padding
-    g.setColor(Glove.hoverColor)
-    g.rectangle(
-      "line",
-      self.x - op, self.y - op,
-      self.w + op * 2, self.h + op * 2,
-      cornerRadius, cornerRadius
-    )
-  end
+
 
   g.setColor(self.color)
   g.rectangle("fill", self.x, self.y, self.w, self.h, cornerRadius, cornerRadius)
@@ -40,6 +31,16 @@ function Button:draw()
 
   --减去字体宽度
   local fw, fh = self:getFontSize()
+
+  if self:isOver(love.mouse.getPosition()) then
+    g.setColor(Glove.hoverColor)
+    g.rectangle(
+      "line",
+      self.x, self.y,
+      self.w, self.h,
+      cornerRadius, cornerRadius
+    )
+  end
 
   g.print(self.label, self.x + self.w / 2 - fw / 2 + padding,
     self.y + self.h / 2 - fh / 2 + padding)
@@ -57,7 +58,7 @@ function Button:getFontSize()
 end
 
 function Button:setSize(w, h)
-  local labelWidth,labelHeight =self:getFontSize()
+  local labelWidth, labelHeight = self:getFontSize()
   self.w = labelWidth > w and labelWidth or w
   self.h = labelHeight > h and labelHeight or h
 end
@@ -65,6 +66,5 @@ end
 function Button:onClick(x, y, button)
   self.clickFunc()
 end
-
 
 return Button

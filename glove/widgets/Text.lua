@@ -6,7 +6,7 @@ local Text = widget:extend()
 
 
 -- text可以是string 或者 func返回string
-function Text:init(x, y, w, h, text)
+function Text:init( text)
   self.type = "Text"
   local font = g.getFont()
   self.font = font
@@ -33,6 +33,7 @@ end
 
 function Text:draw()
   g.setColor(self.color)
+  g.print(self:getText(),self.x,self.y)
 end
 
 function Text:getText()

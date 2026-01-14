@@ -9,7 +9,7 @@ local padding = 10
 local Button_img = widget:extend()
 
 
-function Button_img:init(x, y, w, h, label, imagepath, func)
+function Button_img:init(label, imagepath, func)
     local font = g.getFont()
     self.type = "Button"
     self.font = font
@@ -68,6 +68,7 @@ function Button_img:setScale(w,h)
 end
 
 function Button_img:onClick(x, y, button)
+    print("click",self.clickFunc)
     self.clickFunc()
 end
 

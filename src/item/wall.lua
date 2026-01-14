@@ -2,10 +2,11 @@ local bodyItem = require "src.item.bodyItem"
 
 local wall = bodyItem:extend()
 
-function wall:init(x, y, w, h, imgPath, bodyInfo)
+function wall:init(imgPath, bodyInfo)
     
     self.type="wall"
-    self:setImage("res/image/wall.png",w,h)
+    self.autoBody=true
+    self:setImage("res/image/wall.png")
 end
 
 return wall
