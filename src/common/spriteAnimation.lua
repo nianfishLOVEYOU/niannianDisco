@@ -37,7 +37,10 @@ function SpriteAnimation:setQuadAnimation( frameW, frameH, frameCount, frameDura
             self.originalW, self.originalH
         ))
     end
+    
+    self:setQuid(self.quads[1])
 end
+
 
 function SpriteAnimation:update(dt)
     if self.frameCount == 1 or self.frameCount == 0 then

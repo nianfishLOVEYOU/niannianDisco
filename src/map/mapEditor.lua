@@ -58,10 +58,7 @@ end
 
 --- 判断鼠标是否在某个块内部
 local function hitTest(item, mx, my)
-    local xin=mx >= item.x- item.w /2 and mx <= item.x + item.w /2
-    local yin=my >= item.y -item.h and my <= item.y 
-    print("xin yin",xin,yin)
-    return xin and yin
+    return item:isOver(mx,my)
 end
 
 function mapEditor:update(dt)
@@ -83,7 +80,7 @@ function mapEditor:mousepressed(x, y, button)
         mapEditor.selected = nil
         for i = #mapEditor.map.items, 1, -1 do -- 从上到下遍历，先选中最上层
             local it = mapEditor.map.items[i]
-            print("item xywh id: ",i,it.x,it.y,it.w,it.h)
+            --print("item xywh id: ",i,it.x,it.y,it.w,it.h)
             if hitTest(it, worldX, worldY) and it.layer > getlayer then
                 print("select")
                 mapEditor.selected = it
@@ -120,28 +117,6 @@ function mapEditor:mousereleased(x, y, button)
         end
         mapEditor.selected = nil
     end
-end
-
-function mapEditor:setUI()
-    local vstackchild = {}
-
-    local inputPlayerName = Glove.Input(self.state, "playername", {
-        width = 100
-    })
-
-    -- 名字输入
-    local second = Glove.HStack({
-        align = "start",
-        spacing = 0
-    }, {Glove.Text("输入name:", {
-        color = colors.red
-    }), inputPlayerName})
-
-    table.insert(vstackchild, second)
-    self.vstack = Glove.VStack({
-        spacing = 30
-    }, vstackchild -- Glove.Spacer()
-    )
 end
 
 function mapEditor:mousemoved(x, y, dx, dy, istouch)
@@ -219,12 +194,6 @@ function mapEditor:draw()
     -- 2. 所有块（半透明红色或自定义图片）
     for _, it in ipairs(mapEditor.map.items) do
         it:draw()
-        love.graphics.setColor(1,0,0)
-        love.graphics.rectangle(
-          "line",
-          it.x-it.w/2 , it.y-it.h,
-          it.w ,it.h
-        )
     end
 
     -- 3. 选中块的轮廓（黄色）

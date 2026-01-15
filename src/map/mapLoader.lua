@@ -45,7 +45,8 @@ function MapLoader.load(mapFile)
             if it.type == "wall" then
                 item:setSize(it.w, it.h)
             end
-
+            
+            --print(item.type,item.x,item.y,it.x,it.y)
             table.insert(map.items, item)
         else
             local item = Item:new()

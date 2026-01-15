@@ -16,9 +16,9 @@ AnchoredImage.ANCHOR = {
 -- @param anchorX,anchorY 锚点比例（0~1，例如0.5,0.5是中心）
 function AnchoredImage:init(path, x, y, anchorX, anchorY)
     self.img = resourceManager.loadImage(path)
-    if not self.img then 
-        print("!ERROR non path ! : "..path)
-        return 
+    if not self.img then
+        print("!ERROR non path ! : " .. path)
+        return
     end
     self.quad = nil
     -- 原始尺寸
@@ -64,12 +64,17 @@ end
 
 -- 设置尺寸（缩放时锚点位置不变）
 function AnchoredImage:setSize(w, h)
-    self.w = w
-    self.h = h
+    self.w = w or 0
+    self.h = h or 0
 end
 
 function AnchoredImage:getSize()
-    return self.w,self.h
+    print(self.quad)
+    if self.quad then
+        local x, y, qw, qh = self.quad:getViewport()
+        return qw, qh
+    end
+    return self.w, self.h
 end
 
 function AnchoredImage:setQuid(quad)
@@ -135,6 +140,11 @@ function AnchoredImage:draw()
     }
 
     if (self.quad) then
+        --这里因为元尺寸过大，所以需要根据裁剪算新的尺寸
+        local qx, qy, qw, qh = self.quad:getViewport()
+        scaleX = self.w / qw
+        scaleY = self.h / qh
+        
         local qx, qy, qw, qh = self.quad:getViewport()
         -- 锚点偏移量 = 锚点比例 * 当前尺寸
         local offsetX = self.anchorX * qw

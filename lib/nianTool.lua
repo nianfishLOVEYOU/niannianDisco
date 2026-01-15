@@ -125,3 +125,62 @@ function printStackTrace(message)
     print(stackTrace)
     print("=======================")
 end
+
+
+
+
+-- 核心工具函数：判断鼠标是否点击到指定Body（兼容任意旋转角度）
+function isBodyClicked(body, mx, my)
+    -- 遍历刚体上的所有碰撞体
+    for _, fixture in ipairs(body:getFixtureList()) do
+        local shape = fixture:getShape()
+        local shapeType = shape:getType()
+
+        -- 关键：获取形状在「物理世界坐标」下的顶点（已自动包含旋转/位移）
+        local worldPoints = {body:getWorldPoints(shape:getPoints())}
+
+        if shapeType == "rectangle" then
+            -- 旋转后的矩形：用多边形射线法检测（不再用轴对齐边界）
+            if isPointInPolygon(mx, my, worldPoints) then
+                return true
+            end
+
+        elseif shapeType == "circle" then
+            -- 圆形不受旋转影响，检测逻辑不变
+            local cx, cy = body:getWorldCenter()
+            local radius = shape:getRadius()
+            local dx = mx - cx
+            local dy = my - cy
+            if dx*dx + dy*dy <= radius*radius then
+                return true
+            end
+
+        elseif shapeType == "polygon" then
+            -- 多边形本身就支持旋转，直接用射线法
+            if isPointInPolygon(mx, my, worldPoints) then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+-- 辅助函数：射线法判断点是否在多边形内（核心，兼容任意旋转）
+function isPointInPolygon(px, py, points)
+    local inside = false
+    -- points是{x1,y1,x2,y2,...xn,yn}格式，遍历所有边
+    local j = #points - 1 -- 最后一个点的索引（x坐标）
+    for i = 1, #points, 2 do
+        local xi, yi = points[i], points[i+1] -- 当前点
+        local xj, yj = points[j], points[j+1] -- 上一个点
+
+        -- 射线法核心逻辑：判断点是否与边相交
+        local intersect = ((yi > py) ~= (yj > py)) -- 点在边的y轴范围内
+            and (px < (xj - xi) * (py - yi) / (yj - yi) + xi) -- 点在边的x轴左侧
+        if intersect then
+            inside = not inside -- 每相交一次，内外状态翻转
+        end
+        j = i -- 更新上一个点为当前点
+    end
+    return inside
+end

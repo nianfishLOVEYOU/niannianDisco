@@ -32,6 +32,15 @@ function imageItem:setSize(w,h)
     self.h = h
 end
 
+
+function imageItem:isOver(mouseX, mouseY)
+    -- 0.5，1的偏移是否包含
+    local w,h=self:getSize()
+    local xin=mouseX >= self.x- w /2 and mouseX <= self.x + w /2
+    local yin=mouseY >= self.y -h and mouseY <= self.y 
+    return xin and yin
+end
+
 function imageItem:setAnchor(AnchorX, AnchorY)
     self.image:setAnchor(AnchorX, AnchorY)
 end
@@ -40,8 +49,8 @@ end
 function imageItem:setQuadAnimation(frameW, frameH, frameCount, frameDuration)
     self.isQuid=true
     self.image:setQuadAnimation(frameW, frameH, frameCount, frameDuration)
-    self.w = self.image.frameWidth * pixSize
-    self.h = self.image.frameHeight * pixSize
+    self.w,self.h =self.image:getSize()
+    print(self.type,self.x,self.y,self.w,self.h,self.image.frameWidth,self.image.frameHeight)
 end
 
 function imageItem:setImage(imgPath, w, h)

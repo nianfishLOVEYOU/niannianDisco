@@ -2,32 +2,34 @@
 local imageItem = require "src.item.imageItem"
 local bodyItem = imageItem:extend()
 
-function bodyItem:init( imgPath, bodyInfo)
+function bodyItem:init(imgPath, bodyInfo)
     -- 初始化子类特有属性
     self.type = "bodyItem"
-    self.bodyInfo=bodyInfo
+    self.bodyInfo = bodyInfo
     self.colw, self.colh = self.w, self.h
     self.body, self.fixture, self.shape = setBody(0, 0, self.w, self.h, 0, -0.5, bodyInfo)
 end
 
-function bodyItem:setBody(w,h, AnchorX, AnchorY, bodyInfo)
+function bodyItem:setBody(w, h, AnchorX, AnchorY, bodyInfo)
     self:destoryBody()
-    self.bodyInfo=bodyInfo
-    self.autoBody=false
+    self.bodyInfo = bodyInfo
+    self.autoBody = false
     AnchorX = AnchorX or 0
     AnchorY = AnchorY or -0.5
     self.body, self.fixture, self.shape = setBody(self.x, self.y, w, h, AnchorX, AnchorY, bodyInfo)
 end
 
-function bodyItem:setSize(w,h)
-    bodyItem.super.setSize(self,w,h)
+function bodyItem:setSize(w, h)
+    bodyItem.super.setSize(self, w, h)
     if self.autoBody then
-        self:setBody(w,h, 0, -0.5,self.bodyInfo)
+        self:setBody(w, h, 0, -0.5, self.bodyInfo)
     end
+    self:setPos(self.x, self.y)
 end
 
 function bodyItem:setPos(x, y, z)
-    self.z = z or 0
+    self.z = z or self.z
+    self.x, self.y = x, y
     self.body:setPosition(x, y)
 end
 
