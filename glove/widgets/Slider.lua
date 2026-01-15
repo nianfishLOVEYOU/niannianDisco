@@ -41,7 +41,6 @@ function Slider:draw()
 end
 
 function Slider:setSize(w, h)
-    self.image:setSize(w, h)
     self.w = w
     self.h = h
 end
