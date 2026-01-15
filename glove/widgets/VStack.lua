@@ -52,7 +52,7 @@ function VStack:layout()
   self.w = fun.max(
     children,
     function(child) return child.w or 0 end
-  ) or 0
+  ) or self.w
 
   -- Count spacers with no size.
   local spacerCount = fun.count(children, isSpacerWithoutSize)

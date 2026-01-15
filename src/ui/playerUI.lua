@@ -11,29 +11,12 @@ end
 -- 更新播放列表显示
 function PlayerUI:refresh()
     
-    local width, height = love.graphics.getDimensions()
-    -- 创建本地列表
-    if self.stack then
-        self.stack:destroy()
-    end
-    self.stack = self:getvstack()
-    local sw, sh = self.stack:getSize()
-    self.stack:setPos(width / 2 - sw / 2, height - 50)
-
+    self:clearStacks()
     --背景
-    local c = {}
-    for i = 1, 12, 1 do
-        local ima = Glove.Image:new("res/image/ui/blackdrag.png")
-        ima:setSize(50, 100)
-        table.insert(c, ima)
-    end
-    if self.backstuck then
-        self.backstuck:destroy()
-    end
-    self.backstuck = Glove.HStack:new(c, 0)
-    self.backstuck:setPos(0, height - 100)
+    self:addStack(self:getBackStack())
+    -- 创建本地列表
+    self:addStack(self:getvstack())
 
-    self.backstuck:setLocalPos(nil, nil, -1)
 end
 
 local click = function()
@@ -87,6 +70,8 @@ local list = function()
 end
 
 function PlayerUI:getvstack()
+    local width, height = love.graphics.getDimensions()
+    ------playbutton------
     local playimg = audio.isPlaying and "res/image/ui/resume.png" or "res/image/ui/pase.png"
     local playButton = Glove.Button_img:new("", playimg, click)
     playButton:setScale(2, 2)
@@ -96,18 +81,53 @@ function PlayerUI:getvstack()
     perButton:setScale(2, 2)
     local listButton = Glove.Button_img:new("", "res/image/ui/listbutton.png", list)
     listButton:setScale(2, 2)
-    local hight = love.graphics.getHeight()
+    ------ slider-------
+    local playSlider = Glove.Slider:new(0,function (value)
+        PlayerUI:dragProgress(value)
+    end)
+    playSlider:setSize(width - 80,20)
+    ------ musicvoice slider------
+    
+    local progressText = Glove.Text:new("进度:")
+    local voiceText = Glove.Text:new("音量:")
+    local voiceSlider = Glove.Slider:new(0,function (value)
+        audio:setVolume(value)
+    end)
 
-    local hstack = Glove.HStack:new({ perButton, playButton, nextButton, listButton }, 0, "center")
-    local stack = Glove.VStack:new({ hstack })
+    --右边对其
+    local musiVoiceHStack= Glove.HStack:new({progressText, voiceText,voiceSlider}, 0, "center")
+    local sliderHStack= Glove.HStack:new({ playSlider }, 0, "center")
+    local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton, listButton }, 20, "center")
+    local stack = Glove.VStack:new({musiVoiceHStack, sliderHStack ,buttonHStack })
 
+    local sw, sh = stack:getSize()
+    stack:setPos(width / 2 - sw / 2, height - 50)
     return stack
 end
 
+function PlayerUI:getBackStack()
+    local width, height = love.graphics.getDimensions()
+    local c = {}
+    for i = 1, 12, 1 do
+        local ima = Glove.Image:new("res/image/ui/blackdrag.png")
+        ima:setSize(50, 100)
+        table.insert(c, ima)
+    end
+
+    
+    local backstuck = Glove.HStack:new(c, 0)
+    backstuck:setPos(0, height - 100)
+    backstuck:setLocalPos(nil, nil, -1)
+
+    return backstuck
+end
+
 function PlayerUI:draw()
+
+    
+    PlaylistUI.super.draw(self)
     local width, height = love.graphics.getDimensions()
 
-    self.backstuck:draw()
     -- 当前播放信息
     local currentTrack = audio:getCurrentTrack()
     if currentTrack then

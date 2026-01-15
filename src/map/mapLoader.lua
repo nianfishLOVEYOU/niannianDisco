@@ -4,7 +4,7 @@ local Item = require "src.item.item"
 
 local MapLoader = {}
 
-local itemTypes = {"floor","tree", "wall", "mic", "ball", "sofa", "startPoint", "eventZone", "lightpoint", "fire"}
+local itemTypes = { "floor", "tree", "wall", "mic", "ball", "sofa", "startPoint", "eventZone", "lightpoint", "fire" }
 local itemnews = {}
 
 for _, module in ipairs(itemTypes) do
@@ -15,7 +15,6 @@ end
 --- @param mapFile 相对根目录的 JSON 路径，例如 "maps/map01.json"
 --- @return table 包含 fields: backgroundImage (Image), items (list of Item)
 function MapLoader.load(mapFile)
-
     local raw = love.filesystem.read(mapFile)
     if not raw then
         error("无法读取地图文件：" .. mapFile)
@@ -41,19 +40,24 @@ function MapLoader.load(mapFile)
         print("mapLoad:", it.type)
         if itemnews[it.type] then
             local item = itemnews[it.type]:new()
-            item:setSize(it.w, it.h)
-            item:setPos(it.x, it.y,it.z)
+            item:setPos(it.x, it.y, it.z)
+            --特殊的有长宽不定的item
+            if it.type == "wall" then
+                item:setSize(it.w, it.h)
+            end
+
             table.insert(map.items, item)
         else
-            local item=Item:new()
+            local item = Item:new()
             item:setSize(it.w, it.h)
-            item:setPos(it.x, it.y,it.z)
+            item:setPos(it.x, it.y, it.z)
             table.insert(map.items, item)
         end
     end
 
     return map
 end
+
 --- mapTable 包含items  startPoint
 --- 将地图对象保存为 JSON（编辑器使用）
 --- @param mapTable 必须包含 fields: background (string), items (list)
@@ -89,7 +93,6 @@ function MapLoader.save(mapTable, outFile)
     end
     file:write(jsonStr)
     file:close()
-
 end
 
 return MapLoader

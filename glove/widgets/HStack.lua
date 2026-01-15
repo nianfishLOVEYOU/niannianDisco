@@ -62,7 +62,7 @@ function HStack:layout()
     function(child,i) 
       local _,h =child:getSize()
       return h or 0 end
-  )or 0
+  )or self.h
 
   -- Count spacers with no size.
   local spacerCount = fun.count(children, isSpacerWithoutSize)
