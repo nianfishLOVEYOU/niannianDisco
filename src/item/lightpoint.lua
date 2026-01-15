@@ -6,8 +6,20 @@ function LightPoint:init(x, y)
     -- 初始化子类特有属性
     self.type = "lightpoint"
     if lightShader.isCreatShader then
-        lightShader.addPointLight({ x = x, y = y, r = 0.5, g = 0.5, b = 0.5, radius = 350, intensity = 0.8 })
+       self.light = lightShader.addPointLight({ radius = 350, intensity = 0.8 })
     end
 end
 
+function LightPoint:setPos(x,y,z)
+    LightPoint.super.setPos(self,x,y,z)
+    self.light.x,self.light.y=x,y
+end
+
+function LightPoint:update(dt)
+    --设置灯光颜色
+    self.light.r,self.light.g,self.light.b=self.color[1],self.color[2],self.color[3]
+    --父类的方法执行
+    LightPoint.super.update(self,dt)
+    
+end
 return LightPoint

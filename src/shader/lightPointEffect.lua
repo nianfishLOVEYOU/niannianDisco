@@ -86,16 +86,16 @@ end
 
 --设置环境光
 function lightPointEffect.setAmbient(color, light)
-    shadereffect:setUniform("ambientColor",color)     -- 环境光颜色（暗灰色）
-    shadereffect:setUniform("ambientIntensity", light)               -- 环境光强度
+    shadereffect:setUniform("ambientColor", color)     -- 环境光颜色（暗灰色）
+    shadereffect:setUniform("ambientIntensity", light) -- 环境光强度
 end
 
 -- ===================== 光源操作接口（核心） =====================
 -- 添加点光源（返回光源ID，用于后续移除）
 function lightPointEffect.addPointLight(params)
+    params = params or {}
     -- 默认参数
     local light = {
-        id = #pointLights + 1,
         x = params.x or 0,
         y = params.y or 0,
         r = params.r or 1.0,
@@ -108,16 +108,16 @@ function lightPointEffect.addPointLight(params)
     }
     table.insert(pointLights, light)
     lightPointEffect.updateShaderLights() -- 更新着色器光源数据
-    return light.id
+    return light
 end
 
 -- 移除指定ID的点光源
-function lightPointEffect.removePointLight(lightId)
+function lightPointEffect.removePointLight(lightin)
     for i, light in ipairs(pointLights) do
-        if light.id == lightId then
+        if light == lightin then
             light.actived = false -- 标记为未激活（比直接删除更高效）
             -- 可选：彻底删除（需重新排序ID）
-            -- table.remove(pointLights, i)
+            table.remove(pointLights, i)
             lightPointEffect.updateShaderLights()
             return true
         end
@@ -128,8 +128,8 @@ end
 function lightPointEffect.removePointLightLast()
     if #pointLights > 0 then
         local lastLight = pointLights[#pointLights]
-        lightPointEffect.removePointLight(lastLight.id)
-        print("移除光源 ID:", lastLight.id)
+        lightPointEffect.removePointLight(lastLight)
+        print("移除光源 ID:", #pointLights)
     end
 end
 

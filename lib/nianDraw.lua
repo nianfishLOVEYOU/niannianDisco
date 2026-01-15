@@ -1,4 +1,4 @@
-local nianDraw = {
+nianDraw = {
     depthCanvas = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight()),
     finalCanvas = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight()),
     drawObjects = {},         -- 存储所有要渲染的对象
@@ -160,4 +160,3 @@ function nianDraw:drawByShaderReg(drawInfo, shader)
     })
 end
 
-return nianDraw
