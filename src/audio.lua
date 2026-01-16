@@ -4,6 +4,7 @@ local json = require "lib.json"
 local Audio = {
     currentSource = nil,
     playlist = {},
+    localplaylist={}, --指向本地的tmp文件夹内，也指向其他music文件夹
     currentMusicName = "",
     currentIndex = 0,
     volume = 0.3,
