@@ -88,3 +88,4 @@ tips
 				√ ui打开list会出问题，有一个w为nil
 				uiHStack的h有问题
 			21 eventmanager的使用方法还是问题很大，remove一个方法还是有问题，希望加入新的标识来
+			22最高层对底层的ui点击焦点屏蔽

@@ -24,6 +24,8 @@ function Slider:draw()
     local width = self.w
     local height = self.h
 
+    self.progress=math.max(0, math.min(1, self.progress))
+
     -- 进度条
     if self:isOver(love.mouse.getPosition()) then
         g.setColor(self.backColor)
