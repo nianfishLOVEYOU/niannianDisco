@@ -8,9 +8,9 @@ else
     -- package.path = package.path .. ";lib/?.lua;lib/?/init.lua;src/?.lua"
 end
 
-
-nianTool = require "lib.nianTool"
-nianDraw = require "lib.nianDraw"
+require "lib.nianMath"
+require "lib.nianTool"
+require "lib.nianDraw"
 animation = require "src.animation"
 
 eventManager = require "src.manager.eventManager"

@@ -137,6 +137,8 @@ function player:draw()
     love.graphics.rectangle('fill', self.x - self.w / 2, self.y - self.h - 30, self.w, 20)
 
     love.graphics.setColor(1, 1, 1)
+    local fw=myFont:getWidth(self.name)
+    love.graphics.print(self.name, self.x -fw /2, self.y - self.h - 30)
 
 end
 

@@ -96,7 +96,9 @@ function mapEditor:mousepressed(x, y, button)
     elseif button == 2 then -- 右键：创建
         if not mapEditor.selected then
             -- 在空白处创建新块（默认 64×64，使用默认图片 block.png）
-            local newItem = itemnews[itemTypes[ItemIndex]]:new(floorToPixSize(worldX), floorToPixSize(worldY), 64, 64)
+            local newItem = itemnews[itemTypes[ItemIndex]]:new()
+            newItem:setPos(floorToPixSize(worldX), floorToPixSize(worldY))
+            newItem:setSize(64, 64)
             table.insert(mapEditor.map.items, newItem)
             --mapEditor.selected = newItem
             mapEditor.dragOffset.x = 0
