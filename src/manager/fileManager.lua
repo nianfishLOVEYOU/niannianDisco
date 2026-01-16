@@ -10,7 +10,7 @@ systemManager:init_regester(function()
 end)
 
 systemManager:quit_regester(function()
-    FileManager:clearTempFile()
+   -- FileManager:clearTempFile()
 end)
 
 -- path 为完整路径
@@ -90,7 +90,7 @@ function FileManager.getExtension(path)
     return ext -- 若没有匹配到则返回 nil
 end
 
--- 保存
+-- 保存表，避免无法序列化的文件
 function FileManager:saveTable(tableName, table_in)
     local path = "info/" .. tableName .. ".json"
     -- 保存到本地的路径
@@ -102,7 +102,7 @@ function FileManager:saveTable(tableName, table_in)
     end
 end
 
--- 读取
+-- 读取表，避免无法序列化的文件
 function FileManager:readTable(tableName)
     local path = "info/" .. tableName .. ".json"
     -- 保存到本地的路径
@@ -135,20 +135,22 @@ function love.filedropped(file)
     print("filedropped")
 end
 
--- 递归遍历 folder（相对路径）下的所有文件（不包括子文件夹本身）
-local function listAllFiles(folder)
+
+
+-- 递归遍历 folder（相对路径）下的所有文件和文件夹,{type,name,filepath,files}
+function FileManager:listAllFiles(folder)
     local files = {}
     local items = love.filesystem.getDirectoryItems(folder) -- 返回该目录下的文件+子文件夹名
 
     for _, name in ipairs(items) do
         local fullPath = folder .. "/" .. name
         if love.filesystem.isFile(fullPath) then
-            table.insert(files, fullPath) -- 记录文件路径
-        elseif love.filesystem.isDirectory(fullPath) then
+            table.insert(files, {type ="file",name = name, filepath =fullPath}) -- 记录文件路径
+        elseif love.filesystem.isDirectory(fullPath) then --文件夹
             -- 递归子文件夹
             local sub = listAllFiles(fullPath)
+            table.insert(files, {type ="folder",name = name, files =sub} )
             for _, p in ipairs(sub) do
-                table.insert(files, p)
             end
         end
     end
@@ -156,7 +158,7 @@ local function listAllFiles(folder)
 end
 
 -- 删除 folder（相对路径）下的所有文件（包括子文件夹里的文件），并可选删除空文件夹
-local function deleteAllFiles(folder, removeEmptyDirs)
+function FileManager:deleteAllFiles(folder, removeEmptyDirs)
     local allFiles = listAllFiles(folder)
 
     -- 先删除文件
@@ -213,7 +215,7 @@ function FileManager:open_folder(path)
 end
 
 function FileManager:clearTempFile()
-    -- deleteAllFiles("tmp")
+    self:deleteAllFiles("tmp")
 end
 
 return FileManager
