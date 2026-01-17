@@ -32,7 +32,7 @@ local next = function()
     if #audio.playlist == 0 then
         return
     end
-    if not network.musicTransfering > 0 then
+    if network.musicTransfering == 0 then
         print("-music next-")
         audio:next(((audio.currentIndex) % #audio.playlist) + 1)
     else
@@ -44,7 +44,7 @@ local per = function()
     if #audio.playlist == 0 then
         return
     end
-    if not network.musicTransfering > 0 then
+    if network.musicTransfering== 0 then
         print("-music next-")
         local index = audio.currentIndex - 1
         if index < 1 then
@@ -57,7 +57,6 @@ local per = function()
 end
 
 local list = function()
-    print("list")
     if not uiManager:getUI("playlistUI") then
         local playlistUI = require("src.ui.playlistUI"):new()
         uiManager:addUI("playlistUI", playlistUI)
@@ -90,17 +89,14 @@ function PlayerUI:getvstack()
     self.infoText =infoText 
     local progressText = Glove.Text:new("进度:")
     self.progressText =progressText
-    local voiceText = Glove.Text:new("音量:")
-    local voiceSlider = Glove.Slider:new(0, function(value)
+    self.progressText:setSize(120,20)
+    local volumeText = Glove.Text:new("音量:")
+    local volumeSlider = Glove.Slider:new(audio.volume, function(value)
         audio:setVolume(value)
     end)
 
     --右边对其
-    local musiVoiceHStack = Glove.HStack:new({infoText, progressText, voiceText, voiceSlider })
-    print("infoText:getSize()")
-    print(infoText:getSize())
-    print("musiVoiceHStack:getSize()")
-    print(musiVoiceHStack:getSize())
+    local musiVoiceHStack = Glove.HStack:new({infoText, progressText, volumeText, volumeSlider })
     local sliderHStack = Glove.HStack:new({ playSlider })
     local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton, listButton } )
     local stack = Glove.VStack:new({ musiVoiceHStack, sliderHStack, buttonHStack },10,"center")
@@ -145,7 +141,9 @@ function PlayerUI:update(dt)
                 string.format("%02d:%02d / %02d:%02d", currentMinutes, currentSeconds, totalMinutes,
                     totalSeconds))
             local progress = audio:getPosition() / duration
-            self.playSlider.progress=progress
+            if(not self.playSlider.isDrag)then
+                self.playSlider.progress=progress
+            end
             --self.playSlider:setVisible(true)
         else
             self.infoText:setText("没有正在播放的音乐 ")

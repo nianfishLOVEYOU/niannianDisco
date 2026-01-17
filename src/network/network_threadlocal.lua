@@ -254,7 +254,7 @@ while true do
                 if p.enet then p.enet:send(msg) end
             end
         elseif cmd.cmd == "send_unicast" then
-            print("[Sand] >> " .. cmd.msg.type)
+            print("[Sand Uni] >> " .. cmd.msg.type)
             local msg = json.encode(cmd.msg)
             local p = peers[cmd.peer_id]
             if p and p.enet then p.enet:send(msg) end
@@ -314,7 +314,7 @@ while true do
                 end
                 coroutine.resume(fileReceiveTasks[msg.musicname].task, msg)
             else
-                print("[networkHandle] << " .. msg.type, event.data)
+                print("[Handle] << " .. msg.type, event.data)
                 -- 其它业务消息直接转发给主线程
                 local address = tostring(event.peer)
                 local ip, port = address:match("([^:]+):([^:]+)")
@@ -325,7 +325,6 @@ while true do
                     port    = port,
                     msg     = msg,
                 }
-                print("[networkHandle] << over")
             end
         elseif event.type == "disconnect" then
             infoNetworkCh:push {

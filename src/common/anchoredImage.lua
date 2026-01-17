@@ -69,7 +69,7 @@ function AnchoredImage:setSize(w, h)
 end
 
 function AnchoredImage:getSize()
-    print(self.quad)
+   -- print(self.quad)
     if self.quad then
         local x, y, qw, qh = self.quad:getViewport()
         return qw, qh

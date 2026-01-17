@@ -164,14 +164,11 @@ function mapEditor:keypressed(key)
 
     if key == "s" then
         -- 保存为 JSON（覆盖原文件或另存为）
-
         MapLoader.save(mapEditor.map, "res/maps/edited.json")
         print("地图已保存到 res/maps/edited.json")
     elseif key == "o" then
-        print("oo",cam:getScale())
         cam:setScale(cam:getScale()-0.2)
     elseif key == "p" then
-        print("pp",cam:getScale())
         cam:setScale(cam:getScale()+0.2)
 
     elseif key == "delete" then

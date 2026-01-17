@@ -67,7 +67,9 @@ function PlaylistUI:getvstack()
 
     local listVstack = Glove.VStack:new({},10)
     for i, v in ipairs(audio.playlist) do
-        local nameText = Glove.Text:new((i == audio.currentIndex and "[播放中]" or "") .. v.name)
+        local iswaitstr= audio.stuck and "[正在获取..]" or "[√]"
+        local musicInfo = i == audio.currentIndex and "[播放]" ..iswaitstr or ""
+        local nameText = Glove.Text:new(musicInfo .. v.name)
         nameText:setSize(100,20)
         local hstack = Glove.HStack:new({ nameText })
         hstack:setName(v.name)

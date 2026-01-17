@@ -93,7 +93,6 @@ end
 function uiManager:draw()
     for i, v in ipairs(self.uiTable) do
         if v.options.visiable then
-            --print(v.name)
             v.ui:draw()
         end
     end
@@ -102,7 +101,6 @@ end
 function uiManager:mouseLeased(x,y,button)
     for i, v in ipairs(self.uiTable) do
         if v.options.visiable then
-            --print(v.name)
             v.ui:mouseLeased(x,y,button)
         end
     end
@@ -111,7 +109,6 @@ end
 function uiManager:mousePressed(x,y,button)
     for i, v in ipairs(self.uiTable) do
         if v.options.visiable then
-            --print(v.name)
             v.ui:mousePressed(x,y,button)
         end
     end
@@ -120,7 +117,6 @@ end
 function uiManager:mouseMoved(x,y,dx,dy)
     for i, v in ipairs(self.uiTable) do
         if v.options.visiable then
-            --print(v.name)
             v.ui:mouseMoved(x,y,dx,dy)
         end
     end
@@ -129,7 +125,6 @@ end
 function uiManager:wheelmoved(x,y)
     for i, v in ipairs(self.uiTable) do
         if v.options.visiable then
-            --print(v.name)
             v.ui:wheelmoved(x,y)
         end
     end

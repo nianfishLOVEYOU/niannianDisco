@@ -62,7 +62,6 @@ end
 -- 获得玩家id
 function Network:getPeersId(address)
     for key, value in pairs(self.peers) do
-        print("getPeersId", key, value.address, address)
         if value.address == address then
             return key
         end
@@ -117,7 +116,6 @@ function Network:info()
             -- audio:play(0)
             self.musicTransfering = self.musicTransfering - 1
         elseif pktCh.type == "getPeers" then
-            print("getPeers out")
             self.peers = pktCh.peers
             self.enterRoom = true
             if (statusManager.status == "menu") then
@@ -136,7 +134,7 @@ function Network:info()
                 time = love.timer.getTime()
             }
             local id = self:getPeersId(pktCh.address)
-            print("connectedPeer---chackID  :", id, pktCh.address)
+            print("[connectedPeer]---chackID  :", id, pktCh.address)
             if id then
                 network:send_unicast(id, msg)
                 self.connects[id] = pktCh.address
@@ -148,7 +146,7 @@ function Network:info()
 
             uiManager:refresh("playerlistUI")
         elseif pktCh.type == "disconnectPeer" then
-            print("getdisconnectPeer---", pktCh.address)
+            print("[getdisconnectPeer]---", pktCh.address)
             --删除这个角色 如果有角色的话
             local id = self:getPeersId(pktCh.address)
             if id then
@@ -171,7 +169,7 @@ function Network:handleMessage(message, address)
             print(v.name)
         end
         audio.playlist = message.playlist
-        audio.currentIndex = message.index
+        --audio.currentIndex = message.index
         uiManager:refresh("playlistUI")
     elseif message.type == "updatePlayStatus" then
         --播放状态更新

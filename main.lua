@@ -11,14 +11,13 @@ end
 require "lib.nianMath"
 require "lib.nianTool"
 require "lib.nianDraw"
-animation = require "src.animation"
 
 eventManager = require "src.manager.eventManager"
 mouseManager = require "src.manager.mouseManager"
 keybordManager = require "src.manager.keybordManager"
 systemManager = require "src.manager.systemManager"
 require "glove"
-
+camera= require("lib.gamera")
 network = require "src.network.network"
 audio = require "src.audio"
 fileManager = require "src.manager.fileManager"
@@ -51,7 +50,7 @@ openlocalMod = true
 ---设置摄像机
 pixSize = 4
 -- 参数：left, top, width, height（世界边界）
-cam =  require("lib.gamera").new(-2000, -2000, 4000, 4000) -- 这里把整个游戏地图设为 2000×2000
+cam =  camera.new(-2000, -2000, 4000, 4000) -- 这里把整个游戏地图设为 2000×2000
 -- 若想让摄像机只占屏幕的一部分（比如 UI 区域），可以限制窗口：
 cam:setWindow(0, 0, 600, 450) -- 只在左上 800×600 区域绘制
 cam:setScale(0.7)
@@ -128,7 +127,7 @@ function love.update(dt)
     systemManager:update(dt)
     statusManager:update(dt)
     animation:update(dt)
-    
+    timer:update(dt)
     -- 使用时发送参数
     local mx, my = love.mouse.getPosition()
 end

@@ -1,6 +1,6 @@
 function love.conf(t)
     
-    t.identity = "nianListenStream"  -- 固定名称，避免使用默认的 "lovegame"
+    t.identity = "nianListenStream"  -- 固定名称，避免使用默认的 "lovegame"  用来存储的位置名称
     t.window.title = "nianListenStream"
     t.window.width = 600
     t.window.height = 450

@@ -60,7 +60,6 @@ function MusicInputUI:init()
 end
 
 local closeUI = function()
-    print("closeUI")
     uiManager:removeUI("musicInputUI")
 end
 

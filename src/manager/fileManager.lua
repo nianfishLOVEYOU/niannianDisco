@@ -46,8 +46,8 @@ end
 function FileManager:getFilePathByName(name)
     local path = "tmp/" .. name
     local info = love.filesystem.getInfo(path)
-    if not info then
-        return path
+    if info then
+        return path,info
     end
     return nil -- 直接返回字节数
 end

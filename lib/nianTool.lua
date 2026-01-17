@@ -1,4 +1,6 @@
 nianTool = {}
+timer= require "src.common.timer"
+animation = require "src.animation"
 
 function nianTool:dump(tbl, indent)
     indent = indent or 0

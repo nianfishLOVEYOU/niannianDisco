@@ -73,7 +73,6 @@ function PlayerManager:update(dt)
         self.player:update(dt)
     end
     for k, rp in pairs(self.remotePlayers) do
-        --print(rp.x, rp.y,rp.update)
         rp:update(dt)
     end
 end
