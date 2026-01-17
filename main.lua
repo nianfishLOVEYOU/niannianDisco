@@ -198,13 +198,14 @@ function love.draw()
     -- 绘制UI等覆盖内容
     systemManager:draw()
 
-    --绘制uidebug
-    printUi()
 
     love.graphics.setColor(1, 0, 0)
     love.graphics.print("localmod " .. tostring(openlocalMod), 100, 10)
     love.graphics.setColor(1, 1, 1)
     love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth()-nianDraw.depthCanvas:getWidth()*0.2, 0,0,0.2,0.2)
+    
+    --绘制uidebug
+    debugPrintUi()
     -- debug
     DebugPrint()
 end

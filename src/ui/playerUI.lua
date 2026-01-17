@@ -82,7 +82,7 @@ function PlayerUI:getvstack()
     local playSlider = Glove.Slider:new(0, function(value)
         PlayerUI:dragProgress(value)
     end)
-    playSlider:setSize(width - 80, 20)
+    playSlider:setSize(width - 80, 10)
     self.playSlider=playSlider
     ------ musicvoice slider------
 
@@ -96,13 +96,17 @@ function PlayerUI:getvstack()
     end)
 
     --右边对其
-    local musiVoiceHStack = Glove.HStack:new({infoText, progressText, voiceText, voiceSlider }, 20, "center")
-    local sliderHStack = Glove.HStack:new({ playSlider }, 0, "center")
-    local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton, listButton }, 20, "center")
-    local stack = Glove.VStack:new({ musiVoiceHStack, sliderHStack, buttonHStack },10,"start")
+    local musiVoiceHStack = Glove.HStack:new({infoText, progressText, voiceText, voiceSlider })
+    print("infoText:getSize()")
+    print(infoText:getSize())
+    print("musiVoiceHStack:getSize()")
+    print(musiVoiceHStack:getSize())
+    local sliderHStack = Glove.HStack:new({ playSlider })
+    local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton, listButton } )
+    local stack = Glove.VStack:new({ musiVoiceHStack, sliderHStack, buttonHStack },10,"center")
 
     local sw, sh = stack:getSize()
-    stack:setPos(width / 2 - sw / 2, height - 200)
+    stack:setPos(width / 2 - sw / 2, height - sh)
     return stack
 end
 

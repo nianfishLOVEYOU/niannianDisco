@@ -64,6 +64,16 @@ function DebugPrint()
     love.graphics.print("FPS: " .. fps, 10, 10)
 
     love.graphics.setColor(1, 1, 1)
+
+    if love.mouse.isDown(2) then
+        local x, y = love.mouse.getPosition()
+        local wx,wy = cam:toWorld(x,y)
+        love.graphics.setColor(1, 0, 0)
+        love.graphics.circle("fill", x, y,3)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print("mouse screen: " .. x ..","..y, x+10, y-10)
+        love.graphics.print("mouse world: " .. wx ..","..wy, x+10, y)
+    end
 end
 
 function printCol()
@@ -92,7 +102,7 @@ function printCol()
     end
 end
 
-function printUi()
+function debugPrintUi()
     love.graphics.setLineWidth(2)
 
     for _, widget in pairs(Glove.widgets) do

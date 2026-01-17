@@ -60,7 +60,7 @@ Glove = {
       Glove.setFocus(clickWidget)
       print("'o'mouseInThe:", clickWidget.type, clickWidget.name)
     else
-      print("nil")
+      print(" mousePressed setFocus nil")
       --移除焦点
       Glove.setFocus(nil)
     end
