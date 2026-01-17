@@ -5,8 +5,8 @@ local Game = {}
 
 function Game:init()
     --ui
-    -- local playerUI = require("src.ui.playerUI"):new()
-    -- uiManager:addUI("playerUI",playerUI)
+    local playerUI = require("src.ui.playerUI"):new()
+    uiManager:addUI("playerUI",playerUI)
     local playerlistUI = require("src.ui.playerlistUI"):new()
     uiManager:addUI("playerlistUI",playerlistUI)
 

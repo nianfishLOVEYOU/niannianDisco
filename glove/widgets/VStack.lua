@@ -1,7 +1,7 @@
 local fun = require "glove/fun"
 local widget = require "glove.widgets.widget"
 
-local aligtype = { "start", "center,end" }
+local aligtype = { "start", "center","end" }
 local VStack = widget:extend()
 
 function VStack:init( childrenTB, spacing, align)

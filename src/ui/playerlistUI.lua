@@ -31,12 +31,11 @@ function PlayerlistUI:getvstack()
 
     local vstackchild = {}
 
-    local title = Glove.HStack:new( {Glove.Text:new("房间里的小伙伴:")})
+    local title = Glove.HStack:new( {Glove.Text:new("房间里的小伙伴:",0)})
     table.insert(vstackchild, title)
 
     for k, v in pairs(network.peers) do
-        local name = Glove.Text:new("小比噶" .. k)
-        local hstack = Glove.HStack:new({name})
+        --local hstack = Glove.HStack:new({Glove.Text:new("小比噶" .. k)})
         table.insert(vstackchild, hstack)
     end
     local stack = Glove.VStack:new(vstackchild ,30)

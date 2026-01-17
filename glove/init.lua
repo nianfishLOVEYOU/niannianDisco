@@ -93,9 +93,10 @@ Glove = {
 
   mousemoved = function(x, y, dx, dy)
     if mouseIsDown1 then
-      local clickWidget = Glove.getFirstWidget(x, y)
+      local clickWidget = focusedWidget
       if focusedWidget and focusedWidget == clickWidget then
         clickWidget:onDrag(x, y, dx, dy)
+        clickWidget.isDrag=true
       end
     else
       local clickWidget = Glove.getFirstWidget(x, y)
@@ -107,6 +108,10 @@ Glove = {
 
   mousereleased = function(x, y, button)
     if button ~= 1 then return end
+    local clickWidget = focusedWidget
+    if clickWidget and clickWidget.isDrag  then
+      clickWidget:onDragOver(x, y)
+    end
     mouseIsDown1 = false
   end,
 

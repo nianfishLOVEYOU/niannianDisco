@@ -46,7 +46,7 @@ end
 function MenuUI:draw()
     love.graphics.setColor(0, 0, 0, 0.8)
     love.graphics.rectangle('fill', self.posx - 20, self.posy - 20, 200, 200)
-    MenuUI.super.draw(self)
+    self:drawStacks()
 end
 
 function MenuUI:getvstack()

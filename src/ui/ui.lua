@@ -30,6 +30,10 @@ function UI:update(dt)
 end
 
 function UI:draw()
+    self:drawStacks()
+end
+
+function UI:drawStacks()
     love.graphics.push()
     love.graphics.scale(self.scalex, self.scaley)
     -- 这里绘制所有 UI 元素

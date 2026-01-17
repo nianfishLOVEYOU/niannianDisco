@@ -96,13 +96,13 @@ function PlayerUI:getvstack()
     end)
 
     --右边对其
-    local musiVoiceHStack = Glove.HStack:new({infoText, progressText, voiceText, voiceSlider }, 10, "center")
+    local musiVoiceHStack = Glove.HStack:new({infoText, progressText, voiceText, voiceSlider }, 20, "center")
     local sliderHStack = Glove.HStack:new({ playSlider }, 0, "center")
     local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton, listButton }, 20, "center")
-    local stack = Glove.VStack:new({ musiVoiceHStack, sliderHStack, buttonHStack })
+    local stack = Glove.VStack:new({ musiVoiceHStack, sliderHStack, buttonHStack },10,"start")
 
     local sw, sh = stack:getSize()
-    stack:setPos(width / 2 - sw / 2, height - 50)
+    stack:setPos(width / 2 - sw / 2, height - 200)
     return stack
 end
 
@@ -137,21 +137,22 @@ function PlayerUI:update(dt)
             local currentSeconds = math.floor(audio:getPosition() % 60)
             local totalMinutes = math.floor(duration / 60)
             local totalSeconds = math.floor(duration % 60)
-            self.progressText = Glove.Text:new("进度:" ..
+            self.progressText:setText("进度:" ..
                 string.format("%02d:%02d / %02d:%02d", currentMinutes, currentSeconds, totalMinutes,
                     totalSeconds))
             local progress = audio:getPosition() / duration
             self.playSlider.progress=progress
-            self.playSlider:setVisible(true)
+            --self.playSlider:setVisible(true)
         else
             self.infoText:setText("没有正在播放的音乐 ")
-            self.playSlider:setVisible(false)
+            self.playSlider.progress=0
+            --self.playSlider:setVisible(false)
         end
     end
 end
 
 function PlayerUI:draw()
-    PlayerUI.super.draw(self)
+    self:drawStacks()
     local width, height = love.graphics.getDimensions()
     -- if network.musicTransfering > 0 then
     --     love.graphics.setColor(0.2, 0.2, 0.2, 0.5)

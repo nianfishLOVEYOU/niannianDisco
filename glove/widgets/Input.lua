@@ -46,7 +46,7 @@ function Input:draw()
   local substrWidth
   -- 计算当前文字的宽度
   while true do
-    substr = value:sub(i, #value)
+    substr = value:utf8sub(i, value:utf8len())
     substrWidth = font:getWidth(substr)
     if substrWidth <= limit then break end
     i = i + 1
@@ -57,18 +57,19 @@ function Input:draw()
   local y = self.y + padding
 
   g.setColor(self.color)
-  g.setFont(font)
   g.print(substr, x, y)
 
   local printCursor=love.timer.getTime()%2>1
+
+
 
   --显示输入光标
   if Glove.isFocused(self) and printCursor then
     if inputCursor then
       -- Draw vertical cursor line.
       local height = font:getHeight()
-      local cursorPosition = math.min(inputCursor - i + 1, #substr)
-      local cursorX = x + font:getWidth(substr:sub(1, cursorPosition))
+      local cursorPosition = math.min(inputCursor - i + 1, substr:utf8len())
+      local cursorX = x + font:getWidth(substr:utf8sub(1, cursorPosition))
       g.line(cursorX, y, cursorX, y + height)
     end
   end

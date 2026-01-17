@@ -47,14 +47,26 @@ function Slider:setSize(w, h)
     self.h = h
 end
 
+
+function Slider:onDragOver(x, y)
+    self:dragProgress(x)
+end
+
 --被拖拽
 function Slider:onDrag(x, y, dx, dy)
-    self:dragProgress(x)
+    self:justSetProgress(x)
 end
 
 function Slider:onClick(x, y, button)
     Glove.setFocus(self)
     self:dragProgress(x)
+end
+
+function Slider:justSetProgress(x)
+    local ax = self.x
+    local width = self.w
+    self.progress = (x - ax) / width
+    self.progress = math.max(0, math.min(1, self.progress))
 end
 
 function Slider:dragProgress(x)

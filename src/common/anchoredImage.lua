@@ -144,7 +144,12 @@ function AnchoredImage:draw()
         local qx, qy, qw, qh = self.quad:getViewport()
         scaleX = self.w / qw
         scaleY = self.h / qh
-        
+        if self.flipX then
+            scaleX = -scaleX
+        end
+        if self.flipY then
+            scaleY = -scaleY
+        end
         local qx, qy, qw, qh = self.quad:getViewport()
         -- 锚点偏移量 = 锚点比例 * 当前尺寸
         local offsetX = self.anchorX * qw

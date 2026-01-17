@@ -89,6 +89,10 @@ function item:onDrag(x, y, dx, dy)
 
 end
 
+function item:onDragOver(x, y)
+    
+end
+
 -- 悬停
 function item:onHold(x, y)
 

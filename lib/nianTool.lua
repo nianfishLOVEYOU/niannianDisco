@@ -30,25 +30,25 @@ bodyType = {
     static = "static"
 }
 
---默认 static 可以自己定义为
+-- 默认 static 可以自己定义为
 function setBody(x, y, w, h, anchorX, anchorY, bodyInfo)
-    bodyInfo          = bodyInfo or {}
-    bodyInfo.x        = x or 0
-    bodyInfo.y        = y or 0
-    bodyInfo.w        = bodyInfo.w or w
-    bodyInfo.h        = bodyInfo.h or h
-    bodyInfo.anchorX  = bodyInfo.anchorX or anchorX or 0
-    bodyInfo.anchorY  = bodyInfo.anchorY or anchorY or 0
-    bodyInfo.type     = bodyInfo.type or "static"
-    bodyInfo.tag      = bodyInfo.tag or "unknown"
+    bodyInfo = bodyInfo or {}
+    bodyInfo.x = x or 0
+    bodyInfo.y = y or 0
+    bodyInfo.w = bodyInfo.w or w
+    bodyInfo.h = bodyInfo.h or h
+    bodyInfo.anchorX = bodyInfo.anchorX or anchorX or 0
+    bodyInfo.anchorY = bodyInfo.anchorY or anchorY or 0
+    bodyInfo.type = bodyInfo.type or "static"
+    bodyInfo.tag = bodyInfo.tag or "unknown"
     bodyInfo.friction = bodyInfo.friction or 0
-    bodyInfo.sensor   = not not bodyInfo.sensor
+    bodyInfo.sensor = not not bodyInfo.sensor
     -- 物理
-    local body        = love.physics.newBody(world, bodyInfo.x, bodyInfo.y, bodyInfo.type) -- 世界, 位置, 类型
-    local shape       = love.physics.newRectangleShape(bodyInfo.w * bodyInfo.anchorX, bodyInfo.h * bodyInfo.anchorY,
-        bodyInfo.w, bodyInfo.h)                                                            -- 相对刚体的偏移和尺寸
-    local fixture     = love.physics.newFixture(body, shape, 1)                            -- 刚体, 形状, 密度
-    fixture:setFriction(bodyInfo.friction)                                                 --摩擦力
+    local body = love.physics.newBody(world, bodyInfo.x, bodyInfo.y, bodyInfo.type) -- 世界, 位置, 类型
+    local shape = love.physics.newRectangleShape(bodyInfo.w * bodyInfo.anchorX, bodyInfo.h * bodyInfo.anchorY,
+        bodyInfo.w, bodyInfo.h) -- 相对刚体的偏移和尺寸
+    local fixture = love.physics.newFixture(body, shape, 1) -- 刚体, 形状, 密度
+    fixture:setFriction(bodyInfo.friction) -- 摩擦力
     body:setPosition(bodyInfo.x, bodyInfo.y)
     body:setFixedRotation(true)
     fixture:setSensor(bodyInfo.sensor)
@@ -57,7 +57,6 @@ end
 
 function DebugPrint()
     love.graphics.setColor(1, 0, 0)
-
 
     -- 计算 FPS
     local fps = love.timer.getFPS()
@@ -83,10 +82,10 @@ function printCol()
                 love.graphics.circle("line", x, y, radius)
             elseif shapeType == "polygon" then
                 -- shape:getPoints() 返回局部坐标序列
-                local points = { body:getWorldPoints(shape:getPoints()) }
+                local points = {body:getWorldPoints(shape:getPoints())}
                 love.graphics.polygon("line", points)
             elseif shapeType == "edge" then
-                local points = { body:getWorldPoints(shape:getPoints()) }
+                local points = {body:getWorldPoints(shape:getPoints())}
                 love.graphics.line(points)
             end
         end
@@ -98,17 +97,20 @@ function printUi()
 
     for _, widget in pairs(Glove.widgets) do
         love.graphics.setColor(0, 1, 0, 0.3) -- 白色轮廓
-        if widget.type == "VStack" then love.graphics.setColor(1, 1, 0, 0.5) end
-        if widget.type == "HStack" then love.graphics.setColor(0, 1, 1, 0.3) end
+        if widget.type == "VStack" then
+            love.graphics.setColor(1, 1, 0, 0.5)
+        end
+        if widget.type == "HStack" then
+            love.graphics.setColor(0, 1, 1, 0.3)
+        end
         local x, y = widget:getPos()
         local w, h = widget:getSize()
-        if not w or not h then 
-            --print("!!!!!!" ,widget.type,widget.name,widget.x,widget.y,widget.w,widget.h)
+        if not w or not h then
+            -- print("!!!!!!" ,widget.type,widget.name,widget.x,widget.y,widget.w,widget.h)
         end
         love.graphics.rectangle("line", x, y, w, h)
     end
 end
-
 
 -- 打印完整的调用堆栈（模仿报错格式）
 function printStackTrace(message)
@@ -125,9 +127,6 @@ function printStackTrace(message)
     print(stackTrace)
     print("=======================")
 end
-
-
-
 
 -- 核心工具函数：判断鼠标是否点击到指定Body（兼容任意旋转角度）
 function isBodyClicked(body, mx, my)
@@ -151,7 +150,7 @@ function isBodyClicked(body, mx, my)
             local radius = shape:getRadius()
             local dx = mx - cx
             local dy = my - cy
-            if dx*dx + dy*dy <= radius*radius then
+            if dx * dx + dy * dy <= radius * radius then
                 return true
             end
 
@@ -171,12 +170,12 @@ function isPointInPolygon(px, py, points)
     -- points是{x1,y1,x2,y2,...xn,yn}格式，遍历所有边
     local j = #points - 1 -- 最后一个点的索引（x坐标）
     for i = 1, #points, 2 do
-        local xi, yi = points[i], points[i+1] -- 当前点
-        local xj, yj = points[j], points[j+1] -- 上一个点
+        local xi, yi = points[i], points[i + 1] -- 当前点
+        local xj, yj = points[j], points[j + 1] -- 上一个点
 
         -- 射线法核心逻辑：判断点是否与边相交
         local intersect = ((yi > py) ~= (yj > py)) -- 点在边的y轴范围内
-            and (px < (xj - xi) * (py - yi) / (yj - yi) + xi) -- 点在边的x轴左侧
+        and (px < (xj - xi) * (py - yi) / (yj - yi) + xi) -- 点在边的x轴左侧
         if intersect then
             inside = not inside -- 每相交一次，内外状态翻转
         end
@@ -184,3 +183,125 @@ function isPointInPolygon(px, py, points)
     end
     return inside
 end
+
+-- 为string添加方法
+string.safeSub = function(self, start, finish)
+    if not self or self == "" then
+        return ""
+    end
+
+    -- 使用utf8库安全处理
+    start = start or 1
+    finish = finish or utf8.len(self)
+
+    -- 将字符索引转换为字节索引
+    local byteStart = utf8.offset(self, start)
+    local byteFinish = utf8.offset(self, finish + 1)
+
+    if byteFinish then
+        byteFinish = byteFinish - 1
+    end
+
+    if byteStart then
+        return string.sub(self, byteStart, byteFinish)
+    else
+        return ""
+    end
+end
+
+---utf8 字符串的处理办法----
+function initStringExtensions()
+    -- 确保utf8可用
+    if not utf8 and love and love.utf8 then
+        utf8 = love.utf8
+    elseif not utf8 then
+        local ok, utf8_module = pcall(require, "utf8")
+        if ok then
+            utf8 = utf8_module
+        end
+    end
+
+    -- 安全删除第一个字符
+    string.removeFirstChar = function(self)
+        if not self or self == "" then
+            return ""
+        end
+
+        local bytePos = utf8.offset(self, 2)
+        if bytePos then
+            return string.sub(self, bytePos)
+        else
+            return "" -- 只剩一个字符
+        end
+    end
+
+    -- 安全删除最后一个字符
+    string.removeLastChar = function(self)
+        if not self or self == "" then
+            return ""
+        end
+
+        local charCount = utf8.len(self)
+        if charCount <= 1 then
+            return ""
+        end
+
+        local byteStart = utf8.offset(self, 1)
+        local byteEnd = utf8.offset(self, charCount) - 1
+
+        if byteStart and byteEnd then
+            return string.sub(self, byteStart, byteEnd)
+        end
+        return ""
+    end
+
+    -- 获取UTF-8字符长度
+    string.utf8len = function(self)
+        return utf8.len(self)
+    end
+
+    -- 按字符分割字符串
+    string.splitChars = function(self)
+        local chars = {}
+        for _, char in utf8.codes(self) do
+            table.insert(chars, char)
+        end
+        return chars
+    end
+
+    -- 反转中文字符串
+    string.utf8reverse = function(self)
+        local chars = {}
+        for _, char in utf8.codes(self) do
+            table.insert(chars, 1, char)
+        end
+        return table.concat(chars)
+    end
+
+    string.utf8sub = function(self, start, finish)
+        if not self or self == "" then
+            return ""
+        end
+
+        -- 使用utf8库安全处理
+        start = start or 1
+        finish = finish or utf8.len(self)
+
+        -- 将字符索引转换为字节索引
+        local byteStart = utf8.offset(self, start)
+        local byteFinish = utf8.offset(self, finish + 1)
+
+        if byteFinish then
+            byteFinish = byteFinish - 1
+        end
+
+        if byteStart then
+            return string.sub(self, byteStart, byteFinish)
+        else
+            return ""
+        end
+    end
+
+end
+
+initStringExtensions()

@@ -90,7 +90,7 @@ function PlaylistUI:draw()
     love.graphics.rectangle('fill', scissorX - pass, scissorY - pass, scissorW + pass * 2, scissorH + pass * 2)
     love.graphics.setScissor(scissorX, scissorY, scissorW, scissorH) -- 开启剪裁
     -- 裁剪内容
-    PlaylistUI.super.draw(self)
+    self:drawStacks()
 
     love.graphics.setScissor() -- 关闭剪裁
 

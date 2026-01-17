@@ -9,7 +9,19 @@ function Class:new(base)
     -- 设置继承
     if base then
         setmetatable(cls, {
-            __index = base
+            -- 核心改造：__index包装函数，保留查找上下文
+            __index = function(t, k)
+                -- 1. 先检查基类是否有这个key（避免直接返回base导致上下文丢失）
+                local value = base[k]
+                
+                -- 2. 安全防护：避免覆盖核心属性（比如super）
+                if k == "super" then
+                    return base  -- 强制返回基类，防止super被误赋值
+                end
+                
+                -- 3. 返回基类的属性/方法，同时保留t（子类）的上下文
+                return value
+            end
         })
         cls.super = base
     end
