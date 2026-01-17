@@ -42,7 +42,7 @@ function VStack:layout()
     local children = self.children
     local spacerWidth = 0
     local spacing = self.spacing or 0
-    local y = self.localY or 0
+    local y = 0
 
     for i, child in ipairs(children) do
         if child.type == "VStack" or child.type == "HStack" then

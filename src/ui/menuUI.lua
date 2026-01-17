@@ -85,9 +85,7 @@ function MenuUI:getvstack()
     -- end)
     local bt = Glove.HStack:new({ linkButton })
 
-
-
-    local stack = Glove.VStack:new({first,second,bt},0)
+    local stack = Glove.VStack:new({first,second,bt,Toggle},10)
     stack.spacing = 10
 
     stack:setPos(self.posx, self.posy,self.z)

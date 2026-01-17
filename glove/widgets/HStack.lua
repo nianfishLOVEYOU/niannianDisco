@@ -48,7 +48,7 @@ function HStack:layout()
     local children = self.children
     local spacerWidth = 0
     local spacing = self.spacing or 0
-    local x = self.localX or 0
+    local x =  0
 
     for i, child in ipairs(children) do
         if child.type == "VStack" or child.type == "HStack" then
@@ -108,8 +108,6 @@ function HStack:layout()
 
             x = child.localX + cw
 
-            print("child.localX")
-            print(child.localX, child.localY, cw)
         end
     end
 
