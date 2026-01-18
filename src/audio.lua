@@ -3,12 +3,14 @@ local json = require "lib.json"
 
 local Audio = {
     currentSource = nil,
-    playlist = {},
+    playlist = {}, --*{userid , path , duration, name }
     localplaylist = {}, -- 指向本地的tmp文件夹内，也指向其他music文件夹
     currentMusicName = "",
     currentIndex = 0,
     volume = 0.3,
-    stuck = false
+    stuck = false,
+    downloadProgress = 100
+
 }
 
 systemManager:update_regester(function(dt)
@@ -58,7 +60,7 @@ function Audio:loadMusic(path)
         self.currentSource = source
         self.currentMusicName = path
         self.currentSource:setVolume(self.volume)
-        self.stuck = false
+        self:setStuck(false)
         return true, source
     end
     print("loadMusic error")
@@ -97,6 +99,21 @@ function Audio:stop()
     end
 end
 
+function Audio:setStuck(stuck)
+
+    self.stuck = stuck
+    self.downloadProgress = stuck and 0 or 100
+end
+
+function Audio:sendRequestFile(musicindex)
+    local uerid = audio.playlist[musicindex].uerid
+    local msg = {
+        type = "requestFile",
+        index = musicindex
+    }
+    network:send_unicast(uerid, msg) -- 相拥有资源的人请求
+    print("sendRequestFile" ,uerid ,audio.playlist[musicindex].name,musicindex)
+end
 -- 按钮按下，进入下一首
 function Audio:next(index)
     if self.currentIndex == index then
@@ -122,13 +139,9 @@ function Audio:next(index)
         -- 播放
         self:MusicStart(path, 0)
     else
-        local uerid = audio.playlist[index].uerid
-        local msg = {
-            type = "requestFile",
-            index = index
-        }
+        self:sendRequestFile(index)
         network:send_unicast(uerid, msg) -- 相拥有资源的人请求
-        self.stuck = true
+        self:setStuck(true)
         uiManager:refresh("playlistUI")
     end
 
@@ -149,13 +162,9 @@ function Audio:receiveToNext(index)
         -- 播放
         self:MusicStart(path, 0)
     else
-        local uerid = audio.playlist[index].uerid
-        local msg = {
-            type = "requestFile",
-            index = index
-        }
-        network:send_unicast(uerid, msg) -- 相拥有资源的人请求
-        self.stuck = true
+        self:sendRequestFile(index)
+        self:setStuck(true)
+        self.downloadProgress = 0
     end
     uiManager:refresh("playlistUI")
 end
@@ -195,6 +204,7 @@ function Audio:update(dt)
         local musicpath = fileManager:getFilePathByName(self.playlist[self.currentIndex].name)
         if musicpath then
             self:MusicStart(musicpath, 0)
+            self.downloadProgress = 0
         end
     end
 

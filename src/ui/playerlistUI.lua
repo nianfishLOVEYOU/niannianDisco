@@ -33,7 +33,6 @@ function PlayerlistUI:getvstack()
 
     local roomguy = Glove.VStack:new( {Glove.Text:new("房间里的小伙伴:",0)})
     for k, v in pairs(network.peers) do
-        print("PlayerlistUI",k)
         roomguy:addChild(Glove.Text:new("小比噶" .. k))
     end
     roomguy:layout()

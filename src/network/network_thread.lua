@@ -168,7 +168,9 @@ local function filesystemReadFile(path)
     return f, size
 end
 
+-------------------------------
 -------------文件单播------------
+-------------------------------
 local fileUnicastTaskId = 0
 local fileUnicastTasks = {}
 local function fileUnicastTask(name, path, peer_id, id)
@@ -214,7 +216,7 @@ local function fileUnicastTask(name, path, peer_id, id)
         ts = os.time(),
         name = name
     }
-    print("[INFO] 文件发送完毕，已发送 FIN，退出 " .. taskId)
+    print("-------------[INFO] 文件发送完毕，已发送 FIN，退出------------ " .. taskId)
     fileUnicastTasks[taskId] = nil
 end
 
@@ -245,7 +247,10 @@ local function fileUnicastTaskUpdate()
     end
 end
 
+-------------------------------
 ---------接收音乐文件------------
+-------------------------------
+
 local fileReceiveTasks = {}
 local function fileReceiveTask(name)
     local tmp = commonData.tmpPath .. name -- 临时文件名
@@ -271,6 +276,7 @@ local function fileReceiveTask(name)
             f:flush() -- 强制把缓冲区写入磁盘[[2]]
         end
 
+        --发送进度
         if i >= returnProgressCount then
             infoNetworkCh:push{
                 type = "info_returnProgress",
@@ -291,7 +297,7 @@ local function fileReceiveTask(name)
         seq = msg.seq
     }
 
-    print("[INFO] 接收完毕 FIN，退出")
+    print("-------------------[INFO] 接收完毕 FIN，退出--------------------------------")
     fileReceiveTasks[msg.musicname] = nil
 end
 
@@ -357,7 +363,7 @@ while true do
             end
         elseif cmd.cmd == "send_unicast" then
             local msg = json.encode(cmd.msg)
-            print("[Sand] >> " .. cmd.msg.type)
+            print("[Sand uni ]"..cmd.peer_id.." >> " .. cmd.msg.type)
             local p = peers[cmd.peer_id]
             if p and p.enet then
                 p.enet:send(msg) -- ENet 单点发送

@@ -112,8 +112,9 @@ function Network:info()
             -- audio:loadMusic(pktCh.path)
             -- audio:play(0)
             self.musicTransfering = self.musicTransfering - 1
+        elseif pktCh.type == "info_returnProgress"then
+            audio.downloadProgress=pktCh.progress
         elseif pktCh.type == "getPeers" then
-            print("getPeers",pktCh.peers[1] or pktCh.peers[2])
             self.peers = pktCh.peers
             self.userid = pktCh.userid
             self.enterRoom = true

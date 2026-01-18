@@ -94,3 +94,4 @@ tips
 			23 地图编辑器跟不上版本，需要改为item方式 ,先清理itemmanager
 			√ 24 拖动页面大小会出bug
 			√ 25 uitext 文件sub出问题会报错utf8
+			26 显示下载进度
