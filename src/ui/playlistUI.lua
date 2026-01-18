@@ -13,7 +13,7 @@ local musicInput = function(file, name, fullname, extend)
         return
     end
     -- 判断文件是否存在
-    local tmpPath = "tmp/" .. name
+    local tmpPath = commonData.tmpPath .. name
     if (fileManager:fileIsExsit(tmpPath)) then
         print(">x<  file exsit do not cope: " .. tmpPath)
         local music = love.audio.newSource(tmpPath, "stream")

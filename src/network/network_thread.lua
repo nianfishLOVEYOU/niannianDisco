@@ -237,7 +237,6 @@ end
 local function fileUnicastTaskUpdate()
     
     for taskId, task in pairs(fileUnicastTasks) do
-        print("-------!!!!!! fileUnicastTaskUpdate",taskId)
         if coroutine.status(task) == "dead" then
             print("! fileUnicastTasks ! isdead " .. taskId)
         else
@@ -379,7 +378,7 @@ while true do
     -- ③ ENet 事件（接收音频块）
     local event = host:service(0)
     while event do
-        print("ENet event:", event.type, tostring(event.peer), event.channel or "")
+        --print("ENet event:", event.type, tostring(event.peer), event.channel or "")
         if event.type == "connect" then
             print("[CONNECT] 来自 " .. tostring(event.peer))
 

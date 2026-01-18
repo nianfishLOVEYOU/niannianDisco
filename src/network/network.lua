@@ -112,8 +112,8 @@ function Network:info()
             -- audio:loadMusic(pktCh.path)
             -- audio:play(0)
             self.musicTransfering = self.musicTransfering - 1
-        elseif pktCh.type == "info_returnProgress"then
-            audio.downloadProgress=pktCh.progress
+        elseif pktCh.type == "info_returnProgress" then
+            audio.downloadProgress = pktCh.progress
         elseif pktCh.type == "getPeers" then
             self.peers = pktCh.peers
             self.userid = pktCh.userid
@@ -183,9 +183,7 @@ function Network:handleMessage(message, address)
     elseif message.type == "requestFile" then
         -- 缺少资源请求发送
         local userid = self:getPeersId(address)
-        if message.needFile then
-            audio:fileRequestAllow(userid, message.index)
-        end
+        audio:fileRequestAllow(userid, message.index)
     elseif message.type == "playermove" then
         -- 收到远程玩家移动信息
         local remotePlayer = playerManager.remotePlayers[message.userid]

@@ -1,12 +1,10 @@
 local FileManager = {
-    listpath = "",
-    musicpath = ""
 }
 
 systemManager:init_regester(function()
     -- 创建目录
-    FileManager.createDir("tmp")
-    FileManager.createDir("info")
+    FileManager.createDir(commonData.tmpPath)
+    FileManager.createDir("info/")
 end)
 
 systemManager:quit_regester(function()
