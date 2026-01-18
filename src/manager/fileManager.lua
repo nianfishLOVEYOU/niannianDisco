@@ -41,8 +41,9 @@ function FileManager:fileIsExsit(path)
     return true -- 直接返回字节数
 end
 
+--检查所有文件夹，找到路径
 function FileManager:getFilePathByName(name)
-    local path = "tmp/" .. name
+    local path = commonData.tmpPath .. name
     local info = love.filesystem.getInfo(path)
     if info then
         return path,info
