@@ -3,7 +3,7 @@ local json = require "lib.json"
 
 local Audio = {
     currentSource = nil,
-    playlist = {}, --*{userid , path , duration, name }
+    playlist = {}, -- *{userid , path , duration, name }
     localplaylist = {}, -- 指向本地的tmp文件夹内，也指向其他music文件夹
     currentMusicName = "",
     currentIndex = 0,
@@ -106,14 +106,15 @@ function Audio:setStuck(stuck)
 end
 
 function Audio:sendRequestFile(musicindex)
-    local uerid = audio.playlist[musicindex].uerid
+    local userid = audio.playlist[musicindex].userid
     local msg = {
         type = "requestFile",
         index = musicindex
     }
-    network:send_unicast(uerid, msg) -- 相拥有资源的人请求
-    print("sendRequestFile" ,uerid ,audio.playlist[musicindex].name,musicindex)
+    network:send_unicast(userid, msg) -- 相拥有资源的人请求
+    print("sendRequestFile", userid, audio.playlist[musicindex].name, musicindex)
 end
+
 -- 按钮按下，进入下一首
 function Audio:next(index)
     if self.currentIndex == index then
@@ -121,12 +122,11 @@ function Audio:next(index)
     end
 
     self.currentIndex = index
-    self:sendUpdatePlayList()
 
     local msg = {
         type = "tonext",
         index = index,
-        uerid = self.playlist[index].userid
+        userid = self.playlist[index].userid
     }
     network:send_Broadcast(msg)
 
@@ -140,7 +140,6 @@ function Audio:next(index)
         self:MusicStart(path, 0)
     else
         self:sendRequestFile(index)
-        network:send_unicast(uerid, msg) -- 相拥有资源的人请求
         self:setStuck(true)
         uiManager:refresh("playlistUI")
     end
@@ -259,14 +258,23 @@ function Audio:addPlayMusic(path, duration, name)
 end
 
 -- 发送列表信息
-function Audio:sendUpdatePlayList()
-    -- 发送列表
-    local msg = {
-        type = "playlist_update",
-        playlist = self.playlist,
-        index = self.currentIndex
-    }
-    network:send_Broadcast(msg)
+function Audio:sendUpdatePlayList(id)
+    if id then
+        -- 发送列表
+        local msg = {
+            type = "playlist_update",
+            playlist = self.playlist,
+        }
+        network:send_unicast(id,msg)
+    else
+        -- 发送列表
+        local msg = {
+            type = "playlist_update",
+            playlist = self.playlist,
+        }
+        network:send_Broadcast(msg)
+    end
+
 end
 
 -- 发送播放信息

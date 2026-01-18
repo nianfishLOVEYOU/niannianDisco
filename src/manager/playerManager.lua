@@ -62,7 +62,7 @@ end
 
 function PlayerManager:removeRemotePlayer(id)
     if self.remotePlayers[id] then
-        self.remotePlayers[id].player:destroy()
+        self.remotePlayers[id]:destroy()
         self.remotePlayers[id] = nil
     end
 end

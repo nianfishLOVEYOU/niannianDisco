@@ -140,7 +140,7 @@ function Network:info()
                 self.connects[id] = pktCh.address
                 if self.userid < id then
                     -- id小的先发歌单
-                    audio:sendUpdatePlayList()
+                    audio:sendUpdatePlayList(id)
                 end
             end
 
@@ -165,11 +165,7 @@ end
 function Network:handleMessage(message, address)
     if message.type == "playlist_update" then
         -- 播放列表更新
-        for k, v in pairs(message.playlist) do
-            print(v.name)
-        end
         audio.playlist = message.playlist
-        -- audio.currentIndex = message.index
         uiManager:refresh("playlistUI")
     elseif message.type == "updatePlayStatus" then
         -- 播放状态更新
