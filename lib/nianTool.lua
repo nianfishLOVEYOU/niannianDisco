@@ -122,6 +122,7 @@ function DebugPrint()
     love.graphics.print("FPS: " .. fps, 10, 10)
     love.graphics.print("按下b 编辑地图", 10, 20)
     love.graphics.print("是否开启networklocalmod " .. tostring(commonData.openlocalMod), 10, 30)
+    --love.graphics.print("音乐声值："..audio:getMusicSpectrum())
     love.graphics.setColor(1, 1, 1)
 
     --显示鼠标位置
@@ -140,6 +141,7 @@ function DebugPrint()
     love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * 0.2, 0, 0,
         0.2, 0.2)
 
+        
 end
 
 

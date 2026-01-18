@@ -192,7 +192,7 @@ function Audio:automusicNext()
     if self:isOvered() then
         nextId=((audio.currentIndex) % #audio.playlist) + 1
     end
-    
+
     if nextId ~=0 and network.userid == self.playlist[nextId].userid then
         self:next(nextId)
     end
@@ -221,6 +221,24 @@ function Audio:update(dt)
 
 end
 
+
+
+local spectrumBars = 1    -- 仅获取1个频率能量值
+local fftSize = 64      -- 满足 1024 ≥ 1 即可
+local smoothFactor = 0.2  -- 平滑因子，避免圆形大小突变
+local currentEnergy = 0   -- 当前能量值
+function Audio:getMusicSpectrum()
+    -- 参数1: 要获取的柱形数量 (spectrumBars)
+    -- 参数2: FFT的大小 (通常是 512, 1024, 2048)
+    -- 参数3: 结果存放的数组 (可选)
+    local spectrum = love.audio.getSpectrum(spectrumBars, fftSize)
+    local rawEnergy = spectrum[1]  -- 数组只有1个元素，取索引1
+    
+    -- 平滑处理能量值，让圆形大小变化更自然
+    currentEnergy = currentEnergy * smoothFactor + rawEnergy * (1 - smoothFactor)
+    return currentEnergy
+end
+
 -- 开启音乐播放
 function Audio:MusicStart(path, delay)
     timer:after(delay, function()
@@ -236,6 +254,7 @@ function Audio:setVolume(vol)
         self.currentSource:setVolume(self.volume)
     end
 end
+
 
 function Audio:musicExist(name)
     for k, v in pairs(self.playlist) do
