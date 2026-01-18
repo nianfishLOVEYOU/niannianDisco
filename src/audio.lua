@@ -192,8 +192,8 @@ function Audio:automusicNext()
     if self:isOvered() then
         nextId=((audio.currentIndex) % #audio.playlist) + 1
     end
-    print("automusicNext",nextId,#self.playlist)
-    if network.userid == self.playlist[nextId].userid then
+    
+    if nextId ~=0 and network.userid == self.playlist[nextId].userid then
         self:next(nextId)
     end
 end
