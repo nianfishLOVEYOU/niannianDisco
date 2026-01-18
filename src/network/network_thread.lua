@@ -235,7 +235,9 @@ end
 
 -- 执行单播文件
 local function fileUnicastTaskUpdate()
+    
     for taskId, task in pairs(fileUnicastTasks) do
+        print("-------!!!!!! fileUnicastTaskUpdate",taskId)
         if coroutine.status(task) == "dead" then
             print("! fileUnicastTasks ! isdead " .. taskId)
         else

@@ -17,7 +17,6 @@ systemManager:update_regester(function(dt)
     Audio:update(dt)
 end)
 
-local nonPlayTime = 0
 
 function Audio:isPlaying()
     return self.currentSource and self.currentSource:isPlaying()
@@ -146,7 +145,7 @@ function Audio:next(index)
 
 end
 
--- 接收到消息，检查并播放下一首
+-- 非主动下一首，检查并播放下一首
 function Audio:receiveToNext(index)
     if self.currentIndex == index then
         return
@@ -179,39 +178,47 @@ function Audio:seek(position)
     end
 end
 
+--限制每次播放结束自动下一首只有一人广播
+function Audio:automusicNext()
+    -- 从0开始播放
+    if #self.playlist==0 then return end
+
+    local nextId =0
+    --还没开始播放的时候播放
+    if self.currentIndex == 0  then
+        nextId=1
+    end
+    -- 从播放结束之后开始播放
+    if self:isOvered() then
+        nextId=((audio.currentIndex) % #audio.playlist) + 1
+    end
+    print("automusicNext",nextId,#self.playlist)
+    if network.userid == self.playlist[nextId].userid then
+        self:next(nextId)
+    end
+end
+
 local waittime = os.time()
 function Audio:update(dt)
     -- 如果没有音乐资源就等待，直到下载好
     if os.time() - waittime > 0.5 then
         waittime = os.time()
-    else
-        return
-    end
 
-    -- 从0开始播放
-    if self.currentIndex == 0 and #self.playlist > 0 then
-        self:next(1)
-    end
-
-    -- 从播放结束之后开始播放
-    if self:isOvered() then
-        self:next(((audio.currentIndex) % #audio.playlist) + 1)
-    end
-
-    if self.stuck then
-        print("stuck!!")
-        local musicpath = fileManager:getFilePathByName(self.playlist[self.currentIndex].name)
-        if musicpath then
-            self:MusicStart(musicpath, 0)
-            self.downloadProgress = 0
+        self:automusicNext()
+        --音乐资源等待下载
+        if self.stuck then
+            print("stuck!!")
+            local musicpath = fileManager:getFilePathByName(self.playlist[self.currentIndex].name)
+            if musicpath then
+                self:MusicStart(musicpath, 0)
+                self.downloadProgress = 0
+            end
         end
+
+    else
+        --不是定时的逻辑
     end
 
-    if #self.playlist ~= 0 and not self:isPlaying() then
-        nonPlayTime = nonPlayTime + dt
-    else
-        nonPlayTime = 0
-    end
 end
 
 -- 开启音乐播放
