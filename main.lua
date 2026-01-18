@@ -43,10 +43,6 @@ ffi.C.SetConsoleOutputCP(65001) -- 936 = GBK  65001 =utf-8
 myFont = love.graphics.newFont("fonts/msyh.ttc", 12)
 love.graphics.setFont(myFont)
 
----主要变量------
-openMapEditorMode = false
-openlocalMod = true
-
 ---设置摄像机
 pixSize = 4
 -- 参数：left, top, width, height（世界边界）
@@ -110,16 +106,9 @@ function love.load()
     
     systemManager:init()
 
-    if openMapEditorMode then
-        statusManager:statusChange("editor")
-    else
-        statusManager:statusChange("menu")
-    end
+    statusManager:statusChange("menu")
 
-    if not openMapEditorMode then
-        loadMap()
-    end
-
+    loadMap()
 end
 
 function love.update(dt)
@@ -134,11 +123,9 @@ end
 
 local function keypressed(k)
     if k == "b" then -- B 键 → 广播
-        openMapEditorMode = true
+        commonData.openMapEditorMode = true
         statusManager:statusChange("editor")
         closeMap()
-    elseif k == "n" then -- N 键 → 游戏
-        openlocalMod = true
     end
     -- 拖拽歌曲添加播放列表
     -- 暂停，下一首，功能
@@ -155,20 +142,8 @@ local function camDepth()
 end
 
 local function camDraw()
-    -- if map then
-    --     love.graphics.setColor(1, 1, 1)
-    --     love.graphics.draw(map.background, 0, 0, 0, pixSize, pixSize)
-    --     love.graphics.draw(map.background, 400, 0, 0, pixSize, pixSize)
-    --     love.graphics.draw(map.background, 0, 400, 0, pixSize, pixSize)
-    --     love.graphics.draw(map.background, 400, 400, 0, pixSize, pixSize)
-    -- end
-
     nianDraw:drawFinal()
     systemManager:camdraw()
-
-    if openMapEditorMode then
-        printCol()
-    end
 end
 
 -- 无画布场景绘制
@@ -177,13 +152,14 @@ local function drawNoCanvasScene()
 end
 
 function love.draw()
-    if openMapEditorMode then
+    if commonData.openMapEditorMode then
         cam:draw(camDepth)
-        drawNoCanvasScene()
+        cam:draw(camDraw)
         systemManager:draw()
+        -- debug
+        DebugPrint()
         return
     end
-
 
     -- 相机深度绘制
     cam:draw(camDepth)
@@ -197,14 +173,6 @@ function love.draw()
     -- 绘制UI等覆盖内容
     systemManager:draw()
 
-
-    love.graphics.setColor(1, 0, 0)
-    love.graphics.print("localmod " .. tostring(openlocalMod), 100, 10)
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth()-nianDraw.depthCanvas:getWidth()*0.2, 0,0,0.2,0.2)
-    
-    --绘制uidebug
-    debugPrintUi()
     -- debug
     DebugPrint()
 end

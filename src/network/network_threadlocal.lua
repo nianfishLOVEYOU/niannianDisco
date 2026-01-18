@@ -1,10 +1,10 @@
 -- fused：只能使用虚拟文件系统的默认路径  打包之后
-package.path        = package.path .. ";?.lua;?/init.lua"
+package.path = package.path .. ";?.lua;?/init.lua"
 
-local socket        = require "socket"
-local enet          = require "enet"
-local json          = require "lib.json"             -- 任意轻量 JSON 库
-local stun          = require "src.network.nianStun" -- ← 仍保留引用，后面不再使用
+local socket = require "socket"
+local enet = require "enet"
+local json = require "lib.json" -- 任意轻量 JSON 库
+local stun = require "src.network.nianStun" -- ← 仍保留引用，后面不再使用
 
 local ctrlNetworkCh = love.thread.getChannel("ctrlNetwork")
 local infoNetworkCh = love.thread.getChannel("infoNetwork")
@@ -12,7 +12,7 @@ local infoNetworkCh = love.thread.getChannel("infoNetwork")
 --------------------------------------------------------------------
 -- 1️⃣ 读取主线程指令，获取 “code” （仍保留原有逻辑）
 --------------------------------------------------------------------
-local code          = ""
+local code = ""
 while true do
     local cmd = ctrlNetworkCh:pop()
     if cmd then
@@ -31,9 +31,9 @@ end
 -- 2️⃣ 本机地址（不再走 STUN）
 --------------------------------------------------------------------
 local myAddr = {
-    ip         = "127.0.0.1",
-    port       = nil, -- 稍后由 ENet 主机获取
-    remotePort = nil --远程的
+    ip = "127.0.0.1",
+    port = nil, -- 稍后由 ENet 主机获取
+    remotePort = nil -- 远程的
 }
 local a5002 = false
 --------------------------------------------------------------------
@@ -42,13 +42,13 @@ local a5002 = false
 local host, err = enet.host_create("127.0.0.1:5001", 32, 2, 0, 0) -- 0 表示让系统挑选空闲端口
 if not host then
     print("! ENet host 创建失败 :", err)
-    --infoNetworkCh:push { type = "connectFail" }
+    -- infoNetworkCh:push { type = "connectFail" }
     host, err = enet.host_create("127.0.0.1:5002", 32, 2, 0, 0)
     a5002 = true
 end
 
 -- 取得系统分配的端口，填入 myAddr
-myAddr.port       = a5002 and 5002 or 5001 -- 提取端口号字符串
+myAddr.port = a5002 and 5002 or 5001 -- 提取端口号字符串
 myAddr.remotePort = a5002 and 5001 or 5002
 print(string.format("ENet 本机监听：%s:%d", myAddr.ip, myAddr.port))
 
@@ -62,13 +62,15 @@ local peers = {} -- {id = {ip = "...", port = ..., enet = enetPeer}}
 --     port =myAddr.port
 -- })
 table.insert(peers, {
-    ip      = "127.0.0.1",
-    port    = myAddr.remotePort,
+    ip = "127.0.0.1",
+    port = myAddr.remotePort,
     address = "127.0.0.1" .. ":" .. myAddr.remotePort
 })
 
-
-infoNetworkCh:push { type = "getPeers", peers = peers }
+infoNetworkCh:push{
+    type = "getPeers",
+    peers = peers
+}
 --------------------------------------------------------------------
 -- 5️⃣ 连接到已知 Peer（ENet 会在内部完成 UDP 打洞后的可靠通道）
 --------------------------------------------------------------------
@@ -85,9 +87,9 @@ end
 --------------------------------------------------------------------
 -- 6️⃣ 文件广播协程（保持原实现，仅改动少量变量名）
 --------------------------------------------------------------------
-local fileBroadcastTaskId=0
+local fileBroadcastTaskId = 0
 local fileBroadcastTasks = {}
-local function fileBroadcastTask(cmd,id)
+local function fileBroadcastTask(cmd, id)
     local taskId = id
     coroutine.yield()
     local info, err = love.filesystem.getInfo(cmd.path)
@@ -96,7 +98,9 @@ local function fileBroadcastTask(cmd,id)
     f:open("r")
     local seq = 0
     while true do
-        if f:isEOF() then break end
+        if f:isEOF() then
+            break
+        end
         local chunk = f:read(64 * 1024)
         seq = seq + 1
         local data = love.data.encode("string", "base64", chunk)
@@ -104,10 +108,10 @@ local function fileBroadcastTask(cmd,id)
         for _, p in pairs(peers) do
             if p and p.enet then
                 local pkt = json.encode {
-                    type      = "audio",
-                    seq       = seq,
-                    ts        = os.time(),
-                    data      = data,
+                    type = "audio",
+                    seq = seq,
+                    ts = os.time(),
+                    data = data,
                     musicname = cmd.name
                 }
                 p.enet:send(pkt)
@@ -121,30 +125,30 @@ local function fileBroadcastTask(cmd,id)
     for _, p in pairs(peers) do
         if p and p.enet then
             p.enet:send(json.encode {
-                type      = "AUDIOFIN",
-                ts        = os.time(),
+                type = "AUDIOFIN",
+                ts = os.time(),
                 musicname = cmd.name
             })
         end
     end
 
-    infoNetworkCh:push {
+    infoNetworkCh:push{
         type = "sendAudioOk",
         path = cmd.path,
-        ts   = os.time(),
+        ts = os.time(),
         name = cmd.name
     }
     print("[INFO] 文件发送完毕，已发送 FIN，退出", "任务：" .. taskId)
-    fileBroadcastTasks[taskId]=nil
+    fileBroadcastTasks[taskId] = nil
 end
 
 --------------------------------------------------------------------
 -- 7️⃣ 文件单播协程（保持原实现）
 --------------------------------------------------------------------
-local fileUnicastTaskId=0
+local fileUnicastTaskId = 0
 local fileUnicastTasks = {}
-local function fileUnicastTask(cmd,id)
-    local taskId =id
+local function fileUnicastTask(cmd, id)
+    local taskId = id
     coroutine.yield()
     local p = peers[cmd.peer_id]
     if p and p.enet then
@@ -153,14 +157,16 @@ local function fileUnicastTask(cmd,id)
         local seq = 0
         while true do
             local chunk = f:read(64 * 1024)
-            if not chunk then break end
+            if not chunk then
+                break
+            end
             seq = seq + 1
             local data = love.data.encode("string", "base64", chunk)
             local pkt = json.encode {
-                type      = "audio",
-                seq       = seq,
-                data      = data,
-                ts        = os.time(),
+                type = "audio",
+                seq = seq,
+                data = data,
+                ts = os.time(),
                 musicname = cmd.name
             }
             p.enet:send(pkt)
@@ -168,19 +174,19 @@ local function fileUnicastTask(cmd,id)
         end
         f:close()
         p.enet:send(json.encode {
-            type      = "AUDIOFIN",
-            ts        = os.time(),
+            type = "AUDIOFIN",
+            ts = os.time(),
             musicname = cmd.name
         })
 
-        infoNetworkCh:push {
+        infoNetworkCh:push{
             type = "sendAudioOk",
             path = cmd.path,
             ts = os.time(),
             name = cmd.name
         }
-        print("[INFO] 文件发送完毕，已发送 FIN，退出 "..taskId)
-        fileUnicastTasks[taskId]=nil
+        print("[INFO] 文件发送完毕，已发送 FIN，退出 " .. taskId)
+        fileUnicastTasks[taskId] = nil
     end
 end
 
@@ -196,17 +202,30 @@ local function fileReceiveTask(name)
     local msg
     while true do
         msg = coroutine.yield()
-        if msg.type == "AUDIOFIN" then break end
+        if msg.type == "AUDIOFIN" then
+            break
+        end
         local raw = love.data.decode("string", "base64", msg.data)
         f:write(raw)
         f:flush()
+
+        if i >= returnProgressCount then
+            infoNetworkCh:push{
+                type = "info_returnProgress",
+                progress = msg.progress,
+                musicname = msg.musicname
+            }
+            i = 1
+        end
+
+        i = i + 1
     end
     f:close()
-    infoNetworkCh:push {
+    infoNetworkCh:push{
         type = "audioOk",
         path = tmp,
-        ts   = msg.ts,
-        seq  = msg.seq
+        ts = msg.ts,
+        seq = msg.seq
     }
     print("[INFO] 接收完毕 FIN，退出")
     fileReceiveTasks[msg.musicname] = nil
@@ -236,28 +255,34 @@ while true do
             -- 关闭所有 ENet 连接
             print("quit")
             for _, p in pairs(peers) do
-                if p.enet then p.enet:disconnect() end
+                if p.enet then
+                    p.enet:disconnect()
+                end
             end
             return
         elseif cmd.cmd == "broadcast_mp3" then
             local task = coroutine.create(fileBroadcastTask)
-            fileBroadcastTasks[fileBroadcastTaskId]=task
-            coroutine.resume(task, cmd,fileBroadcastTaskId)
+            fileBroadcastTasks[fileBroadcastTaskId] = task
+            coroutine.resume(task, cmd, fileBroadcastTaskId)
         elseif cmd.cmd == "unicast_mp3" then
             local task = coroutine.create(fileUnicastTask)
-            fileUnicastTasks[fileUnicastTaskId]= task
-            coroutine.resume(task, cmd,fileUnicastTaskId)
+            fileUnicastTasks[fileUnicastTaskId] = task
+            coroutine.resume(task, cmd, fileUnicastTaskId)
         elseif cmd.cmd == "send_Broadcast" then
             print("[Sand] >> " .. cmd.msg.type)
             local msg = json.encode(cmd.msg)
             for _, p in pairs(peers) do
-                if p.enet then p.enet:send(msg) end
+                if p.enet then
+                    p.enet:send(msg)
+                end
             end
         elseif cmd.cmd == "send_unicast" then
             print("[Sand Uni] >> " .. cmd.msg.type)
             local msg = json.encode(cmd.msg)
             local p = peers[cmd.peer_id]
-            if p and p.enet then p.enet:send(msg) end
+            if p and p.enet then
+                p.enet:send(msg)
+            end
         end
     end
 
@@ -266,7 +291,7 @@ while true do
     ----------------------------------------------------------------    
     for taskId, task in pairs(fileBroadcastTasks) do
         if coroutine.status(task) == "dead" then
-            print("! fileBroadcastTasks ! isdead "..taskId)
+            print("! fileBroadcastTasks ! isdead " .. taskId)
         else
             local ok, err = coroutine.resume(task)
             if not ok then
@@ -278,7 +303,7 @@ while true do
     ---单播resume
     for taskId, task in pairs(fileUnicastTasks) do
         if coroutine.status(task) == "dead" then
-            print("! fileUnicastTasks ! isdead "..taskId)
+            print("! fileUnicastTasks ! isdead " .. taskId)
         else
             local ok, err = coroutine.resume(task)
             if not ok then
@@ -298,8 +323,8 @@ while true do
             --     peers    = peers,
             -- }  --也许无法序列化peers 所以导致闪退
 
-            infoNetworkCh:push {
-                type    = "connectedPeer",
+            infoNetworkCh:push{
+                type = "connectedPeer",
                 address = tostring(event.peer)
             }
         elseif event.type == "receive" then
@@ -309,7 +334,9 @@ while true do
                 -- 若是新文件，创建接收协程
                 if not fileReceiveTasks[msg.musicname] then
                     local task = coroutine.create(fileReceiveTask)
-                    fileReceiveTasks[msg.musicname] = { task = task }
+                    fileReceiveTasks[msg.musicname] = {
+                        task = task
+                    }
                     coroutine.resume(task, msg.musicname)
                 end
                 coroutine.resume(fileReceiveTasks[msg.musicname].task, msg)
@@ -318,17 +345,17 @@ while true do
                 -- 其它业务消息直接转发给主线程
                 local address = tostring(event.peer)
                 local ip, port = address:match("([^:]+):([^:]+)")
-                infoNetworkCh:push {
-                    type    = "networkHandle",
+                infoNetworkCh:push{
+                    type = "networkHandle",
                     address = address,
-                    ip      = ip,
-                    port    = port,
-                    msg     = msg,
+                    ip = ip,
+                    port = port,
+                    msg = msg
                 }
             end
         elseif event.type == "disconnect" then
-            infoNetworkCh:push {
-                type    = "disconnectPeer",
+            infoNetworkCh:push{
+                type = "disconnectPeer",
                 address = tostring(event.peer)
             }
         end

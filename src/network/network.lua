@@ -37,15 +37,12 @@ end
 ---开启网络线程
 function Network:startNetThread(code)
     if not self:NetThreadIsRun() then
-        if openlocalMod then
-            netThread = love.thread.newThread("src/network/network_threadlocal.lua")
-        else
-            netThread = love.thread.newThread("src/network/network_thread.lua")
-        end
+        netThread = love.thread.newThread("src/network/network_thread.lua")
         netThread:start()
-        ctrlNetworkCh:push {
+        ctrlNetworkCh:push{
             cmd = "start",
-            code = code
+            code = code,
+            localmod = commonData.openlocalMod
         }
         self.netThreadIsStart = true
     end
@@ -69,14 +66,14 @@ function Network:getPeersId(address)
 end
 
 function Network:send_Broadcast(msg)
-    ctrlNetworkCh:push {
+    ctrlNetworkCh:push{
         cmd = "send_Broadcast",
         msg = msg
     }
 end
 
 function Network:send_unicast(id, msg)
-    ctrlNetworkCh:push {
+    ctrlNetworkCh:push{
         cmd = "send_unicast",
         msg = msg,
         peer_id = id
@@ -84,16 +81,16 @@ function Network:send_unicast(id, msg)
 end
 
 function Network:broadcast_mp3(path, name)
-    ctrlNetworkCh:push {
+    ctrlNetworkCh:push{
         cmd = "broadcast_mp3",
         path = path,
-        name = name,
+        name = name
     }
     self.musicTransfering = self.musicTransfering + 1
 end
 
 function Network:unicast_mp3(id, path, name)
-    ctrlNetworkCh:push {
+    ctrlNetworkCh:push{
         cmd = "unicast_mp3",
         path = path,
         name = name,
@@ -122,15 +119,15 @@ function Network:info()
                 eventManager:emit("connectSeccess")
             end
         elseif pktCh.type == "connectedPeer" then
-            --和玩家建立了连接
-            --发送自己的名字和信息
+            -- 和玩家建立了连接
+            -- 发送自己的名字和信息
             local msg = {
                 type = "playerConnectInfo",
                 userid = self.userid,
                 name = playerManager.name,
                 x = playerManager.player.x,
                 y = playerManager.player.y,
-                playerType = 1, --初始小海兔
+                playerType = 1, -- 初始小海兔
                 time = love.timer.getTime()
             }
             local id = self:getPeersId(pktCh.address)
@@ -139,7 +136,7 @@ function Network:info()
                 network:send_unicast(id, msg)
                 self.connects[id] = pktCh.address
                 if self.userid < id then
-                    --id小的先发歌单
+                    -- id小的先发歌单
                     audio:sendUpdatePlayList()
                 end
             end
@@ -147,7 +144,7 @@ function Network:info()
             uiManager:refresh("playerlistUI")
         elseif pktCh.type == "disconnectPeer" then
             print("[getdisconnectPeer]---", pktCh.address)
-            --删除这个角色 如果有角色的话
+            -- 删除这个角色 如果有角色的话
             local id = self:getPeersId(pktCh.address)
             if id then
                 playerManager:removeRemotePlayer(id)
@@ -161,18 +158,18 @@ function Network:info()
     end
 end
 
---回包回调
+-- 回包回调
 function Network:handleMessage(message, address)
     if message.type == "playlist_update" then
-        --播放列表更新
+        -- 播放列表更新
         for k, v in pairs(message.playlist) do
             print(v.name)
         end
         audio.playlist = message.playlist
-        --audio.currentIndex = message.index
+        -- audio.currentIndex = message.index
         uiManager:refresh("playlistUI")
     elseif message.type == "updatePlayStatus" then
-        --播放状态更新
+        -- 播放状态更新
         audio:seek(message.position)
         if message.isPlaying then
             audio:resume()
@@ -181,29 +178,29 @@ function Network:handleMessage(message, address)
         end
         audio.currentIndex = message.index
     elseif message.type == "tonext" then
-        --通知下一首 客通知主->要准备下一首的资源
+        -- 通知下一首 客通知主->要准备下一首的资源
 
         audio:receiveToNext(message.index)
     elseif message.type == "requestFile" then
-        --缺少资源请求发送
+        -- 缺少资源请求发送
         local userid = self:getPeersId(address)
         if message.needFile then
             audio:fileRequestAllow(userid, message.index)
         end
     elseif message.type == "playermove" then
-        --收到远程玩家移动信息
+        -- 收到远程玩家移动信息
         local remotePlayer = playerManager.remotePlayers[message.userid]
         if remotePlayer then
             remotePlayer:gotoPos(message.x, message.y)
         end
     elseif message.type == "playerspeek" then
-        --收到远程玩家说话信息
+        -- 收到远程玩家说话信息
         local remotePlayer = playerManager.remotePlayers[message.userid]
         if remotePlayer then
             remotePlayer:speak(message.speakInfo)
         end
     elseif message.type == "playerConnectInfo" then
-        --收到玩家生成信息
+        -- 收到玩家生成信息
         playerManager:addRemotePlayer(message.userid, message.name, message.x, message.y)
     else
         print("## no handle by: " .. message.type)

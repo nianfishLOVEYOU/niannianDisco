@@ -1,6 +1,7 @@
 nianTool = {}
-timer= require "src.common.timer"
+timer = require "src.common.timer"
 animation = require "src.animation"
+commonData = require "src.common.commonData"
 
 function nianTool:dump(tbl, indent)
     indent = indent or 0
@@ -57,28 +58,8 @@ function setBody(x, y, w, h, anchorX, anchorY, bodyInfo)
     return body, fixture, shape
 end
 
-function DebugPrint()
-    love.graphics.setColor(1, 0, 0)
 
-    -- 计算 FPS
-    local fps = love.timer.getFPS()
-    -- 在屏幕左上角显示 FPS
-    love.graphics.print("FPS: " .. fps, 10, 10)
-
-    love.graphics.setColor(1, 1, 1)
-
-    if love.mouse.isDown(2) then
-        local x, y = love.mouse.getPosition()
-        local wx,wy = cam:toWorld(x,y)
-        love.graphics.setColor(1, 0, 0)
-        love.graphics.circle("fill", x, y,3)
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.print("mouse screen: " .. x ..","..y, x+10, y-10)
-        love.graphics.print("mouse world: " .. wx ..","..wy, x+10, y)
-    end
-end
-
-function printCol()
+local function printCol()
     love.graphics.setColor(0, 1, 0) -- 白色轮廓
     love.graphics.setLineWidth(2)
 
@@ -104,7 +85,7 @@ function printCol()
     end
 end
 
-function debugPrintUi()
+local function debugPrintUi()
     love.graphics.setLineWidth(2)
 
     for _, widget in pairs(Glove.widgets) do
@@ -123,6 +104,44 @@ function debugPrintUi()
         love.graphics.rectangle("line", x, y, w, h)
     end
 end
+
+-- debug 输出
+function DebugPrint()
+    -- 显示碰撞体积
+    if commonData.openMapEditorMode then
+        cam:draw(printCol)
+    end
+
+    --uidebug体积
+    debugPrintUi()
+
+    love.graphics.setColor(1, 1, 0)
+    -- 计算 FPS
+    local fps = love.timer.getFPS()
+    -- 在屏幕左上角显示 FPS
+    love.graphics.print("FPS: " .. fps, 10, 10)
+    love.graphics.print("按下b 编辑地图", 10, 20)
+    love.graphics.print("是否开启networklocalmod " .. tostring(commonData.openlocalMod), 10, 30)
+    love.graphics.setColor(1, 1, 1)
+
+    --显示鼠标位置
+    if love.mouse.isDown(2) then
+        local x, y = love.mouse.getPosition()
+        local wx, wy = cam:toWorld(x, y)
+        love.graphics.setColor(1, 0, 0)
+        love.graphics.circle("fill", x, y, 3)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.print("mouse screen: " .. x .. "," .. y, x + 10, y - 10)
+        love.graphics.print("mouse world: " .. wx .. "," .. wy, x + 10, y)
+    end
+
+    -- 显示深度图
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * 0.2, 0, 0,
+        0.2, 0.2)
+
+end
+
 
 -- 打印完整的调用堆栈（模仿报错格式）
 function printStackTrace(message)
@@ -317,3 +336,7 @@ function initStringExtensions()
 end
 
 initStringExtensions()
+
+-- 使用io读取文件的方法
+-- local dir = love.filesystem.getSaveDirectory():gsub("/", "\\")
+-- local f = io.open(dir .. "\\" .. cmd.path, "rb")
