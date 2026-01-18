@@ -44,9 +44,23 @@ local function getPublicAddr()
 end
 
 local myAddr
-local peers = {} -- {id={ip,port,enetPeer}}
+local peers = {} -- {id={ip,port,address,enetPeer}}
 local sigPeer --令信服务器peer
 local host  --enet端口服务
+
+-- 传输到主线程的，需要避开无法序列化的字段
+local function getOutPeers()
+    local outPeers={}
+    for id, peer in pairs(peers) do
+        outPeers[id]={
+            ip = peer.ip,
+            port = peer.port,
+            address = peer.address
+        }
+    end
+    return outPeers
+end
+
 ------------------区分本地测试和正式服务---------------------
 if localmod then
 
@@ -58,7 +72,7 @@ if localmod then
         port = nil, -- 稍后由 ENet 主机获取
         remotePort = nil -- 远程的
     }
-    local a5002 = false
+    local a5002 = false --是二号机
     local err
     -- 3️⃣ 创建 ENet 主机（绑定到本机 127.0.0.1，端口交给系统随机分配）
     host, err = enet.host_create("127.0.0.1:5001", 32, 2, 0, 0) -- 0 表示让系统挑选空闲端口
@@ -75,16 +89,16 @@ if localmod then
     print(string.format("ENet 本机监听：%s:%d", myAddr.ip, myAddr.port))
 
     --假填入另一个玩家ip
-    table.insert(peers, {
+    peers[a5002 and 1 or 2]={
         ip = "127.0.0.1",
         port = myAddr.remotePort,
         address = "127.0.0.1" .. ":" .. myAddr.remotePort
-    })
-
+    }
     -- 假发送获取到连接
     infoNetworkCh:push{
         type = "getPeers",
-        peers = peers
+        peers = getOutPeers(),
+        userid= a5002 and 2 or 1
     }
 else
     ---------------------------------
@@ -129,6 +143,7 @@ else
     sigPeer:send(pkt) -- 简单文本协议
     print("signaling :", SIGNAL_HOST .. ":" .. SIGNAL_PORT)
 end
+
 
 ------------ 如果连接失败就直接结束线程 ---------
 
@@ -377,7 +392,7 @@ while true do
             elseif msg.type == "signaling" then -- 令信返回
                 -- 假设返回 "id:ip:port"
                 local list = {}
-                local userid
+                local userid --自己的id
                 local peersnum = 0
                 for id, ip, port in msg.list:gmatch("(%d+):([^:]+):(%d+)") do
                     -- print("#peers: " .. id .. " -- " .. ip .. ":" .. port)
@@ -388,7 +403,8 @@ while true do
                     if ip ~= myAddr.ip or tonumber(port) ~= myAddr.port then
                         peers[tonumber(id)] = {
                             ip = ip,
-                            port = tonumber(port)
+                            port = tonumber(port),
+                            address = ip .. ":" .. port
                         }
                     elseif ip == myAddr.ip and tonumber(port) == myAddr.port then
                         print("self : " .. id .. " -- " .. ip .. ":" .. port)

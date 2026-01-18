@@ -113,7 +113,9 @@ function Network:info()
             -- audio:play(0)
             self.musicTransfering = self.musicTransfering - 1
         elseif pktCh.type == "getPeers" then
+            print("getPeers",pktCh.peers[1] or pktCh.peers[2])
             self.peers = pktCh.peers
+            self.userid = pktCh.userid
             self.enterRoom = true
             if (statusManager.status == "menu") then
                 eventManager:emit("connectSeccess")
