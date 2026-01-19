@@ -130,8 +130,6 @@ local function keypressed(k)
     if k == "f" then 
         fileManager:openMusicDirectory()
     end
-    -- 拖拽歌曲添加播放列表
-    -- 暂停，下一首，功能
 end
 -- debug输入方案
 keybordManager:keypressed_regester(function(key)
