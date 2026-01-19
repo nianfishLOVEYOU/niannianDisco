@@ -1,7 +1,7 @@
 -- slider
 
 local image = require "src.common.aUIImage"
-local widget = require "glove.widgets.widget"
+local widget = require "src.glove.widgets.widget"
 
 local g = love.graphics
 local Slider = widget:extend()

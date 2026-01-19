@@ -1,6 +1,6 @@
-local colors = require "glove/colors"
+local colors = require "src.glove.colors"
 local love = require "love"
-local widget = require "glove.widgets.widget"
+local widget = require "src.glove.widgets.widget"
 local image = require "src.common.aUIImage"
 
 local g = love.graphics

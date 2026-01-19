@@ -4,7 +4,7 @@ end
 
 
 local Spacer = require "src.common.aUIImage"
-local widget = require "glove.widgets.widget"
+local widget = require "src.glove.widgets.widget"
 
 local Spacer = widget:extend()
 

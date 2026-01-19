@@ -16,25 +16,12 @@ require "lib.nianMath"
 require "lib.nianTool"
 require "lib.nianDraw"
 
-eventManager = require "src.manager.eventManager"
-mouseManager = require "src.manager.mouseManager"
-keybordManager = require "src.manager.keybordManager"
-systemManager = require "src.manager.systemManager"
-require "glove"
+require "src.manager"
+require "src.glove"
+
 camera= require("lib.gamera")
 network = require "src.network.network"
 audio = require "src.audio"
-fileManager = require "src.manager.fileManager"
-uiManager = require "src.manager.uiManager"
-globleManager = require "src.manager.globleManager"
-resourceManager = require "src.manager.resourceManager"
-
-itemManager = require "src.manager.itemManager"
-playerManager = require "src.manager.playerManager"
--- 全局状态管理
-statusManager = require "src.manager.statusManager"
-shaderManager = require "src.manager.shaderLayerManager"
-
 
 ---修改debug字体
 local ffi = require "ffi"

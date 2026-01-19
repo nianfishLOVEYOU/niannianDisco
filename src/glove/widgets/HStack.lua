@@ -1,5 +1,5 @@
-local fun = require "glove/fun"
-local widget = require "glove.widgets.widget"
+local fun = require "src.glove.fun"
+local widget = require "src.glove.widgets.widget"
 
 --排序方式，顶格，居中，垫底
 local aligtype = {"top", "center","buttom"}

@@ -1,7 +1,7 @@
 --管理ui组件功能
 local love = require "love"
-local colors = require "glove/colors"
-require "glove/string-extensions"
+local colors = require "src.glove.colors"
+require "src.glove.string-extensions"
 require "src.manager.mouseManager"
 
 local focusedWidget = nil

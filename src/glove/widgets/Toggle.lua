@@ -1,4 +1,4 @@
-local widget = require "glove.widgets.widget"
+local widget = require "src.glove.widgets.widget"
 
 local Toggle = widget:extend()
 
