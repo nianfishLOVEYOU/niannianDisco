@@ -131,12 +131,12 @@ Glove = {
 
 
 for _, module in ipairs(utilities) do
-  Glove[module] = require("glove/" .. module)
+  Glove[module] = require("src.glove." .. module)
 end
 
 for _, module in ipairs(widgets) do
   print("init ui " .. module)
-  Glove[module] = require("glove/widgets/" .. module)
+  Glove[module] = require("src.glove.widgets." .. module)
 end
 
 keybordManager:keypressed_regester(function(key)

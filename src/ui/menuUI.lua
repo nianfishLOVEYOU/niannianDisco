@@ -1,5 +1,3 @@
-local colors = require "glove/colors"
-local enet = require "enet"
 local ui = require "src.ui.ui"
 
 local MenuUI = ui:extend()

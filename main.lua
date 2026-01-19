@@ -9,7 +9,7 @@ else
 end
 
 if type(love) == "nil" then
-    love = {} -- 仅在编辑器检查时定义空表，避免未定义提示
+    love = require "love" -- 仅在编辑器检查时定义空表，避免未定义提示
 end
 
 require "lib.nianMath"

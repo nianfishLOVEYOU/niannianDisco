@@ -1,4 +1,4 @@
-local colors = require "glove/colors"
+local colors = require "src.glove.colors"
 local fun = require "glove/fun"
 local love = require "love"
 

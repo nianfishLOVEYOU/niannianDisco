@@ -1,4 +1,4 @@
-local colors = require "glove/colors"
+local colors = require "src.glove.colors"
 local enet = require "enet"
 local ui = require "src.ui.ui"
 

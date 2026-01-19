@@ -1,6 +1,5 @@
 -- ui/playlist.lua
 local image = require "src.common.aUIImage"
-local colors = require "glove/colors"
 local ui = require "src.ui.ui"
 
 local PlaylistUI = ui:extend() -- 子类继承父类
