@@ -6,26 +6,108 @@
         3. 服务器把该客户端加入 peers 表
         4. 服务器把所有已注册的客户端列表以
            {type="signaling", list="id:ip:port|id:ip:port|..."} 广播给每个客户端
---]] -- print(package.path)
+--]]
+-- print(package.path)
 local enet = require "enet"
 local json = require "json"
 local socket = require "socket"
 dofile("/opt/lua/nianTool.lua")
 
 local LISTEN_PORT = 4000 -- 服务器监听端口
-local MAX_PEERS = 64 -- 同时最多接受的客户端数
-local CHANNELS = 1 -- 只用 0 号通道（可靠）
+local MAX_PEERS = 64     -- 同时最多接受的客户端数
+local CHANNELS = 1       -- 只用 0 号通道（可靠）
 
 -- 创建 ENet 主机（绑定本机 UDP 端口）
 local host = assert(enet.host_create("*:" .. LISTEN_PORT, MAX_PEERS, CHANNELS, 0, 0))
 print(string.format("[ENet] 信令服务器已启动，监听 %d 端口", LISTEN_PORT))
 
--- 保存已注册的客户端
+-- 保存已注册的客户端和房间
 -- 结构： peers[id] = {peer = <enet_peer>, ip = "x.x.x.x", port = 12345}
-local rooms ={}
-local addressToRooms ={}
+local rooms = {}
+-- 存储从地址到id，然后用于查找删除id
+local addressToRooms = {}
 --local peers = {}
-local next_id = 1
+
+local function roomAddPeer(code, ip, port)
+    local addr = ip .. ":" .. port
+    local roomPeers --房间成员列表
+    if rooms[code] then
+        roomPeers = rooms[code].peers
+    else
+        rooms[code] = {
+            next_id = 1,
+            peers = {},
+            code = code
+        }
+        roomPeers = rooms[code].peers
+    end
+
+    -- 查找是否之前在房间里面
+    local perpeer, perid
+    for id, rp in pairs(roomPeers) do
+        if rp.addr == addr then
+            perpeer = rp
+            perid = id
+        end
+    end
+
+    if perpeer then
+        perpeer.islive = true
+        print(string.format("[REGISTER BACK] id=%d, %s:%d ,room :%s", perid, ip, port, code))
+    else
+        --设置这个成员信息
+        local id = rooms[code].next_id
+        rooms[code].next_id = id + 1
+        roomPeers[id] = {
+            peer = ev.peer,
+            ip = ip,
+            port = tonumber(port),
+            addr = addr,
+            islive = true
+        }
+        print(string.format("[REGISTER] id=%d, %s:%d ,room :%s", id, ip, port, code))
+    end
+end
+
+local function getRoomPeers(code)
+    local roomPeers --房间成员列表
+    if rooms[code] then
+        roomPeers = rooms[code].peers
+    else
+        rooms[code] = {
+            next_id = 1,
+            peers = {},
+            code = code
+        }
+        roomPeers = rooms[code].peers
+    end
+    return roomPeers
+end
+
+local function reportRoomPeers(code)
+    ----------------------------------------------------------------
+    -- 3️⃣ 生成并广播当前 Peer 列表（type = "signaling"）
+    ----------------------------------------------------------------
+    local roomPeers = getRoomPeers(code)
+    local list_parts = {}
+    for pid, rp in pairs(roomPeers) do
+        if rp.islive then
+            table.insert(list_parts, string.format("%d:%s:%d", pid, rp.ip, rp.port))
+        end
+    end
+    local list_str = table.concat(list_parts, "|")
+    local broadcast = {
+        type = "signaling",
+        list = list_str
+    }
+    local payload = json.encode(broadcast)
+
+    -- 向所有已注册的客户端发送（可靠发送，使用通道 0）
+    for _, pinfo in pairs(roomPeers) do
+        pinfo.peer:send(payload, 0) -- 0 为通道号
+    end
+    print("[BROADCAST] 已发送 peer 列表给全部客户端")
+end
 
 while true do
     -- 非阻塞轮询，0 表示立即返回
@@ -58,68 +140,30 @@ while true do
                 -- 处理 signalingRegister 消息
                 ----------------------------------------------------------------
                 if msg.type == "signalingRegister" then
-                    local code =msg.code
-                    
-
+                    local code = msg.code
 
                     local ip, port = msg.addr:match("([^:]+):(%d+)")
                     if not ip then
                         print("[WARN] 注册数据格式错误:", msg.addr)
-                    elseif  type(code)~="string" or string.len(code)~=4 then 
+                    elseif type(code) ~= "string" or string.len(code) ~= 4 then
                         print("[WARN] 房间code错误:", msg.addr)
                     else
-                        local peers
-                        if rooms[code] then
-                            peers=rooms[code].peers
-                        else
-                            rooms[code]={
-                                next_id=1,
-                                peers={},
-                                code=code
-                            }
-                            peers=rooms[code].peers
-                        end
+                        --房间成员列表
+                        --如果没有这个房间就添加房间，添加成员
 
-                        local id = rooms[code].next_id
-                        rooms[code].next_id = id + 1
-                        peers[id] = {
-                            peer = ev.peer,
-                            ip = ip,
-                            port = tonumber(port)
-                        }
-                        print(string.format("[REGISTER] id=%d, %s:%d ,room :%s", id, ip, port,code))
-                        
-                        --加入索引
-                        local addr=tostring(ev.peer)
+                        roomAddPeer(code, ip, port)
+
+                        --加入索引  --忘记这里干嘛的了
+                        local addr = tostring(ev.peer)
                         if not addressToRooms[addr] then
-                            addressToRooms[addr]={
+                            addressToRooms[addr] = {
                                 code = code,
                                 id = id
                             }
                         end
-                         
 
-                        ----------------------------------------------------------------
-                        -- 3️⃣ 生成并广播当前 Peer 列表（type = "signaling"）
-                        ----------------------------------------------------------------
-                        local list_parts = {}
-                        for pid, pinfo in pairs(peers) do
-                            table.insert(list_parts, string.format("%d:%s:%d", pid, pinfo.ip, pinfo.port))
-                        end
-                        local list_str = table.concat(list_parts, "|")
-                        local broadcast = {
-                            type = "signaling",
-                            list = list_str
-                        }
-                        local payload = json.encode(broadcast)
-
-                        -- 向所有已注册的客户端发送（可靠发送，使用通道 0）
-                        for _, pinfo in pairs(peers) do
-                            pinfo.peer:send(payload, 0) -- 0 为通道号
-                        end
-                        print("[BROADCAST] 已发送 peer 列表给全部客户端")
+                        reportRoomPeers(code)
                     end
-
                 else
                     print("[INFO] 收到未知类型消息:", msg.type or "nil")
                 end
@@ -131,41 +175,22 @@ while true do
         elseif ev.type == "disconnect" then
             -- 找到对应的 id 并从 peers 表中移除
             local removed_id = nil
-            local peers=nil
-            local addr =tostring(ev.peer)
-
-            if addressToRooms[addr]then
-                local code=addressToRooms[addr].code
-                peers =rooms[code].peers
-                removed_id =addressToRooms[addr].id
+            local peers = nil
+            local addr = tostring(ev.peer)
+            local code
+            if addressToRooms[addr] then
+                code = addressToRooms[addr].code
+                peers = rooms[code].peers
+                removed_id = addressToRooms[addr].id
             else
                 print("[WARN] disconnect unknow address:", addr)
             end
-            
+
+            -- 移除peer
             if removed_id then
-
-                peers[removed_id] = nil
+                peers[removed_id].islive = false
+                reportRoomPeers(code)
                 print(string.format("[DISCONNECT] id=%d 已移除", removed_id))
-
-                ----------------------------------------------------------------
-                -- 3️⃣ 生成并广播当前 Peer 列表（type = "signaling"）
-                ----------------------------------------------------------------
-                local list_parts = {}
-                for pid, pinfo in pairs(peers) do
-                    table.insert(list_parts, string.format("%d:%s:%d", pid, pinfo.ip, pinfo.port))
-                end
-                local list_str = table.concat(list_parts, "|")
-                local broadcast = {
-                    type = "signaling",
-                    list = list_str
-                }
-                local payload = json.encode(broadcast)
-
-                -- 向所有已注册的客户端发送（可靠发送，使用通道 0）
-                for _, pinfo in pairs(peers) do
-                    pinfo.peer:send(payload, 0) -- 0 为通道号
-                end
-
             else
                 print("[DISCONNECT] 未登记的 peer 断开")
             end
