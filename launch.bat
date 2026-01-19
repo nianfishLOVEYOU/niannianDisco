@@ -19,5 +19,5 @@ if exist "%LOVE_PATH%" (
     pause
     exit /b 1
 )
-
+   
 pause
