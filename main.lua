@@ -127,6 +127,9 @@ local function keypressed(k)
         statusManager:statusChange("editor")
         closeMap()
     end
+    if k == "f" then 
+        fileManager:openMusicDirectory()
+    end
     -- 拖拽歌曲添加播放列表
     -- 暂停，下一首，功能
 end

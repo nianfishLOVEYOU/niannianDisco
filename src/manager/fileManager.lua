@@ -8,7 +8,7 @@ systemManager:init_regester(function()
 end)
 
 systemManager:quit_regester(function()
-   -- FileManager:clearTempFile()
+    -- FileManager:clearTempFile()
 end)
 
 -- path 为完整路径
@@ -46,7 +46,7 @@ function FileManager:getFilePathByName(name)
     local path = commonData.tmpPath .. name
     local info = love.filesystem.getInfo(path)
     if info then
-        return path,info
+        return path, info
     end
     return nil -- 直接返回字节数
 end
@@ -130,11 +130,9 @@ function love.filedropped(file)
     local name = fullname:match("([^/\\]+)$") or fullname -- 从路径里提取文件名字
     local extend = FileManager.getExtension(name)
 
-    eventManager:emit("fileDrop",file,name,fullname,extend)
+    eventManager:emit("fileDrop", file, name, fullname, extend)
     print("filedropped")
 end
-
-
 
 -- 递归遍历 folder（相对路径）下的所有文件和文件夹,{type,name,filepath,files}
 function FileManager:listAllFiles(folder)
@@ -144,11 +142,11 @@ function FileManager:listAllFiles(folder)
     for _, name in ipairs(items) do
         local fullPath = folder .. "/" .. name
         if love.filesystem.isFile(fullPath) then
-            table.insert(files, {type ="file",name = name, filepath =fullPath}) -- 记录文件路径
-        elseif love.filesystem.isDirectory(fullPath) then --文件夹
+            table.insert(files, { type = "file", name = name, filepath = fullPath }) -- 记录文件路径
+        elseif love.filesystem.isDirectory(fullPath) then                       --文件夹
             -- 递归子文件夹
             local sub = listAllFiles(fullPath)
-            table.insert(files, {type ="folder",name = name, files =sub} )
+            table.insert(files, { type = "folder", name = name, files = sub })
             for _, p in ipairs(sub) do
             end
         end
@@ -215,6 +213,21 @@ end
 
 function FileManager:clearTempFile()
     self:deleteAllFiles("tmp")
+end
+
+function FileManager:openMusicDirectory()
+    -- 获取 Love2D 自带的存档目录
+    local saveDir = love.filesystem.getSaveDirectory()..commonData.musicPath
+    print("游戏存档目录：" .. saveDir)
+
+    -- 打开这个目录
+    if love.system.getOS() == "Windows" then
+        os.execute('explorer "' .. saveDir .. '"')
+    elseif love.system.getOS() == "OS X" then
+        os.execute('open "' .. saveDir .. '"')
+    elseif love.system.getOS() == "Linux" then
+        os.execute('xdg-open "' .. saveDir .. '"')
+    end
 end
 
 return FileManager
