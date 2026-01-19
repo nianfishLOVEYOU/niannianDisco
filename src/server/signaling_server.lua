@@ -28,7 +28,7 @@ local rooms = {}
 local addressToRooms = {}
 --local peers = {}
 
-local function roomAddPeer(code, ip, port)
+local function roomAddPeer(code, ip, port,peer)
     local addr = ip .. ":" .. port
     local roomPeers --房间成员列表
     if rooms[code] then
@@ -52,6 +52,7 @@ local function roomAddPeer(code, ip, port)
     end
 
     if perpeer then
+        perpeer = peer
         perpeer.islive = true
         print(string.format("[REGISTER BACK] id=%d, %s:%d ,room :%s", perid, ip, port, code))
     else
@@ -59,7 +60,7 @@ local function roomAddPeer(code, ip, port)
         local id = rooms[code].next_id
         rooms[code].next_id = id + 1
         roomPeers[id] = {
-            peer = ev.peer,
+            peer = peer,
             ip = ip,
             port = tonumber(port),
             addr = addr,
@@ -151,7 +152,7 @@ while true do
                         --房间成员列表
                         --如果没有这个房间就添加房间，添加成员
 
-                        roomAddPeer(code, ip, port)
+                        roomAddPeer(code, ip, port,ev.peer)
 
                         --加入索引  --忘记这里干嘛的了
                         local addr = tostring(ev.peer)
