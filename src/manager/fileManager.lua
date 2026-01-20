@@ -71,7 +71,7 @@ function FileManager:getFilename(path)
 end
 
 -- 获得路径
-function FileManager.getExtension(path)
+function FileManager:getExtension(path)
     -- 1. 先去掉查询字符串和锚点（?xxx#xxx）
     local clean = path:gsub("[?#].*$", "")
 
@@ -105,7 +105,6 @@ end
 function FileManager:readTable(tableName)
     local path = "info/" .. tableName .. ".json"
     -- 保存到本地的路径
-    -- print("fileManager:readTable :"..srcPath)
     local fileinfo = love.filesystem.getInfo(path)
     if not fileinfo then
         print("! fileManager:readTable nil !: " .. path)
@@ -119,7 +118,6 @@ function FileManager:readTable(tableName)
         return result
     end
 
-    -- print("! fileManager:readTable fail !: "..srcPath)
     return nil
 end
 
@@ -128,12 +126,13 @@ function love.filedropped(file)
     -- 或者是文件夹
     local fullname = file:getFilename()
     local name = fullname:match("([^/\\]+)$") or fullname -- 从路径里提取文件名字
-    local extend = FileManager.getExtension(name)
+    local extend = FileManager:getExtension(name)
 
     eventManager:emit("fileDrop", file, name, fullname, extend)
-    print("filedropped")
+    print("【filedropped】")
 end
 
+-- type = "file" or "folder"
 -- 递归遍历 folder（相对路径）下的所有文件和文件夹,{type,name,filepath,files}
 function FileManager:listAllFiles(folder)
     local files = {}
@@ -142,11 +141,11 @@ function FileManager:listAllFiles(folder)
     for _, name in ipairs(items) do
         local fullPath = folder .. "/" .. name
         if love.filesystem.isFile(fullPath) then
-            table.insert(files, { type = "file", name = name, filepath = fullPath }) -- 记录文件路径
-        elseif love.filesystem.isDirectory(fullPath) then                       --文件夹
+            table.insert(files, { type = "file", name = name, path = fullPath }) -- 记录文件路径
+        elseif love.filesystem.isDirectory(fullPath) then                        --文件夹
             -- 递归子文件夹
-            local sub = listAllFiles(fullPath)
-            table.insert(files, { type = "folder", name = name, files = sub })
+            local sub = FileManager:listAllFiles(fullPath)
+            table.insert(files, { type = "folder", name = name, path = fullPath, files = sub })
             for _, p in ipairs(sub) do
             end
         end
@@ -155,69 +154,36 @@ function FileManager:listAllFiles(folder)
 end
 
 -- 删除 folder（相对路径）下的所有文件（包括子文件夹里的文件），并可选删除空文件夹
-function FileManager:deleteAllFiles(folder, removeEmptyDirs)
-    local allFiles = listAllFiles(folder)
+function FileManager:deleteAllFiles(folder)
+    local allFiles = FileManager:listAllFiles(folder)
 
-    -- 先删除文件
-    for _, path in ipairs(allFiles) do
-        local ok, err = love.filesystem.remove(path)
-        if not ok then
-            print("[WARN] 删除文件失败:", path, err)
-        else
-            print("[INFO] 已删除文件:", path)
-        end
-    end
-
-    -- 可选：删除空的子文件夹（从最深层向根层遍历）
-    if removeEmptyDirs then
-        local function removeEmpty(dir)
-            local items = love.filesystem.getDirectoryItems(dir)
-            for _, name in ipairs(items) do
-                local sub = dir .. "/" .. name
-                if love.filesystem.isDirectory(sub) then
-                    removeEmpty(sub) -- 递归先处理子目录
-                end
-            end
-            -- 子目录已处理完，若此目录已空则删除
-            local remaining = love.filesystem.getDirectoryItems(dir)
-            if #remaining == 0 then
-                local ok, err = love.filesystem.remove(dir)
-                if ok then
-                    print("[INFO] 已删除空文件夹:", dir)
+    local function deleteFiles (files)
+        for _, fileInfo in ipairs(files) do
+            if fileInfo.type == "file" then
+                local ok, err = love.filesystem.remove(fileInfo.path)
+                if not ok then
+                    print("[WARN] 删除文件失败:", path, err)
                 else
-                    print("[WARN] 删除文件夹失败:", dir, err)
+                    print("[INFO] 已删除文件:", path)
                 end
+            elseif fileInfo.type == "folder" then
+                deleteFiles(fileInfo.files)
             end
-        end
-        removeEmpty(folder)
-    end
-end
 
--- 打开文件夹
-function FileManager:open_folder(path)
-    -- 根据运行平台选择对应命令
-    local cmd
-    if package.config:sub(1, 1) == "\\" then -- Windows
-        cmd = string.format('explorer "%s"', path)
-    else
-        -- 先尝试 macOS 的 open，若失败再用 xdg-open（Linux）
-        local is_macos = io.popen('uname'):read("*l") == "Darwin"
-        if is_macos then
-            cmd = string.format('open "%s"', path)
-        else
-            cmd = string.format('xdg-open "%s"', path)
         end
     end
-    os.execute(cmd)
+
+    deleteFiles(allFiles)
 end
 
 function FileManager:clearTempFile()
     self:deleteAllFiles("tmp")
 end
 
-function FileManager:openMusicDirectory()
+--打开音乐文件夹
+function FileManager.openMusicDirectory()
     -- 获取 Love2D 自带的存档目录
-    local saveDir = love.filesystem.getSaveDirectory()..commonData.musicPath
+    local saveDir = love.filesystem.getSaveDirectory() .. commonData.musicPath
     print("游戏存档目录：" .. saveDir)
 
     -- 打开这个目录
@@ -229,5 +195,6 @@ function FileManager:openMusicDirectory()
         os.execute('xdg-open "' .. saveDir .. '"')
     end
 end
+
 
 return FileManager

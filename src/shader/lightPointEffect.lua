@@ -138,7 +138,7 @@ function lightPointEffect.updateShaderLights()
     -- 填充光源数组（最多lightMaxCount个）
     for i = 1, lightMaxCount do
         local light = pointLights[i] or { actived = false }
-        local x, y = cam:toScreen(light.x or 0, light.y or 0)
+        local x, y = cameraManager.cam:toScreen(light.x or 0, light.y or 0)
         -- 批量发送光源数据到着色器
         shadereffect:setUniform(string.format("lights[%d].position", i - 1), { x, y })
         shadereffect:setUniform(string.format("lights[%d].color", i - 1), { light.r or 0, light.g or 0, light.b or 0 })

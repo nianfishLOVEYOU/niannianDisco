@@ -1,3 +1,4 @@
+require "src.manager.fontSet"
 
 eventManager = require "src.manager.eventManager"
 mouseManager = require "src.manager.mouseManager"
@@ -14,3 +15,5 @@ playerManager = require "src.manager.playerManager"
 -- 全局状态管理
 statusManager = require "src.manager.statusManager"
 shaderManager = require "src.manager.shaderLayerManager"
+bodyManager = require "src.manager.bodyManager"
+cameraManager=require "src.manager.cameraManager"

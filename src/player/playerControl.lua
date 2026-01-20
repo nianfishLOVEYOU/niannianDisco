@@ -46,7 +46,7 @@ function playerControl:mousePressed(x, y, button)
         if (y > love.graphics.getHeight() - 100) then
             return
         end
-        x, y = cam:toWorld(x, y)
+        x, y = cameraManager.cam:toWorld(x, y)
         playerManager.player:gotoPos(x, y)
         local msg = {
             userid=network.userid,

@@ -22,9 +22,9 @@ function Game:update(dt)
     if playerManager.player then
         local playerx=playerManager.player.x+playerManager.player.w/2
         local playery =playerManager.player.y+playerManager.player.h/2
-        local x,y =cam:getPosition()
+        local x,y =cameraManager.cam:getPosition()
         local t=0.2
-        cam:setPosition(lerp(x,playerx,t),lerp(y,playery,t) )
+        cameraManager.cam:setPosition(lerp(x,playerx,t),lerp(y,playery,t) )
     end
 
     --设置地图
