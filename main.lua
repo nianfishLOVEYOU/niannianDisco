@@ -12,10 +12,7 @@ if type(love) == "nil" then
     love = {} -- 仅在编辑器检查时定义空表，避免未定义提示
 end
 
-require "lib.nianMath"
 require "lib.nianTool"
-require "lib.nianDraw"
-
 require "src.manager"
 require "src.glove"
 
@@ -34,41 +31,6 @@ ffi.C.SetConsoleOutputCP(65001) -- 936 = GBK  65001 =utf-8
 myFont = love.graphics.newFont("fonts/msyh.ttc", 12)
 love.graphics.setFont(myFont)
 
----设置摄像机
-pixSize = 4
--- 参数：left, top, width, height（世界边界）
-cam =  camera.new(-2000, -2000, 4000, 4000) -- 这里把整个游戏地图设为 2000×2000
--- 若想让摄像机只占屏幕的一部分（比如 UI 区域），可以限制窗口：
-cam:setWindow(0, 0, 600, 450) -- 只在左上 800×600 区域绘制
-cam:setScale(0.7)
--- 物理设置
-world = love.physics.newWorld(0, 0, true) -- x重力, y重力, 是否允许休眠
-
--- 创建离屏画布，尺寸与窗口相同
-canvas = love.graphics.newCanvas(love.graphics.getWidth(), love.graphics.getHeight())
--- 感知
-local function beginContact(a, b, coll)
-    local ua, ub = a:getUserData(), b:getUserData()
-    if ua and ua.isSensor then
-        ua:onEnter(b)
-    end
-    if ub and ub.isSensor then
-        ub:onEnter(a)
-    end
-end
-
-local function endContact(a, b, coll)
-    local ua, ub = a:getUserData(), b:getUserData()
-    if ua and ua.isSensor then
-        ua:onLeave(b)
-    end
-    if ub and ub.isSensor then
-        ub:onLeave(a)
-    end
-end
-
-world:setCallbacks(beginContact, endContact)
-
 local function loadMap()
     love.keyboard.setTextInput(true, 50, 50, 400, 30) 
     local MapLoader = require "src.map.mapLoader"
@@ -79,7 +41,7 @@ local function loadMap()
         for i, v in ipairs(map.items) do
             itemManager:addItem(v)
         end
-        cam:setPosition(map.startPoint.x, map.startPoint.y)
+        cameraManager.cam:setPosition(map.startPoint.x, map.startPoint.y)
     end
 end
 
@@ -108,9 +70,24 @@ function love.update(dt)
     statusManager:update(dt)
     animation:update(dt)
     timer:update(dt)
+    --debug检测
+    nianDebug.DebugUpdate(dt)
     -- 使用时发送参数
     local mx, my = love.mouse.getPosition()
 end
+
+
+-- 方法2：监控窗口焦点事件，避免在里面做耗时操作
+function love.focus(focus)
+    if focus then
+        print("窗口获得焦点")
+        -- 仅做轻量操作，比如恢复音效，不要加载大量资源
+    else
+        print("窗口失去焦点")
+        -- 仅做轻量操作，比如暂停音效，不要销毁/重建资源
+    end
+end
+
 
 local function keypressed(k)
     if k == "b" then -- B 键 → 广播
@@ -140,21 +117,21 @@ end
 
 -- 无画布场景绘制
 local function drawNoCanvasScene()
-    cam:draw(camDraw) -- 所有绘制都在摄像机坐标系下完成
+    cameraManager.cam:draw(camDraw) -- 所有绘制都在摄像机坐标系下完成
 end
 
 function love.draw()
     if commonData.openMapEditorMode then
-        cam:draw(camDepth)
-        cam:draw(camDraw)
+        cameraManager.cam:draw(camDepth)
+        cameraManager.cam:draw(camDraw)
         systemManager:draw()
         -- debug
-        DebugPrint()
+        nianDebug.DebugPrint()
         return
     end
 
     -- 相机深度绘制
-    cam:draw(camDepth)
+    cameraManager.cam:draw(camDepth)
 
     -- 使用Shader管理器渲染场景
     shaderManager:render(drawNoCanvasScene)
@@ -166,7 +143,7 @@ function love.draw()
     systemManager:draw()
 
     -- debug
-    DebugPrint()
+        nianDebug.DebugPrint()
 end
 
 function love.quit()

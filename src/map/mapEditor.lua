@@ -73,7 +73,7 @@ local function floorToPixSize(x)
 end
 
 function mapEditor:mousepressed(x, y, button)
-    local worldX, worldY = cam:toWorld( x, y )
+    local worldX, worldY = cameraManager.cam:toWorld( x, y )
     print("button",x,y,"world", worldX,worldY)
     local getlayer=-1;
     if button == 1 then -- 左键：选中或新建
@@ -120,13 +120,13 @@ function mapEditor:mousereleased(x, y, button)
 end
 
 function mapEditor:mousemoved(x, y, dx, dy, istouch)
-    local worldX, worldY = cam:toWorld( x, y )
+    local worldX, worldY = cameraManager.cam:toWorld( x, y )
     if mapEditor.selected and love.mouse.isDown(1) then
         local posx=floorToPixSize(worldX+mapEditor.dragOffset.x ) 
         local posy=floorToPixSize(worldY+mapEditor.dragOffset.y)
         mapEditor.selected:setPos(posx,posy)
     elseif love.mouse.isDown(3) then
-        cam:setPosition(cam.x - dx, cam.y - dy)
+        cameraManager.cam:setPosition(cam.x - dx, cam.y - dy)
     end
 end
 
@@ -167,9 +167,9 @@ function mapEditor:keypressed(key)
         MapLoader.save(mapEditor.map, "res/maps/edited.json")
         print("地图已保存到 res/maps/edited.json")
     elseif key == "o" then
-        cam:setScale(cam:getScale()-0.2)
+        cameraManager.cam:setScale(cameraManager.cam:getScale()-0.2)
     elseif key == "p" then
-        cam:setScale(cam:getScale()+0.2)
+        cameraManager.cam:setScale(cameraManager.cam:getScale()+0.2)
 
     elseif key == "delete" then
         if mapEditor.selected then

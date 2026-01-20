@@ -16,7 +16,7 @@ function UiAnchoredImage:draw()
     end
 
     if self.depthByY then
-        local _, sy = cam:toScreen(0, self.y)
+        local _, sy = cameraManager.cam:toScreen(0, self.y)
         self.depth = sy / love.graphics.getHeight()
         self.depth = self.depth > 1 and 1 or self.depth
         self.depth = self.depth < 0 and 0 or self.depth
