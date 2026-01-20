@@ -38,7 +38,7 @@ function uiManager:addUI(name,ui,options)
         local instance={name =name ,ui= ui,options=options }
         table.insert(self.uiTable,instance)
         ui.z=#self.uiTable
-        print("add ui ",name)
+        print("[add ui] ",name)
     else
         print("!  ui is have !",name)
         --replaceUI(name,ui)

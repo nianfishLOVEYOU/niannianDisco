@@ -63,20 +63,23 @@ end
 function PlaylistUI:getvstack()
     local title = Glove.HStack:new({ Glove.Text:new("播放列表:") })
     title:setName("title") 
+    local title2 = Glove.Text:new(">拖拽音乐.mp3文件加入歌单<") 
+    title2.color = {1,0,0}
+    title2:setSize(0,20)
 
     local listVstack = Glove.VStack:new({},10)
     for i, v in ipairs(audio.playlist) do
-        local iswaitstr= audio.stuck and "["..audio.downloadProgress.."%]" or "[√]"
+        local iswaitstr= audio.stuck and "[ ↓ing "..audio.downloadProgress.."%]" or "[√]"
         local musicInfo = i == audio.currentIndex and "[播放]" ..iswaitstr or ""
         local nameText = Glove.Text:new(musicInfo .. v.name)
-        nameText:setSize(100,20)
+        nameText:setSize(160,20)
         local hstack = Glove.HStack:new({ nameText })
         hstack:setName(v.name)
         listVstack:addChild(hstack)
     end
     listVstack:layout()
 
-    local vstack = Glove.VStack:new({title,listVstack}, 10)
+    local vstack = Glove.VStack:new({title,title2,listVstack}, 10)
     vstack:setName( "playerlistui vstack")
     vstack:setPos(self.posx,self.posy,self.z)
     return vstack
@@ -97,7 +100,7 @@ function PlaylistUI:draw()
     love.graphics.setScissor() -- 关闭剪裁
 
     -- 拖拽区域图片
-    self.inputImage:draw()
+    --self.inputImage:draw()
 end
 
 function PlaylistUI:wheelmoved(x, y)

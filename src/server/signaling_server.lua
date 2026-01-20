@@ -123,7 +123,6 @@ while true do
             local ip = ev.host or ev.ip or ev.address
             local port = ev.port or ev.remote_port
             print("peer:", ip, port)
-            -- nianTool:dump(ev.peer)
             print("[CONNECT] 来自 " .. tostring(ev.peer))
 
             -- 这里不立即分配 id，等收到注册消息后再加入 peers

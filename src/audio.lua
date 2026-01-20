@@ -14,7 +14,6 @@ local Audio = {
 }
 
 function Audio:init()
-    self.playlist = globleManager:getGameData("playlist") or {}
 end
 
 function Audio:savePlaylist()
@@ -286,7 +285,7 @@ function Audio:addPlayMusic(path, duration, name)
     }
     table.insert(self.playlist, stack)
     self:sendUpdatePlayList()
-
+    self:savePlaylist()
     uiManager:refresh("playlistUI")
 end
 

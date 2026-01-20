@@ -4,6 +4,8 @@ local ui = require "src.ui.ui"
 local PlayerUI = ui:extend()
 
 function PlayerUI:init()
+    audio.playlist = globleManager:getGameData("playlist") or {}
+    print(1111)
     self:refresh()
 end
 
@@ -66,6 +68,8 @@ local list = function()
 end
 
 function PlayerUI:getvstack()
+    
+
     local width, height = love.graphics.getDimensions()
     ------playbutton------
     local playimg = audio.isPlaying and "res/image/ui/resume.png" or "res/image/ui/pase.png"

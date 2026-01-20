@@ -53,7 +53,6 @@ function GlobleManager:saveGameData(key, value)
         end
         value = deepCopy(value)
     end
-
     -- 4. 执行保存逻辑
     GlobleManager.allData[key] = value
     local saveResult = fileManager:saveTable("allData", GlobleManager.allData)
@@ -61,7 +60,7 @@ function GlobleManager:saveGameData(key, value)
     -- 5. 校验保存结果（假设saveTable返回布尔值标记成功/失败）
     if saveResult then
         -- 优化打印：数字类型区分整数/小数，更清晰
-        print(string.format("[成功] 保存数据：key=%s，类型=%s，值=%s", key, valueType, value))
+        --print(string.format("[成功] 保存数据：key=%s，类型=%s，值=%s", key, valueType, value))
         return true
     else
         print(string.format("[错误] 保存数据失败：fileManager保存table失败，key=%s", key))
@@ -82,7 +81,7 @@ function GlobleManager:getGameData(key)
     if data ~= nil then
         -- 优化打印：数字类型区分整数/小数
         local dataType = type(data)
-        print(string.format("[成功] 读取数据：key=%s，类型=%s，值=%s", key, dataType, data))
+        --print(string.format("[成功] 读取数据：key=%s，类型=%s，值=%s", key, dataType, data))
         return data
     else
         print(string.format("[提示] 读取数据：key=%s 不存在，返回nil", key))

@@ -13,9 +13,6 @@ network = require "src.network.network"
 audio = require "src.audio"
 
 
-------设置为全局默认字体-----
-myFont = love.graphics.newFont("fonts/heiti.ttf", 12)
-love.graphics.setFont(myFont)
 
 local function loadMap()
     love.keyboard.setTextInput(true, 50, 50, 400, 30)
@@ -132,7 +129,6 @@ end
 function love.quit()
     print("游戏已正常退出")
     --保存当前歌单数据
-    audio:savePlaylist()
     network:closeNetThread()
     systemManager:quit()
 end

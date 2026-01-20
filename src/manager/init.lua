@@ -17,3 +17,5 @@ statusManager = require "src.manager.statusManager"
 shaderManager = require "src.manager.shaderLayerManager"
 bodyManager = require "src.manager.bodyManager"
 cameraManager=require "src.manager.cameraManager"
+
+playlistManager =require "src.manager.playlistManager"

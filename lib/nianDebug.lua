@@ -56,7 +56,7 @@ function nianDebug.DebugPrint()
     end
 
     --uidebug体积
-    debugPrintUi()
+    --debugPrintUi()
 
     love.graphics.setColor(1, 1, 0)
     -- 计算 FPS
@@ -81,8 +81,9 @@ function nianDebug.DebugPrint()
 
     -- 显示深度图
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * 0.2, 0, 0,
-        0.2, 0.2)
+    local deepSize =0.1
+    love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() *deepSize, 0, 0,
+        deepSize, deepSize)
 end
 
 

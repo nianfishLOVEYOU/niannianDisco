@@ -94,11 +94,11 @@ function FileManager:saveTable(tableName, table_in)
     local path = "info/" .. tableName .. ".json"
     -- 保存到本地的路径
     local data = require("lib.json").encode(table_in)
-
     local success, message = love.filesystem.write(path, data)
     if not success then
         error("! save file fail !: " .. message)
     end
+    return success
 end
 
 -- 读取表，避免无法序列化的文件
@@ -140,14 +140,14 @@ function FileManager:listAllFiles(folder)
 
     for _, name in ipairs(items) do
         local fullPath = folder .. "/" .. name
-        if love.filesystem.isFile(fullPath) then
+        local fileInfo = love.filesystem.getInfo(fullPath)
+        if fileInfo and fileInfo.type == "file" then
+            -- 是文件，执行逻辑
             table.insert(files, { type = "file", name = name, path = fullPath }) -- 记录文件路径
-        elseif love.filesystem.isDirectory(fullPath) then                        --文件夹
+        elseif fileInfo and fileInfo.type == "directory" then                    --文件夹
             -- 递归子文件夹
             local sub = FileManager:listAllFiles(fullPath)
             table.insert(files, { type = "folder", name = name, path = fullPath, files = sub })
-            for _, p in ipairs(sub) do
-            end
         end
     end
     return files
@@ -179,10 +179,16 @@ function FileManager:clearTempFile()
     self:deleteAllFiles("tmp")
 end
 
+function FileManager.getExtendName(name)
+    local name = name:match("([^/\\]+)$") or name     -- 从路径里提取文件名字
+    local extend = FileManager:getExtension(name)
+    return extend
+end
+
 --打开音乐文件夹
 function FileManager.openMusicDirectory()
     local saveDir = love.filesystem.getSaveDirectory() .. "/" .. commonData.musicPath
-    saveDir = string.gsub(saveDir, "/", "\\")     -- 强制替换所有正斜杠为反斜杠
+    saveDir = string.gsub(saveDir, "/", "\\") -- 强制替换所有正斜杠为反斜杠
     -- 打开这个目录
     if love.system.getOS() == "Windows" then
         -- 获取 Love2D 自带的存档目录

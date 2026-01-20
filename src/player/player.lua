@@ -2,14 +2,14 @@
 local bodyItem = require "src.item.bodyItem"
 local player = bodyItem:extend()
 
-function player:init( imgPath, bodyInfo)
+function player:init(imgPath, bodyInfo)
     print("--------------local")
     self.type = "player"
 
     self:setImage(imgPath)
-    self:setBody(self.w / 2, 10,0,-0.5,{type="dynamic"})
+    self:setBody(self.w / 2, 10, 0, -0.5, { type = "dynamic" })
 
-    
+
     self.speed = 200
     self.direct = 1
     self.ismove = false
@@ -41,7 +41,6 @@ function player:gotoPos(x, y)
     self.targetY = y
     self.moveToTarget = true
 end
-
 
 -- 尝试移动，若与阻挡物体相撞则阻止该方向的位移
 function player:move(dx, dy)
@@ -98,15 +97,22 @@ function player:Animaiton()
     local h, w = 1, 1
     if self.ismove then
         if self.aniidx then
-            self.animationAttribute.w, self.animationAttribute.h = 0.8, 1.3
-            w, h = 1.3, 0.8
+            self.animationAttribute.w, self.animationAttribute.h = 0.8, 1.2
+            w, h = 1.2, 0.8
         end
         if not self.aniidx then
-            self.animationAttribute.w, self.animationAttribute.h = 1.3, 0.8
-            w, h = 0.8, 1.3
+            self.animationAttribute.w, self.animationAttribute.h = 1.2, 0.8
+            w, h = 0.8, 1.2
         end
     else
-        self.aniidx = true
+        if self.aniidx then
+            --self.animationAttribute.w, self.animationAttribute.h = 1, 1.2
+            w, h = 1, 0.9
+        end
+        if not self.aniidx then
+            --self.animationAttribute.w, self.animationAttribute.h = 1, 0.9
+            w, h = 1, 1.1
+        end
     end
 
     local aniSize = {
@@ -137,9 +143,8 @@ function player:draw()
     love.graphics.rectangle('fill', self.x - self.w / 2, self.y - self.h - 30, self.w, 20)
 
     love.graphics.setColor(1, 1, 1)
-    local fw=myFont:getWidth(self.name)
-    love.graphics.print(self.name, self.x -fw /2, self.y - self.h - 30)
-
+    local fw = myFont:getWidth(self.name)
+    love.graphics.print(self.name, self.x - fw / 2, self.y - self.h - 30)
 end
 
 function player:destroy()

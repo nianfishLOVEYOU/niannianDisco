@@ -14,14 +14,14 @@ else
     print("代码模式")
 end
 
-function nianTool:dump(tbl, indent)
+function nianTool.dump(tbl, indent)
     indent = indent or 0
     local prefix = string.rep("  ", indent)
     for k, v in pairs(tbl) do
         local key = tostring(k)
         if type(v) == "table" then
             print(string.format("%s%s = {", prefix, key))
-            dump(v, indent + 1) -- 递归
+            nianTool.dump(v, indent + 1) -- 递归
             print(string.format("%s}", prefix))
         else
             print(string.format("%s%s = %s", prefix, key, tostring(v)))
@@ -237,8 +237,6 @@ function initStringExtensions()
         -- 使用utf8库安全处理
         start = start or 1
         finish = finish or utf8.len(self)
-        print(finish)
-        print(self,utf8.len(self))
         -- 将字符索引转换为字节索引
         local byteStart = utf8.offset(self, start)
         local byteFinish = utf8.offset(self, finish + 1)
