@@ -81,8 +81,11 @@ function PlaylistUI:getvstack()
 
     local vstack = Glove.VStack:new({title,title2,listVstack}, 10)
     vstack:setName( "playerlistui vstack")
-    vstack:setPos(self.posx,self.posy,self.z)
-    return vstack
+    --滑动条
+    local slidePanel =Glove.SlidePanel:new(vstack)
+    slidePanel:setPos(self.posx,self.posy,self.z)
+    slidePanel:setSize(200,300)
+    return slidePanel
 end
 
 function PlaylistUI:draw()
@@ -91,8 +94,7 @@ function PlaylistUI:draw()
     local scissorY = self.posy
     local scissorW = 200
     local scissorH = 300
-    love.graphics.setColor(0, 0, 0, 0.5)
-    love.graphics.rectangle('fill', scissorX - pass, scissorY - pass, scissorW + pass * 2, scissorH + pass * 2)
+
     love.graphics.setScissor(scissorX, scissorY, scissorW, scissorH) -- 开启剪裁
     -- 裁剪内容
     self:drawStacks()

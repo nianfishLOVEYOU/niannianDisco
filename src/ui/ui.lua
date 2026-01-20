@@ -12,11 +12,13 @@ function UI:refresh()
 
 end
 
+--添加渲染widget
 function UI:addStack(stack)
    
     table.insert(self.stacks, stack)
 end
 
+--清理widget
 function UI:clearStacks()
     if #self.stacks == 0 then return end
     for i = #self.stacks, 1, -1 do

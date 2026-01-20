@@ -8,12 +8,12 @@ local SlidePanel = widget:extend()
 local padding = 3
 
 function SlidePanel:init(content)
-    self.type = "Slider"
+    self.type = "SlidePanel"
 
     self.progressX = 0
     self.progressY = 0
 
-    self.color = { 0, 0, 0.5 }
+    self.color = { 0, 0, 0, 0.5 }
 
     self.w = 60
     self.h = 100
@@ -26,7 +26,7 @@ function SlidePanel:init(content)
     self.lockOffsetY = false
 
     if content then
-        self:setContent(content, 0, 0)
+        self:setContent(content, self.spacingX, self.spacingY)
     end
 end
 
@@ -47,18 +47,18 @@ function SlidePanel:getContent()
 end
 
 function SlidePanel:draw()
-    self.progress = math.max(0, math.min(1, self.progress))
-
     -- 进度条
 
     g.setColor(self.color)
-    g.rectangle("fill", self.x, self.y, self.w * self.progress, self.h)
-
+    g.rectangle("fill", self.x, self.y, self.w, self.h)
+    local cx, cy = self:getContent():getLocalPos()
     local content = self:getContent()
     if not content then return end
-    self:backToCenter()
-    content:draw()
 
+    if not self.isDrag then
+        self:backToCenter()
+    end
+    content:draw()
 end
 
 --可滑动空间
@@ -72,7 +72,6 @@ function SlidePanel:getSlideSpace()
     end
     return 0, 0
 end
-
 
 function SlidePanel:onDragOver(x, y)
     self:dragProgress(x)
@@ -99,33 +98,33 @@ function SlidePanel:onDrag(x, y, dx, dy)
     end
 
     content:setLocalPos(cx + dx, cy + dy)
-    
+
+    --拖拽事件
     local xspace, yspace = self:getSlideSpace()
     self.progressX = content.localX / xspace
     self.progressY = content.localY / yspace
-    
-    self:dragProgress(self.progressX,self.progressY)
+
+    self:dragProgress(self.progressX, self.progressY)
 end
 
 function SlidePanel:backToCenter()
     local dx, dy = 0, 0
     local content = self:getContent()
     if not content then return end
-    local cx, cy = self.content:getLocalPos()
-    local cw, ch = self.content:getSize()
-    local backPower = 0.1
+    local cx, cy = content:getLocalPos()
+    local cw, ch = content:getSize()
+    local backPower =10
     --保持content的拖拽对边边界在panel中
 
     --x轴的边界回归
-    if cx > 0 + self.spacingX then dx = -backPower end --child左边角超过了panel就不许更加右移动了
-    if cx + cw < self.w - self.spacingX then dx = backPower end
+    if cx > (0 + self.spacingX) then dx = dx - backPower end --child左边角超过了panel就不许更加右移动了
+    if (cx + cw) < (self.w - self.spacingX) then dx = dx + backPower end
     --y轴的边界回归
-    if cy > 0 + self.spacingY then dy = -backPower end
-    if cy + ch < self.h - self.spacingY then dy = backPower end
+    if cy > (0 + self.spacingY) then dy = dy - backPower end
+    if (cy + ch) < (self.h - self.spacingY) then dy = dy + backPower end
 
     content:setLocalPos(cx + dx, cy + dy)
 end
-
 
 --设置滑页进度x
 function SlidePanel:setProgressX(p)
@@ -135,7 +134,7 @@ function SlidePanel:setProgressX(p)
         local xspace, yspace = self:getSlideSpace()
         content:setLocalPos(p * xspace, content.localY)
         self.progressX = p
-        self:dragProgress(self.progressX,self.progressY)
+        self:dragProgress(self.progressX, self.progressY)
     end
 end
 
@@ -147,13 +146,12 @@ function SlidePanel:setProgressY(p)
         local xspace, yspace = self:getSlideSpace()
         content:setLocalPos(content.localX, p * yspace)
         self.progressY = p
-        self:dragProgress(self.progressX,self.progressY)
+        self:dragProgress(self.progressX, self.progressY)
     end
 end
 
-function SlidePanel:dragProgress(progressX,progressY)
+function SlidePanel:dragProgress(progressX, progressY)
     --如果有拖拽条
-
 end
 
 return SlidePanel
