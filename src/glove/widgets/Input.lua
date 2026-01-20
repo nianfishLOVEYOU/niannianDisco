@@ -1,4 +1,3 @@
-local colors = require "src.glove/colors"
 local love = require "love"
 local widget = require "src.glove.widgets.widget"
 
@@ -83,7 +82,7 @@ function Input:onClick(clickX, clickY, button)
   -- TODO: Is this needed? Maybe only on mobile devices.
 
   local value = self.text or ""
-  inputCursor = #value
+  inputCursor = value:utf8len()
 end
 
 function Input:setText(text)
@@ -103,7 +102,7 @@ function Input:keypressed(keyPressed)
 
   if keyPressed == "backspace" then
     if c > 0 then
-      self.text = value:sub(1, c - 1) .. value:sub(c + 1, #value)
+      self.text = value:utf8sub(1, c - 1) .. value:utf8sub(c + 1, #value)
       inputCursor = c - 1
     end
   elseif keyPressed == "left" then
@@ -115,8 +114,8 @@ function Input:keypressed(keyPressed)
 
     -- Only process printable ASCII characters.
     if #keyPressed == 1 then
-      local head = c == 0 and "" or value:sub(1, c)
-      local tail = value:sub(c + 1, #value)
+      local head = c == 0 and "" or value:utf8sub(1, c)
+      local tail = value:utf8sub(c + 1, #value)
       local shift = lk.isDown("lshift") or lk.isDown("rshift")
       local char = shift and keyPressed:upper() or keyPressed
       self.text = head .. char .. tail

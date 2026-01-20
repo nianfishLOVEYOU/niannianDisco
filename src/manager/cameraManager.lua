@@ -1,3 +1,5 @@
+local camera = require("lib.gamera")
+
 local cameraManager ={}
 
 ---设置摄像机

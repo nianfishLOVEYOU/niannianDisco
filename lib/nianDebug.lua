@@ -92,7 +92,7 @@ function nianDebug.DebugUpdate(dt)
     local currentTime = love.timer.getTime()
     -- 若两次update间隔超过0.5秒，说明主线程被阻塞
     if currentTime - lastTime > 0.5 then
-        print("【nianDebug】主线程阻塞！间隔：" .. (currentTime - lastTime) .. "秒")
+        print("[nianDebug]主线程阻塞！间隔：" .. (currentTime - lastTime) .. "秒")
     end
     lastTime = currentTime
 

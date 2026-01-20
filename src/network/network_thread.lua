@@ -178,7 +178,7 @@ local function fileUnicastTask(name, path, peer_id, id)
     coroutine.yield()
     local p = peers[peer_id]
     if p and p.enet then
-        print("【发送文件给】: ", peer_id, name)
+        print("[发送文件给]: ", peer_id, name)
         local f, size = filesystemReadFile(path)
         local seq = 0
         while true do

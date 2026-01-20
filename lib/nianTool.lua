@@ -237,7 +237,8 @@ function initStringExtensions()
         -- 使用utf8库安全处理
         start = start or 1
         finish = finish or utf8.len(self)
-
+        print(finish)
+        print(self,utf8.len(self))
         -- 将字符索引转换为字节索引
         local byteStart = utf8.offset(self, start)
         local byteFinish = utf8.offset(self, finish + 1)

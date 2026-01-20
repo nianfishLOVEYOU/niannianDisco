@@ -129,7 +129,7 @@ function love.filedropped(file)
     local extend = FileManager:getExtension(name)
 
     eventManager:emit("fileDrop", file, name, fullname, extend)
-    print("【filedropped】")
+    print("[filedropped]")
 end
 
 -- type = "file" or "folder"
@@ -157,7 +157,7 @@ end
 function FileManager:deleteAllFiles(folder)
     local allFiles = FileManager:listAllFiles(folder)
 
-    local function deleteFiles (files)
+    local function deleteFiles(files)
         for _, fileInfo in ipairs(files) do
             if fileInfo.type == "file" then
                 local ok, err = love.filesystem.remove(fileInfo.path)
@@ -169,7 +169,6 @@ function FileManager:deleteAllFiles(folder)
             elseif fileInfo.type == "folder" then
                 deleteFiles(fileInfo.files)
             end
-
         end
     end
 
@@ -182,19 +181,22 @@ end
 
 --打开音乐文件夹
 function FileManager.openMusicDirectory()
-    -- 获取 Love2D 自带的存档目录
-    local saveDir = love.filesystem.getSaveDirectory() .. commonData.musicPath
-    print("游戏存档目录：" .. saveDir)
-
+    local saveDir = love.filesystem.getSaveDirectory() .. "/" .. commonData.musicPath
+    saveDir = string.gsub(saveDir, "/", "\\")     -- 强制替换所有正斜杠为反斜杠
     -- 打开这个目录
     if love.system.getOS() == "Windows" then
-        os.execute('explorer "' .. saveDir .. '"')
+        -- 获取 Love2D 自带的存档目录
+        print("游戏存档目录：" .. saveDir)
+        love.system.openURL(saveDir) -- 打开文件夹，不干扰控制台
+
+        -- coroutine.wrap(function()
+        --     os.execute('explorer "' .. saveDir .. '"')
+        -- end)()
     elseif love.system.getOS() == "OS X" then
         os.execute('open "' .. saveDir .. '"')
     elseif love.system.getOS() == "Linux" then
         os.execute('xdg-open "' .. saveDir .. '"')
     end
 end
-
 
 return FileManager

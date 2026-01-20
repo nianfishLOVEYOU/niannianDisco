@@ -9,7 +9,6 @@ require "lib.nianTool"
 require "src.manager"
 require "src.glove"
 
-camera = require("lib.gamera")
 network = require "src.network.network"
 audio = require "src.audio"
 
@@ -50,6 +49,8 @@ function love.load()
 
     loadMap()
 end
+
+
 
 function love.update(dt)
     world:update(dt)
