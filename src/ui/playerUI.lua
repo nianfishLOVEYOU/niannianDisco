@@ -77,6 +77,9 @@ function PlayerUI:getvstack()
     perButton:setScale(2, 2)
     local listButton = Glove.Button_img:new("", "res/image/ui/listbutton.png", list)
     listButton:setScale(2, 2)
+    local openMusicDirButton = Glove.Button:new("打开音乐文件夹", fileManager.openMusicDirectory)
+    openMusicDirButton.color ={0.5,0.8,0.5}
+
     ------ slider-------
     local playSlider = Glove.Slider:new(0, function(value)
         PlayerUI:dragProgress(value)
@@ -98,7 +101,7 @@ function PlayerUI:getvstack()
     --右边对其
     local musiVoiceHStack = Glove.HStack:new({infoText, progressText, volumeText, volumeSlider })
     local sliderHStack = Glove.HStack:new({ playSlider })
-    local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton, listButton } )
+    local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton, listButton,openMusicDirButton} )
     local stack = Glove.VStack:new({ musiVoiceHStack, sliderHStack, buttonHStack },10,"center")
 
     local sw, sh = stack:getSize()

@@ -13,10 +13,17 @@ local Audio = {
 
 }
 
+function Audio:init()
+    self.playlist = globleManager:getGameData("playlist") or {}
+end
+
+function Audio:savePlaylist()
+    globleManager:saveGameData("playlist",self.playlist)
+end
+
 systemManager:update_regester(function(dt)
     Audio:update(dt)
 end)
-
 
 function Audio:isPlaying()
     return self.currentSource and self.currentSource:isPlaying()

@@ -80,9 +80,6 @@ local function keypressed(k)
         statusManager:statusChange("editor")
         closeMap()
     end
-    if k == "f" then
-        fileManager:openMusicDirectory()
-    end
 end
 -- debug输入方案
 keybordManager:keypressed_regester(function(key)
@@ -133,7 +130,8 @@ end
 
 function love.quit()
     print("游戏已正常退出")
+    --保存当前歌单数据
+    audio:savePlaylist()
     network:closeNetThread()
-
     systemManager:quit()
 end
