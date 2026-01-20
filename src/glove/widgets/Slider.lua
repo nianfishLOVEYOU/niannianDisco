@@ -54,6 +54,7 @@ end
 
 --被拖拽
 function Slider:onDrag(x, y, dx, dy)
+    
     self:justSetProgress(x)
 end
 

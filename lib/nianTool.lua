@@ -7,6 +7,13 @@ require "lib.nianMath"
 require "lib.nianDebug"
 require "lib.nianDraw"
 
+
+if love.filesystem.isFused() then
+    print("打包模式")
+else
+    print("代码模式")
+end
+
 function nianTool:dump(tbl, indent)
     indent = indent or 0
     local prefix = string.rep("  ", indent)

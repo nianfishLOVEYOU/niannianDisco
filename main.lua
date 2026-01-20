@@ -1,12 +1,5 @@
--- 假设你的模块放在项目根目录下的  lib/  文件夹
--- 在任何需要加载模块的脚本最前面加入下面这行
-if love.filesystem.isFused() then
-    -- fused：只能使用虚拟文件系统的默认路径  打包之后
-    package.path = package.path .. ";?.lua;?/init.lua"
-else
-    -- 开发阶段：磁盘上有 lib/、src/ 等目录
-    -- package.path = package.path .. ";lib/?.lua;lib/?/init.lua;src/?.lua"
-end
+-- fused：只能使用虚拟文件系统的默认路径  打包之后
+package.path = package.path .. ";?.lua;?/init.lua"
 
 if type(love) == "nil" then
     love = {} -- 仅在编辑器检查时定义空表，避免未定义提示
@@ -16,23 +9,17 @@ require "lib.nianTool"
 require "src.manager"
 require "src.glove"
 
-camera= require("lib.gamera")
+camera = require("lib.gamera")
 network = require "src.network.network"
 audio = require "src.audio"
 
----修改debug字体
-local ffi = require "ffi"
-ffi.cdef [[
-    int SetConsoleOutputCP(unsigned int wCodePageID);
-]]
-ffi.C.SetConsoleOutputCP(65001) -- 936 = GBK  65001 =utf-8
 
--- 设置为全局默认字体
-myFont = love.graphics.newFont("fonts/msyh.ttc", 12)
+------设置为全局默认字体-----
+myFont = love.graphics.newFont("fonts/heiti.ttf", 12)
 love.graphics.setFont(myFont)
 
 local function loadMap()
-    love.keyboard.setTextInput(true, 50, 50, 400, 30) 
+    love.keyboard.setTextInput(true, 50, 50, 400, 30)
     local MapLoader = require "src.map.mapLoader"
     -- 读取已有地图（若不存在则手动指定背景）
     local mapPath = "res/maps/edited.json"
@@ -53,10 +40,10 @@ end
 function love.load()
     print("save path:", love.filesystem.getSaveDirectory())
     print("LÖVE version:", love.getVersion())
-    
+
     -- shaderManager:addEffect(require("src.shader.blurEffect").getshader(), 1)
     shaderManager:addEffect(require("src.shader.lightPointEffect").getshader(), 1)
-    
+
     systemManager:init()
 
     statusManager:statusChange("menu")
@@ -76,7 +63,6 @@ function love.update(dt)
     local mx, my = love.mouse.getPosition()
 end
 
-
 -- 方法2：监控窗口焦点事件，避免在里面做耗时操作
 function love.focus(focus)
     if focus then
@@ -88,14 +74,13 @@ function love.focus(focus)
     end
 end
 
-
 local function keypressed(k)
     if k == "b" then -- B 键 → 广播
         commonData.openMapEditorMode = true
         statusManager:statusChange("editor")
         closeMap()
     end
-    if k == "f" then 
+    if k == "f" then
         fileManager:openMusicDirectory()
     end
 end
@@ -143,7 +128,7 @@ function love.draw()
     systemManager:draw()
 
     -- debug
-        nianDebug.DebugPrint()
+    nianDebug.DebugPrint()
 end
 
 function love.quit()

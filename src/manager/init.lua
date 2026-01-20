@@ -1,3 +1,4 @@
+require "src.manager.fontSet"
 
 eventManager = require "src.manager.eventManager"
 mouseManager = require "src.manager.mouseManager"
