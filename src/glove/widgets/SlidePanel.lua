@@ -7,60 +7,70 @@ local g = love.graphics
 local SlidePanel = widget:extend()
 local padding = 3
 
-function SlidePanel:init( progress,onSet)
+function SlidePanel:init(content)
     self.type = "Slider"
-    self.progress = progress or 0
-    self.color =  { 0.2, 0.6, 1 }
-    self.backColor = { 0.5, 0.5, 0.5 }
-    self.onSet=onSet
 
-    self.w = 60 
+    self.progressX = 0
+    self.progressY = 0
+
+    self.color = { 0, 0, 0.5 }
+
+    self.w = 60
     self.h = 100
 
-    self.spacing = 10
+    self.spacingX = 10
+    self.spacingY = 10
 
-    self.offsetX=0
-    self.offsetY=0
+    --锁定移动
+    self.lockOffsetX = true
+    self.lockOffsetY = false
 
-    self.lockOffsetX =false
-    self.lockOffsetY =false
-    
+    if content then
+        self:setContent(content, 0, 0)
+    end
+end
+
+--设置滑页内的内容
+function SlidePanel:setContent(child, x, y)
+    self:clearChild()
+    self:addChild(child)
+    x = x or 0
+    y = y or 0
+    child:setLocalPos(x, y)
+end
+
+function SlidePanel:getContent()
+    if #self.children == 1 then
+        return self.children[1]
+    end
+    return nil
 end
 
 function SlidePanel:draw()
-
-    self.progress=math.max(0, math.min(1, self.progress))
+    self.progress = math.max(0, math.min(1, self.progress))
 
     -- 进度条
-    if self:isOver(love.mouse.getPosition()) then
-        g.setColor(self.backColor)
-        g.rectangle("fill", self.x, self.y, self.w, self.h)
 
-        g.setColor(self.color)
-        g.rectangle("fill", self.x, self.y, self.w * self.progress, self.h)
-    else
-        g.setColor(self.backColor)
-        g.rectangle("fill", self.x, self.y, self.w, self.h)
+    g.setColor(self.color)
+    g.rectangle("fill", self.x, self.y, self.w * self.progress, self.h)
 
-        g.setColor(self.color)
-        g.rectangle("fill", self.x, self.y, self.w * self.progress, self.h)
-    end
+    local content = self:getContent()
+    if not content then return end
+    self:backToCenter()
+    content:draw()
 
-    for i, child in ipairs(children) do
-        end
-
-    if self.align == "center" then
-        child:setLocalPos((self.w - cw) / 2, y)
-    elseif self.align == "right" then
-        child:setLocalPos(self.w - cw, y)
-    else -- assume "left"
-        child:setLocalPos(0, y)
-    end
 end
 
-function SlidePanel:setSize(w, h)
-    self.w = w
-    self.h = h
+--可滑动空间
+function SlidePanel:getSlideSpace()
+    local content = self:getContent()
+    if content then
+        local xspace, yspace = self.w - content.w, self.h - content.h
+        xspace = xspace < 0 and 0 or xspace
+        yspace = yspace < 0 and 0 or yspace
+        return xspace, yspace
+    end
+    return 0, 0
 end
 
 
@@ -70,44 +80,80 @@ end
 
 --被拖拽
 function SlidePanel:onDrag(x, y, dx, dy)
-    local minx,miny,maxx,maxy=self.x,self.y,self.x+self.w,self.y+self.h
-    local childx,childy=self.children[1].getPos()
-    local childw,childh=self.children[1].getSize()
+    local content = self:getContent()
+    if not content then return end
+    local cx, cy = content:getLocalPos()
+    local cw, ch = content:getSize()
+    --保持content的拖拽对边边界在panel中
+    if self.lockOffsetX then
+        dx = 0
+    else
+        if cx > 0 + self.spacingX and dx > 0 then dx = 0 end --child左边角超过了panel就不许更加右移动了
+        if cx + cw < self.w - self.spacingX and dx < 0 then dx = 0 end
+    end
+    if self.lockOffsetY then
+        dy = 0
+    else
+        if cy > 0 + self.spacingY and dy > 0 then dy = 0 end
+        if cy + ch < self.h - self.spacingY and dy < 0 then dy = 0 end
+    end
+
+    content:setLocalPos(cx + dx, cy + dy)
     
-    if not self.lockOffsetX then
-        self.offsetX=self.offsetX+dx
+    local xspace, yspace = self:getSlideSpace()
+    self.progressX = content.localX / xspace
+    self.progressY = content.localY / yspace
+    
+    self:dragProgress(self.progressX,self.progressY)
+end
+
+function SlidePanel:backToCenter()
+    local dx, dy = 0, 0
+    local content = self:getContent()
+    if not content then return end
+    local cx, cy = self.content:getLocalPos()
+    local cw, ch = self.content:getSize()
+    local backPower = 0.1
+    --保持content的拖拽对边边界在panel中
+
+    --x轴的边界回归
+    if cx > 0 + self.spacingX then dx = -backPower end --child左边角超过了panel就不许更加右移动了
+    if cx + cw < self.w - self.spacingX then dx = backPower end
+    --y轴的边界回归
+    if cy > 0 + self.spacingY then dy = -backPower end
+    if cy + ch < self.h - self.spacingY then dy = backPower end
+
+    content:setLocalPos(cx + dx, cy + dy)
+end
+
+
+--设置滑页进度x
+function SlidePanel:setProgressX(p)
+    if self.lockOffsetX then return end
+    local content = self:getContent()
+    if content then
+        local xspace, yspace = self:getSlideSpace()
+        content:setLocalPos(p * xspace, content.localY)
+        self.progressX = p
+        self:dragProgress(self.progressX,self.progressY)
     end
-    if not self.lockOffsetY then
-        
-        self.offsetY=self.offsetY+dy
+end
+
+--设置滑页进度y
+function SlidePanel:setProgressY(p)
+    if self.lockOffsetY then return end
+    local content = self:getContent()
+    if content then
+        local xspace, yspace = self:getSlideSpace()
+        content:setLocalPos(content.localX, p * yspace)
+        self.progressY = p
+        self:dragProgress(self.progressX,self.progressY)
     end
 end
 
-function SlidePanel:onClick(x, y, button)
-    Glove.setFocus(self)
-    self:dragProgress(x)
+function SlidePanel:dragProgress(progressX,progressY)
+    --如果有拖拽条
+
 end
 
-function SlidePanel:justSetProgress(x)
-    local ax = self.x
-    local width = self.w
-    self.progress = (x - ax) / width
-    self.progress = math.max(0, math.min(1, self.progress))
-end
-
-function SlidePanel:dragProgress(x)
-    local ax = self.x
-    local width = self.w
-    self.progress = (x - ax) / width
-    self.progress = math.max(0, math.min(1, self.progress))
-    if self.onSet then
-        self.onSet(self.progress)
-    end
-end
-
-function SlidePanel:setProgress(value)
-    self.progress=math.max(0, math.min(1, value))
-    self.onSet(self.progress)
-end
-
-return  SlidePanel
+return SlidePanel
