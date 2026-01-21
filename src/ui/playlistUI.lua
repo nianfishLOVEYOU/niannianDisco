@@ -53,7 +53,7 @@ function PlaylistUI:refresh()
     -- 创建本地列表
     self:clearStacks()
     self:addStack(self:getvstack())
-    --self:addStack(self:getlocalPlayListStack())
+    self:addStack(self:getlocalPlayListStack())
 end
 
 ---------------播放列表------------

@@ -48,6 +48,11 @@ function PlayerManager:keypressed(key)
 end
 
 function PlayerManager:mousePressed(x, y, button)
+    -- 如果 Glove 在该位置有 UI 元素，阻断玩家移动
+    if Glove and Glove.getFirstWidget then
+        local w = Glove.getFirstWidget(x, y)
+        if w then return end
+    end
     if self.player then
         playerControl:mousePressed(x, y, button)
     end
