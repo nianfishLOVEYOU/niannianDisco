@@ -21,10 +21,14 @@ function SlidePanel:init(content)
     self.spacingX = 10
     self.spacingY = 10
 
+    self.dx, self.dy = 0, 0
     --锁定移动
     self.lockOffsetX = true
     self.lockOffsetY = false
 
+    self.t = 0
+    self.dt = 0
+    self.viscous =0.2
     if content then
         self:setContent(content, self.spacingX, self.spacingY)
     end
@@ -75,6 +79,8 @@ end
 
 function SlidePanel:onDragOver(x, y)
     self:dragProgress(x)
+    self.t = 0
+    self.dt = 0
 end
 
 --被拖拽
@@ -104,6 +110,12 @@ function SlidePanel:onDrag(x, y, dx, dy)
     self.progressX = content.localX / xspace
     self.progressY = content.localY / yspace
 
+    self.t = self.t == 0 and love.timer.getTime() or self.t  --如果t为零先初始化
+    self.dt = love.timer.getTime() - self.t
+    self.t = love.timer.getTime()
+    self.dx = dx / self.dt
+    self.dy = dy / self.dt --获得单位时间速度
+
     self:dragProgress(self.progressX, self.progressY)
 end
 
@@ -113,7 +125,7 @@ function SlidePanel:backToCenter()
     if not content then return end
     local cx, cy = content:getLocalPos()
     local cw, ch = content:getSize()
-    local backPower =10
+    local backPower = 10
     --保持content的拖拽对边边界在panel中
 
     --x轴的边界回归
@@ -123,6 +135,15 @@ function SlidePanel:backToCenter()
     if cy > (0 + self.spacingY) then dy = dy - backPower end
     if (cy + ch) < (self.h - self.spacingY) then dy = dy + backPower end
 
+    --脱离指控后速度保持
+    if self.dx ~= 0 then
+        dx = dx + self.dx
+        self.dx=self.dx*self.viscous
+    end
+    if self.dy ~= 0 then
+        dy = dy + self.dy
+        self.dy=self.dy*self.viscous
+    end
     content:setLocalPos(cx + dx, cy + dy)
 end
 

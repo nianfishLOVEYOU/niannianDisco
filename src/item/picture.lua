@@ -8,5 +8,4 @@ function picture:new( imgPath)
     --之后加入可以显示别的图片
 end
 
-
 return picture
