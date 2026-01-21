@@ -133,14 +133,5 @@ function HStack:setPos(x, y, z)
     self:layout()
 end
 
-function HStack:destroy()
-    for _, child in ipairs(self.children) do
-        if child.destroy then
-            child:destroy()
-        end
-    end
-    -- 父类删除
-    HStack.super.destroy(self)
-end
 
 return HStack

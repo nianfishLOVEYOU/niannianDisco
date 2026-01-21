@@ -289,6 +289,23 @@ function Audio:addPlayMusic(path, duration, name)
     uiManager:refresh("playlistUI")
 end
 
+function Audio:removePlayMusic(name)
+    print ("remove music ",name)
+    if not self:musicExist(name) then
+        print(" ## musicNotExist..")
+        return
+    end
+    for index, value in ipairs(self.playlist) do
+        if value.name == name then
+            table.remove(self.playlist,index)
+        end
+    end
+    self:sendUpdatePlayList()
+    self:savePlaylist()
+    uiManager:refresh("playlistUI")
+end
+
+
 -- 发送列表信息
 function Audio:sendUpdatePlayList(id)
     if id then
@@ -321,9 +338,5 @@ function Audio:sendUpdatePlayStatus()
     network:send_Broadcast(msg)
 end
 
--- 暂时用不到
-function Audio:removePlayMusic(name)
-    eventManager:emit("event_playListRemove")
-end
 
 return Audio

@@ -55,6 +55,8 @@ function SlidePanel:draw()
 
     g.setColor(self.color)
     g.rectangle("fill", self.x, self.y, self.w, self.h)
+
+
     local cx, cy = self:getContent():getLocalPos()
     local content = self:getContent()
     if not content then return end
@@ -62,7 +64,18 @@ function SlidePanel:draw()
     if not self.isDrag then
         self:backToCenter()
     end
+
+    
+    local scissorX = self.x
+    local scissorY = self.y
+    local scissorW = self.w
+    local scissorH = self.h
+
+    love.graphics.setScissor(scissorX, scissorY, scissorW, scissorH) -- 开启剪裁
+
     content:draw()
+
+    love.graphics.setScissor() -- 关闭剪裁
 end
 
 --可滑动空间

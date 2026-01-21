@@ -68,10 +68,13 @@ function Button_img:setScale(w,h)
 end
 
 function Button_img:onClick(x, y, button)
-    print("click",self.clickFunc)
-    self.clickFunc()
+    --print("click",self.clickFunc)
+    --self.clickFunc()
 end
 
+function Button_img:onClickOver(x, y,button)
+  self.clickFunc()
+end
 
 return Button_img
 

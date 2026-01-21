@@ -129,14 +129,6 @@ function VStack:setPos(x, y, z)
     self:layout()
 end
 
-function VStack:destroy()
-    for _, child in ipairs(self.children) do
-        if child.destroy then
-            child:destroy()
-        end
-    end
-    -- 父类删除
-    VStack.super.destroy(self)
-end
+
 
 return VStack

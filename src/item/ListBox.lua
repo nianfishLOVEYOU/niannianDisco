@@ -1,2 +1,0 @@
---audio.localplaylist内的每个成员都有一个listBox  
---地图的map存储方式还要再加一个动态物品.listBox 之类的的位置

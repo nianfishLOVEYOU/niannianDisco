@@ -137,9 +137,11 @@ Glove = {
     if clickWidget and clickWidget.isDrag then
       clickWidget.isDrag = false
       clickWidget:onDragOver(x, y)
+    elseif clickWidget then
+      clickWidget:onClickOver(x, y)
     end
     mouseIsDown1 = false
-
+    
     --滑动条
     if Glove.clickSlidePanel then
       Glove.clickSlidePanel.isDrag = true
