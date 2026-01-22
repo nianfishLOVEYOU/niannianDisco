@@ -31,8 +31,8 @@ function Window:init(title, children, close)
     end
     if not self.shadePanel then
         self.shadePanel = Glove.ShadePanel:new()
-        self.shadePanel:setPos(self.x, self.y)
-        self.shadePanel:setSize(self.w, self.h)
+        self.shadePanel:setPos(self.x, self.y + self.titleHeight)
+        self.shadePanel:setSize(self.w, math.max(0, self.h - self.titleHeight))
     end
     if children then
         for _, child in ipairs(children) do
@@ -56,14 +56,14 @@ end
 function Window:setPos(x, y)
     widget.setPos(self, x, y)
     if self.shadePanel then
-        self.shadePanel:setPos(x, y)
+        self.shadePanel:setPos(self.x, self.y + self.titleHeight)
     end
 end
 
 function Window:setSize(w, h)
     widget.setSize(self, w, h)
     if self.shadePanel then
-        self.shadePanel:setSize(w, h)
+        self.shadePanel:setSize(self.w, math.max(0, self.h - self.titleHeight))
     end
 end
 
