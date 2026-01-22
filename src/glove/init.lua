@@ -28,6 +28,7 @@ local widgets = {
   --"ZStack"
   "SlidePanel",
   "Window",
+  "ShadePanel",
 }
 
 local mouseIsDown1 = false
@@ -51,7 +52,7 @@ Glove = {
     return widget == focusedWidget
   end,
 
-  -- 获得排序最后最上的ui
+  -- 获得排序最后最上的ui ,type 查找固定的type
   getFirstWidget = function(mouseX, mouseY, type)
     local clickWidget = nil
     for _, widget in pairs(Glove.widgets) do
@@ -62,10 +63,10 @@ Glove = {
         local width, height = widget:getSize()
         if x <= mouseX and mouseX <= x + width and
             y <= mouseY and mouseY <= y + height then
-          -- 如果控件提供 hitTest 方法，则让控件决定该点是否可被点击（用于裁剪区域内外判定）
+          -- 如果控件提供 isOver 方法，则让控件决定该点是否可被点击（用于裁剪区域内外判定）
           local accept = true
-          if widget.hitTest then
-            local ok = widget:hitTest(mouseX, mouseY)
+          if widget.isOver then
+            local ok = widget:isOver(mouseX, mouseY)
             if not ok then accept = false end
           end
           if accept then
@@ -153,7 +154,7 @@ Glove = {
     
     --滑动条
     if Glove.clickSlidePanel then
-      Glove.clickSlidePanel.isDrag = true
+      Glove.clickSlidePanel.isDrag = false
       Glove.clickSlidePanel = nil
     end
   end,

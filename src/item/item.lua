@@ -8,7 +8,7 @@ item.__gc = function(u)
 end
 
 function item:init()
-    self.name="n_name"
+    self.name = "n_name"
     self.id = ""
     self.type = "item"
 
@@ -38,7 +38,7 @@ function item:init()
 end
 
 function item:setName(name)
-    self.name=name
+    self.name = name
 end
 
 function item:setParentInit()
@@ -47,8 +47,10 @@ function item:setParentInit()
 end
 
 function item:addChild(child)
+    if child.parent then
+        child.parent:removeChild(child)
+    end
     table.insert(self.children, child)
-    --self.children[child.id] = child
     child.parent = self
     child:setParentInit()
 end
@@ -89,13 +91,12 @@ function item:onDrag(x, y, dx, dy)
 
 end
 
-
 function item:onDragOver(x, y)
-    
+
 end
 
-function item:onClickOver(x,y)
-    
+function item:onClickOver(x, y)
+
 end
 
 -- 悬停
@@ -179,6 +180,11 @@ end
 -- 确保没有被引用了
 function item:destroy()
     item.super.destroy(self)
+    for _, child in ipairs(self.children) do
+        if child.destroy then
+            child:destroy()
+        end
+    end
 end
 
 return item

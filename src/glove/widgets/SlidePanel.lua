@@ -1,12 +1,9 @@
 -- slider
 
-local image = require "src.common.aUIImage"
 local widget = require "src.glove.widgets.widget"
 
 local g = love.graphics
 local SlidePanel = widget:extend()
-local padding = 3
-
 function SlidePanel:init(content)
     self.type = "SlidePanel"
 
@@ -28,9 +25,41 @@ function SlidePanel:init(content)
 
     self.t = 0
     self.dt = 0
-    self.viscous =0.2
-    if content then
-        self:setContent(content, self.spacingX, self.spacingY)
+    self.viscous = 0.2
+    if not self.shadePanel then
+        self.shadePanel = Glove.ShadePanel:new( )
+        self.shadePanel:setPos(self.x, self.y)
+        self.shadePanel:setSize(self.w, self.h)
+    end
+    self:setContent(content, self.spacingX, self.spacingY)
+
+
+    --设置点击遮罩
+end
+
+
+function SlidePanel:addChild(child)
+    self.shadePanel:addContent(child)
+    widget.addChild(self, child)
+end
+
+function SlidePanel:removeChild(child)
+    self.shadePanel:removeContent(child)
+    widget.removeChild(self, child)
+end
+
+
+function SlidePanel:setPos(x, y)
+    widget.setPos(self, x, y)
+    if self.shadePanel then
+        self.shadePanel:setPos(x, y)
+    end
+end
+
+function SlidePanel:setSize(w, h)
+    widget.setSize(self, w, h)
+    if self.shadePanel then
+        self.shadePanel:setSize(w, h)
     end
 end
 
@@ -57,7 +86,6 @@ function SlidePanel:draw()
     g.rectangle("fill", self.x, self.y, self.w, self.h)
 
 
-    local cx, cy = self:getContent():getLocalPos()
     local content = self:getContent()
     if not content then return end
 
@@ -65,62 +93,14 @@ function SlidePanel:draw()
         self:backToCenter()
     end
 
-    
-    local scissorX = self.x
-    local scissorY = self.y
-    local scissorW = self.w
-    local scissorH = self.h
-
-    love.graphics.setScissor(scissorX, scissorY, scissorW, scissorH) -- 开启剪裁
-
-    content:draw()
-
-    love.graphics.setScissor() -- 关闭剪裁
-end
-
--- 判断某点是否在可接收点击的可视区域内（即标题/面板可视内容区域）
-function SlidePanel:hitTest(mouseX, mouseY)
-    local px, py = self.x, self.y
-    local pw, ph = self.w, self.h
-    -- 必须在 panel 矩形内
-    if not (px <= mouseX and mouseX <= px + pw and py <= mouseY and mouseY <= py + ph) then
-        return false
-    end
-
-    local content = self:getContent()
-    if not content then
-        -- 没有内容，panel 本身可点击
-        return true
-    end
-
-    -- 检查内容或其子项在该点是否可见且包含该点（递归）
-    local function checkItem(item)
-        if not item.visible then return false end
-        local ix, iy = item:getPos()
-        local iw, ih = item:getSize()
-        if ix <= mouseX and mouseX <= ix + iw and iy <= mouseY and mouseY <= iy + ih then
-            return true
-        end
-        if item.children and #item.children > 0 then
-            for _, ch in ipairs(item.children) do
-                if checkItem(ch) then return true end
-            end
-        end
-        return false
-    end
-
-    -- 只有当内容或其子项在 panel 的可视区域内包含该点时才认为命中
-    if checkItem(content) then
-        return true
-    end
-    return false
+    self.shadePanel:draw()
 end
 
 -- 简化的 Glove 事件接口：点击、拖拽、释放、悬停
 function SlidePanel:onClick(x, y)
     -- x,y 为全局坐标
     -- 只有在可视裁剪区内才处理
-    if not self:hitTest(x, y) then return end
+    if not self:isOver(x, y) then return end
     -- 记录按下用于后续 drag/over
     self._pressed = true
     local content = self:getContent()
@@ -128,13 +108,12 @@ function SlidePanel:onClick(x, y)
         local cx, cy = content:getPos()
         content:onClick(x - cx, y - cy)
     end
-    return
 end
 
 function SlidePanel:onDrag(x, y, dx, dy)
     if not self._pressed then return end
     -- 仍需保证拖拽点在可视区域内
-    if not self:hitTest(x, y) then return end
+    if not self:isOver(x, y) then return end
     -- 使用已有的滑动逻辑（传入 dx,dy 即可）
     local content = self:getContent()
     if not content then return end
@@ -143,9 +122,9 @@ function SlidePanel:onDrag(x, y, dx, dy)
     --     local cx, cy = content:getPos()
     --     content:onDrag(x - cx, y - cy, dx, dy)
     -- else
-        self:onDragInternal(dx, dy)
+    self:onDragInternal(dx, dy)
     -- end
-    print("SlidePanel",dx,dy)
+    --print("SlidePanel",dx,dy)
 end
 
 -- internal helper to reuse existing onDrag code
@@ -154,17 +133,21 @@ function SlidePanel:onDragInternal(dx, dy)
     if not content then return end
     local cx, cy = content:getLocalPos()
     local cw, ch = content:getSize()
-    if self.lockOffsetX then dx = 0 else
+    if self.lockOffsetX then
+        dx = 0
+    else
         if cx > 0 + self.spacingX and dx > 0 then dx = 0 end
         if cx + cw < self.w - self.spacingX and dx < 0 then dx = 0 end
     end
-    if self.lockOffsetY then dy = 0 else
+    if self.lockOffsetY then
+        dy = 0
+    else
         if cy > 0 + self.spacingY and dy > 0 then dy = 0 end
         if cy + ch < self.h - self.spacingY and dy < 0 then dy = 0 end
     end
     content:setLocalPos(cx + dx, cy + dy)
-    
-    print("SlidePanel",dx,dy)
+
+    --print("SlidePanel", dx, dy)
     local xspace, yspace = self:getSlideSpace()
     self.progressX = content.localX / (xspace == 0 and 1 or xspace)
     self.progressY = content.localY / (yspace == 0 and 1 or yspace)
@@ -173,13 +156,13 @@ end
 function SlidePanel:onDragOver(x, y)
     if not self._pressed then return end
     self._pressed = false
-    -- 触发回弹逻辑
+    self:dragProgress(x)
     self.t = 0
     self.dt = 0
     local content = self:getContent()
     if content and content.onDragOver then
-        local cx, cy = content:getPos()
-        content:onDragOver(x - cx, y - cy)
+        local gx, gy = content:getPos()
+        content:onDragOver(x - gx, y - gy)
     end
 end
 
@@ -194,7 +177,7 @@ end
 
 function SlidePanel:onHold(x, y)
     -- hover 不做处理，但也应该在可视区域内才触发 child 的 onHold
-    if not self:hitTest(x, y) then return end
+    if not self:isOver(x, y) then return end
     local content = self:getContent()
     if not content then return end
     -- 转换为 content 本地坐标并调用其 onHold（若存在）
@@ -212,19 +195,6 @@ function SlidePanel:getSlideSpace()
         return xspace, yspace
     end
     return 0, 0
-end
-
-function SlidePanel:onDragOver(x, y)
-    if not self._pressed then return end
-    self._pressed = false
-    self:dragProgress(x)
-    self.t = 0
-    self.dt = 0
-    local content = self:getContent()
-    if content and content.onDragOver then
-        local gx, gy = content:getPos()
-        content:onDragOver(x - gx, y - gy)
-    end
 end
 
 --被拖拽
@@ -300,11 +270,11 @@ function SlidePanel:backToCenter()
     --脱离指控后速度保持
     if self.dx ~= 0 then
         dx = dx + self.dx
-        self.dx=self.dx*self.viscous
+        self.dx = self.dx * self.viscous
     end
     if self.dy ~= 0 then
         dy = dy + self.dy
-        self.dy=self.dy*self.viscous
+        self.dy = self.dy * self.viscous
     end
     content:setLocalPos(cx + dx, cy + dy)
 end
