@@ -13,28 +13,19 @@ local function checkInrange(ax, ay, aw, ah, bx, by, bw, bh)
     return (ax - bx) * (ax - bx) + (ay - by + bw / 2) * (ay - by + bw / 2) <= range * range
 end
 
-function playerControl:interact(obstacles)
-    self.interactItem = nil
-    local player = playerManager.player
-    local haveZone = false
-    for _, obj in ipairs(obstacles) do
-        local objx, objy = obj:getPos()
-        -- 交互
-        if obj.onInteract and checkInrange(player.x, player.y, player.w, player.h, objx, objy, obj.w, obj.h) then
-            self.interactItem = obj
-            if obj.type == "eventZone" then
-                haveZone = true
-            end
-            break
+
+-- 进入交互范围检测
+function playerControl:interactInter(type)
+    if type == "musicInput" then
+        if not uiManager:getUI("musicInputUI") then
+            uiManager:addUI("musicInputUI", require("src.ui.musicInputUI"):new())
         end
     end
+end
 
-    if haveZone then
-        if not uiManager:getUI("musicInputUI") then
-            local musicInputUI = require("src.ui.musicInputUI"):new()
-            uiManager:addUI("musicInputUI", musicInputUI)
-        end
-    else
+-- 离开交互范围检测
+function playerControl:interactLeave(type)
+    if type == "musicInput" then
         if uiManager:getUI("musicInputUI") then
             uiManager:removeUI("musicInputUI")
         end
@@ -68,11 +59,6 @@ function playerControl:keydown(key)
             -- self.interactItem:interact()
         end
 
-    end
-    if key == 'h' then
-        print("h")
-        playerManager:addRemotePlayer(pn, "name", map.startPoint.x, map.startPoint.y)
-        pn = pn + 1
     end
 end
 

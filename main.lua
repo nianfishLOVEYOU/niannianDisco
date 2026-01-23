@@ -11,29 +11,12 @@ require "src.glove"
 
 network = require "src.network.network"
 audio = require "src.audio"
+mapLoader = require "src.map.mapLoader"
 
 
-
-local function loadMap()
-    love.keyboard.setTextInput(true, 50, 50, 400, 30)
-    local MapLoader = require "src.map.mapLoader"
-    -- 读取已有地图（若不存在则手动指定背景）
-    local mapPath = "res/maps/edited.json"
-    if love.filesystem.getInfo(mapPath) then
-        map = MapLoader.load(mapPath)
-        for i, v in ipairs(map.items) do
-            itemManager:addItem(v)
-        end
-        cameraManager.cam:setPosition(map.startPoint.x, map.startPoint.y)
-    end
-end
-
-local function closeMap()
-    map = nil
-    itemManager:removeAll()
-end
 
 function love.load()
+    love.keyboard.setTextInput(true, 50, 50, 400, 30)
     print("save path:", love.filesystem.getSaveDirectory())
     print("LÖVE version:", love.getVersion())
 
@@ -44,7 +27,6 @@ function love.load()
 
     statusManager:statusChange("menu")
 
-    loadMap()
 end
 
 function love.update(dt)

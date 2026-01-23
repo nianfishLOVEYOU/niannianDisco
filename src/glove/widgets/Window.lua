@@ -142,6 +142,7 @@ end
 -- cleanup: remove registration
 function Window:destroy()
     widget.destroy(self)
+    self.shadePanel:destroy()
 end
 
 return Window

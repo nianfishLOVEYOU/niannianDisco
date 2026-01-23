@@ -25,7 +25,9 @@ function PlayerManager:addPlayer(x, y)
     if self.player then
         return
     end
-    local player = player:new( "res/image/player1.png")
+    local selected = globleManager:getGameData("selectedPlayerImage")
+    local img = selected or "res/image/player1.png"
+    local player = player:new( img)
     player:setPos(x, y)
     player:setName(self.name)
     self.player = player

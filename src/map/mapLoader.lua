@@ -58,6 +58,22 @@ function MapLoader.load(mapFile)
     return map
 end
 
+function MapLoader:loadMap(mapPath)
+    if love.filesystem.getInfo(mapPath) then
+        globleManager.map = self.load(mapPath)
+        for i, v in ipairs(globleManager.map.items) do
+            itemManager:addItem(v)
+        end
+        cameraManager.cam:setPosition(globleManager.map.startPoint.x, globleManager.map.startPoint.y)
+    end
+end
+
+
+function MapLoader:closeMap()
+    globleManager.map = nil
+    itemManager:removeAll()
+end
+
 --- mapTable 包含items  startPoint
 --- 将地图对象保存为 JSON（编辑器使用）
 --- @param mapTable 必须包含 fields: background (string), items (list)

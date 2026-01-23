@@ -1,6 +1,7 @@
 --path
 GlobleManager = {
     allData = {},
+    map=nil, --地图
 }
 
 systemManager:init_regester(function()

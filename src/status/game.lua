@@ -5,12 +5,13 @@ local Game = {}
 
 function Game:init()
     --ui
+    mapLoader:loadMap("res/maps/edited.json")
     local playerUI = require("src.ui.playerUI"):new()
     uiManager:addUI("playerUI",playerUI)
     local playerlistUI = require("src.ui.playerlistUI"):new()
     uiManager:addUI("playerlistUI",playerlistUI)
 
-    playerManager:addPlayer(map.startPoint.x, map.startPoint.y)
+    playerManager:addPlayer(globleManager.map.startPoint.x, globleManager.map.startPoint.y)
     --playerManager:addRemotePlayer(1,"name",map.startPoint.x, map.startPoint.y)
 end
 

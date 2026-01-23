@@ -28,6 +28,7 @@ function item:init()
     self.color = { 1, 1, 1 }
     -- 组件
     self.component = {}
+    self.componentMap = {}
     self.visiable = true
     -- 父对象
     self.parent = nil
@@ -91,10 +92,67 @@ end
 
 function item:addComponent(name)
 
+    -- Accept either a component instance or a module name
+    local comp = name
+    if type(name) == "string" then
+        local ok, mod = pcall(require, "src.component." .. name)
+        if not ok then
+            print("item:addComponent require failed:", mod)
+            return
+        end
+        if type(mod.new) == "function" then
+            comp = mod:new()
+        else
+            comp = mod
+        end
+    end
+    if type(comp) ~= "table" then return end
+
+    -- prevent duplicate
+    if comp.name and self.componentMap[comp.name] then return end
+
+    -- if comp already has different owner, remove from it
+    if comp.owner and comp.owner ~= self and comp.owner.removeComponent then
+        comp.owner:removeComponent(comp)
+    end
+
+    -- set owner and register
+    comp.owner = self
+    table.insert(self.component, comp)
+    if comp.name then self.componentMap[comp.name] = comp end
+
+    -- call attach hook if present
+    if comp.onAttach then
+        comp:onAttach(self)
+    end
+    -- if component has enable flag, keep it; otherwise default true
+    if comp.enabled == nil then comp.enabled = true end
 end
 
 function item:removeComponent(name)
 
+    -- remove by instance or by name
+    local comp = name
+    if type(name) == "string" then
+        comp = self.componentMap[name]
+    end
+    if not comp then return end
+
+    for i = #self.component, 1, -1 do
+        if self.component[i] == comp then
+            table.remove(self.component, i)
+        end
+    end
+    if comp.name then self.componentMap[comp.name] = nil end
+
+    -- call detach/destroy hooks
+    if comp.onDetach then
+        comp:onDetach(self)
+    end
+    if comp.destroy then
+        comp:destroy()
+    end
+    comp.owner = nil
 end
 
 -- 点击事件
@@ -189,6 +247,12 @@ end
 
 function item:update(dt)
     self:localPosRefresh()
+    -- update components
+    for _, comp in ipairs(self.component) do
+        if comp and comp.enabled and comp.update then
+            comp:update(dt)
+        end
+    end
 end
 
 function item:draw()
@@ -205,6 +269,16 @@ function item:destroy()
         if child.destroy then
             child:destroy()
         end
+    end
+    -- destroy components
+    for _, comp in ipairs(self.component) do
+        if comp and comp.destroy then
+            comp:destroy()
+        end
+        if comp and comp.onDetach then
+            comp:onDetach(self)
+        end
+        if comp then comp.owner = nil end
     end
 end
 

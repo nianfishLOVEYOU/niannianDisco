@@ -47,6 +47,9 @@ function MenuUI:draw()
     self:drawStacks()
 end
 
+
+
+--主要的输入进入房间
 function MenuUI:getvstack()
     local linkButton = Glove.Button:new("link", function()
         print("got click")
