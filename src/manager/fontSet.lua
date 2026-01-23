@@ -8,5 +8,5 @@ ffi.C.SetConsoleOutputCP(65001) -- 936 = GBK  65001 =utf-8
 
 
 ------设置为全局默认字体-----
-myFont = love.graphics.newFont("fonts/heiti.ttf", 14)
+myFont = love.graphics.newFont("fonts/heiti.ttf", 12)
 love.graphics.setFont(myFont)

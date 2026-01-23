@@ -3,7 +3,6 @@ local love = require "love"
 local widget = require "src.glove.widgets.widget"
 
 local g = love.graphics
-local padding = 10
 
 local Button = widget:extend()
 
@@ -15,11 +14,13 @@ function Button:init(label, func)
   self.label = label
   self.labelColor = colors.black
   self.clickFunc = func
+  self.padding = 10
   self:setSize(40, 20)
+
 end
 
 function Button:draw()
-  local cornerRadius = padding
+  local cornerRadius =  self.padding
 
 
 
@@ -42,8 +43,8 @@ function Button:draw()
     )
   end
 
-  g.print(self.label, self.x + self.w / 2 - fw / 2 + padding,
-    self.y + self.h / 2 - fh / 2 + padding)
+  g.print(self.label, self.x + self.w / 2 - fw / 2 +  self.padding,
+    self.y + self.h / 2 - fh / 2 +  self.padding)
 end
 
 function Button:setText(text)
@@ -52,8 +53,8 @@ function Button:setText(text)
 end
 
 function Button:getFontSize()
-  local labelWidth = self.font:getWidth(self.label) + padding * 2
-  local labelHeight = self.font:getHeight() + padding * 2
+  local labelWidth = self.font:getWidth(self.label) +  self.padding * 2
+  local labelHeight = self.font:getHeight() +  self.padding * 2
   return labelWidth, labelHeight
 end
 
@@ -64,6 +65,10 @@ function Button:setSize(w, h)
 end
 
 function Button:onClick(x, y, button)
+  --self.clickFunc()
+end
+
+function Button:onClickOver(x, y, button)
   self.clickFunc()
 end
 

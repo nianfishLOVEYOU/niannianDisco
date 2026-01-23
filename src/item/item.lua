@@ -94,6 +94,10 @@ function item:onDragOver(x, y)
     
 end
 
+function item:onClickOver(x,y)
+    
+end
+
 -- 悬停
 function item:onHold(x, y)
 

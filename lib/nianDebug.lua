@@ -56,7 +56,7 @@ function nianDebug.DebugPrint()
     end
 
     --uidebug体积
-    debugPrintUi()
+    --ebugPrintUi()
 
     love.graphics.setColor(1, 1, 0)
     -- 计算 FPS

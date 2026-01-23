@@ -27,6 +27,7 @@ local widgets = {
   "VStack",
   --"ZStack"
   "SlidePanel",
+  "Window",
 }
 
 local mouseIsDown1 = false
@@ -61,20 +62,28 @@ Glove = {
         local width, height = widget:getSize()
         if x <= mouseX and mouseX <= x + width and
             y <= mouseY and mouseY <= y + height then
-          local issamType
-          if type then
-            issamType = widget.type == type
-          else
-            issamType = true
+          -- 如果控件提供 hitTest 方法，则让控件决定该点是否可被点击（用于裁剪区域内外判定）
+          local accept = true
+          if widget.hitTest then
+            local ok = widget:hitTest(mouseX, mouseY)
+            if not ok then accept = false end
           end
-
-          if issamType then
-            if clickWidget == nil then
-              clickWidget = widget
+          if accept then
+            local issamType
+            if type then
+              issamType = widget.type == type
             else
-              local _, _, cz = clickWidget:getPos()
-              if z >= cz then
+              issamType = true
+            end
+
+            if issamType then
+              if clickWidget == nil then
                 clickWidget = widget
+              else
+                local _, _, cz = clickWidget:getPos()
+                if z >= cz then
+                  clickWidget = widget
+                end
               end
             end
           end
@@ -137,9 +146,11 @@ Glove = {
     if clickWidget and clickWidget.isDrag then
       clickWidget.isDrag = false
       clickWidget:onDragOver(x, y)
+    elseif clickWidget then
+      clickWidget:onClickOver(x, y)
     end
     mouseIsDown1 = false
-
+    
     --滑动条
     if Glove.clickSlidePanel then
       Glove.clickSlidePanel.isDrag = true

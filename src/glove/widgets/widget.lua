@@ -9,12 +9,19 @@ function widget:init()
 end
 
 function widget:setVisible(v)
-  self.visible=v
+  self.visible = v
 end
 
 function widget:destroy()
   --父类删除
   widget.super.destroy(self)
+  print("remove", self.type)
+  for _, child in ipairs(self.children) do
+    if child.destroy then
+      child:destroy()
+    end
+  end
+
   Glove.widgets[self] = nil
 end
 
