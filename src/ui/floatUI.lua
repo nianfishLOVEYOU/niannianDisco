@@ -27,9 +27,9 @@ end
 function FloatUI:createDialogBox(text, player)
     -- 创建第一个对话框（使用默认样式）
     local dialog1 = dialogueBox:new(
-        text, -- 文字
+        text,     -- 文字
         150, 100, -- 对话框位置
-        200, 180 -- 尾巴指向位置
+        200, 180  -- 尾巴指向位置
     )
 
     table.insert(self.dialogBoxs, dialog1)
@@ -37,100 +37,25 @@ end
 
 -- 创建一个简单的弹窗（若 Glove.Window 可用则使用之）
 -- opts: {w=200,h=120,duration=2,title=""}
-function FloatUI:createPopup(text, x, y, opts)
+function FloatUI:createPopup(text, x, y)
     -- prefer Glove.widgets.Window if available
-    if Glove and Glove.widgets and Glove.widgets.Window then
-        local Window = Glove.widgets.Window
-        local Button = Glove.widgets.Button or Glove.Button
-        local Label = Glove.widgets.Label or Glove.widgets.Text or Glove.Text
 
-        local win = Window:new(title)
-        if win.setPos then win:setPos(x, y) end
-        if win.setSize then win:setSize(w, h) end
 
-        -- add text/label if class available
-        if Label and Label.new then
-            local lbl = Label:new(text)
-            if lbl.setLocalPos then lbl:setLocalPos(8, 8) end
-            if win.addChild then win:addChild(lbl, 8, 8) end
-        end
+    local Window = Glove.Window:new(text, function(window)
+        --关闭window
+    end)
+    local textLable = Glove.Label:new(text)
+    Window:addChild(textLable)
+    textLable:setLocalPos(10, 10)
+    local button = Glove.Button:new("确认", function()
+        --关闭window
+    end)
+    Window:addChild(button)
+    button:setLocalPos(10, 40)
 
-        -- add confirm button
-        if Button and Button.new then
-            local btn = Button:new("OK")
-            if btn.setLocalPos then btn:setLocalPos(w - 80, h - 36) end
-            if btn.setOnClick then
-                btn:setOnClick(function() if win.destroy then win:destroy() end end)
-            else
-                btn.onClick = function() if win.destroy then win:destroy() end end
-            end
-            if win.addChild then win:addChild(btn) end
-        end
+    Window:layout() --还没写layout
 
-        self:addStack(win)
-        if duration and duration > 0 then
-            table.insert(self.timers, { t = 0, duration = duration, target = win, type = "window" })
-        end
-        return win
-    elseif Glove and Glove.Window then
-        -- legacy Glove.Window path
-        local win = Glove.Window:new(title)
-        win:setPos(x, y)
-        win:setSize(w, h)
-        -- draw simple text inside
-        local label = nil
-        if Glove.Text and Glove.Text.new then
-            label = Glove.Text:new(text)
-        elseif Glove.Label and Glove.Label.new then
-            label = Glove.Label:new(text)
-        end
-        if label then
-            if label.setLocalPos then label:setLocalPos(8, 8) end
-            if win.addChild then win:addChild(label, 8, 8) end
-        end
-        -- add confirm button if available
-        local BtnClass = Glove.Button or (Glove.widgets and Glove.widgets.Button)
-        if BtnClass and BtnClass.new then
-            local btn = BtnClass:new("OK")
-            if btn.setLocalPos then btn:setLocalPos(w - 80, h - 36) end
-            if btn.setOnClick then
-                btn:setOnClick(function() if win.destroy then win:destroy() end end)
-            else
-                btn.onClick = function() if win.destroy then win:destroy() end end
-            end
-            if win.addChild then win:addChild(btn) end
-        end
-
-        self:addStack(win)
-        local timer = { t = 0, duration = duration, target = win, type = "window" }
-        table.insert(self.timers, timer)
-        return win
-    else
-        -- fallback simple pop item
-        local item = {
-            type = "popup",
-            x = x,
-            y = y,
-            w = w,
-            h = h,
-            text = text,
-            t = 0,
-            duration = duration,
-            update = function(self, dt)
-                self.t = self.t + dt
-                -- small fade and float
-                self.y = self.y - 10 * dt
-            end,
-            draw = function(self)
-                love.graphics.setColor(0, 0, 0, 0.8)
-                love.graphics.rectangle('fill', self.x, self.y, self.w, self.h, 6, 6)
-                love.graphics.setColor(1, 1, 1, 1)
-                love.graphics.print(self.text, self.x + 8, self.y + 8)
-            end
-        }
-        table.insert(self.widgets, item)
-        return item
-    end
+    table.insert(self.widgets, Window)
 end
 
 function FloatUI:update(dt)
