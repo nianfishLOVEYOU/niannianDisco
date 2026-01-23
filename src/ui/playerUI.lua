@@ -17,7 +17,9 @@ function PlayerUI:refresh()
     -- 创建本地列表
     self:addStack(self:getvstack())
 
-    self:addStack(Glove.Window:new())
+    self:addStack(Glove.Window:new("hello",function (widget)
+        self:removeStack(widget)
+    end))
 end
 
 local click = function()

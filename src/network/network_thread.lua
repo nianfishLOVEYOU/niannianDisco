@@ -63,7 +63,6 @@ end
 
 ------------------区分本地测试和正式服务---------------------
 if localmod then
-
     ---------------------------------
     -- 本地两个固定端口连接
     ---------------------------------
@@ -100,6 +99,7 @@ if localmod then
         peers = getOutPeers(),
         userid= a5002 and 2 or 1
     }
+    
 else
     ---------------------------------
     -- 获得外网ip 连接令信服务器
@@ -317,6 +317,7 @@ end
 local peerHeartTime = os.time()
 -- ---------- 4. 主循环 ----------
 while true do
+    print(11)
     local nowtime = os.time()
     -- ② 处理信令服务器的 Peer 信息（每 2 秒轮询一次）
     if nowtime - peerHeartTime > 2 then
@@ -463,6 +464,7 @@ while true do
         end
         event = host:service(0)
     end
-
+    
+    print(22)
     socket.sleep(0.01)
 end

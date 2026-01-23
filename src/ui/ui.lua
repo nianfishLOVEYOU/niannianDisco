@@ -18,6 +18,16 @@ function UI:addStack(stack)
     table.insert(self.stacks, stack)
 end
 
+function UI:removeStack(stack)
+    for i, s in ipairs(self.stacks) do
+        if s == stack then
+            s:destroy()
+            table.remove(self.stacks, i)
+            break
+        end
+    end
+end
+
 --清理widget
 function UI:clearStacks()
     if #self.stacks == 0 then return end

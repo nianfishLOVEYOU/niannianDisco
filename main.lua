@@ -47,8 +47,6 @@ function love.load()
     loadMap()
 end
 
-
-
 function love.update(dt)
     world:update(dt)
     systemManager:update(dt)
@@ -77,6 +75,9 @@ local function keypressed(k)
         commonData.openMapEditorMode = true
         statusManager:statusChange("editor")
         closeMap()
+    end
+    if k == "n" then -- N 键 → 正常模式
+        network:closeNetThread()
     end
 end
 -- debug输入方案

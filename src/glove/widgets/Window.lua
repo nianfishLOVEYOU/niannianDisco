@@ -9,7 +9,7 @@ local love = require "love"
 
 local Window = widget:extend()
 
-function Window:init(title, children, close)
+function Window:init(title, close,children)
     self.type = "Window"
     -- 使用 item 的字段（item:init 已由构造链初始化）
     self.x = 100
@@ -26,7 +26,7 @@ function Window:init(title, children, close)
     self.draggable = true
     self._dragging = false
 
-    self.close = close or function()
+    self.close = close or function(widget)
         self:destroy()
     end
     if not self.shadePanel then
@@ -39,7 +39,8 @@ function Window:init(title, children, close)
             self:addChild(child)
         end
     end
-
+    -- Ensure initial position is clamped to screen
+    self:setPos(self.x, self.y)
 end
 
 function Window:addChild(child)
@@ -54,7 +55,18 @@ end
 
 
 function Window:setPos(x, y)
-    widget.setPos(self, x, y)
+    -- clamp to screen so window never moves off-screen
+    local screenW = love.graphics.getWidth()
+    local screenH = love.graphics.getHeight()
+    local nx = x or self.x
+    local ny = y or self.y
+    local maxX = math.max(0, screenW - self.w)
+    local maxY = math.max(0, screenH - self.h)
+    if nx < 0 then nx = 0 end
+    if ny < 0 then ny = 0 end
+    if nx > maxX then nx = maxX end
+    if ny > maxY then ny = maxY end
+    widget.setPos(self, nx, ny)
     if self.shadePanel then
         self.shadePanel:setPos(self.x, self.y + self.titleHeight)
     end
@@ -109,7 +121,7 @@ function Window:onClick(x, y)
     local bx = self.x + self.w - cs - 6
     local by = self.y + (self.titleHeight - cs) / 2
     if x >= bx and y >= by and x <= bx + cs and y <= by + cs then
-        self:close()
+        self.close(self)
         return
     end
 end
