@@ -317,7 +317,6 @@ end
 local peerHeartTime = os.time()
 -- ---------- 4. 主循环 ----------
 while true do
-    print(11)
     local nowtime = os.time()
     -- ② 处理信令服务器的 Peer 信息（每 2 秒轮询一次）
     if nowtime - peerHeartTime > 2 then
@@ -465,6 +464,5 @@ while true do
         event = host:service(0)
     end
     
-    print(22)
     socket.sleep(0.01)
 end

@@ -95,15 +95,13 @@ local animationOut={
 }
 
 function animationOut:update(dt)
-    local removeid ={}
-    for i, v in ipairs(animationOut.anims) do
+    -- iterate backwards and remove finished animations immediately
+    for i = #self.anims, 1, -1 do
+        local v = self.anims[i]
         v:update(dt)
         if v.finished then
-            table.insert(removeid,i)
+            table.remove(self.anims, i)
         end
-    end
-    for i = #removeid, 1, -1 do
-        table.remove(animationOut.anims,removeid[i])
     end
 end
 

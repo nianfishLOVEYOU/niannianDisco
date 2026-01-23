@@ -48,6 +48,8 @@ function love.load()
 end
 
 function love.update(dt)
+    
+
     world:update(dt)
     systemManager:update(dt)
     statusManager:update(dt)
@@ -57,6 +59,7 @@ function love.update(dt)
     nianDebug.DebugUpdate(dt)
     -- 使用时发送参数
     local mx, my = love.mouse.getPosition()
+    
 end
 
 -- 方法2：监控窗口焦点事件，避免在里面做耗时操作
