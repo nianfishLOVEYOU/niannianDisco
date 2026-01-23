@@ -1,48 +1,38 @@
+local dialogueBox = require("src.ui.uiHelpSrc.dialogueBox")
 local ui = require "src.ui.ui"
 local FloatUI = ui:extend()
-local love = require "love"
 
 function FloatUI:init()
     self.timers = {}
-    self.items = {} -- floating items (tables with update/draw)
+    self.widgets = {
+    } -- floating items (tables with update/draw)
+    self.floatTexts = {}
+    self.dialogBoxs = {}
     self.z = 1000
 end
 
 -- 创建一个渐隐并向上漂移的文字
 -- opts: {duration=1.5, vy= -30, color={1,1,1,1}, font=nil}
-function FloatUI:createFloatText(text, x, y, opts)
-    opts = opts or {}
-    local duration = opts.duration or 1.5
-    local vy = opts.vy or -30
-    local color = opts.color or {1,1,1,1}
-    local font = opts.font or love.graphics.getFont()
+function FloatUI:createFloatText(text, x, y)
+    local duration = 1.5
+    local vy = -30
+    local color = { 1, 1, 1, 1 }
+    local gtext = Glove.Text:new(text)
+    gtext:setPos(x, y, 0)
+    gtext.color = color
 
-    local item = {
-        type = "floatText",
-        text = text,
-        x = x,
-        y = y,
-        vy = vy,
-        t = 0,
-        duration = duration,
-        color = { unpack(color) },
-        font = font,
-        update = function(self, dt)
-            self.t = self.t + dt
-            self.y = self.y + self.vy * dt
-            local a = 1 - (self.t / self.duration)
-            if a < 0 then a = 0 end
-            self.color[4] = a
-        end,
-        draw = function(self)
-            love.graphics.setFont(self.font)
-            love.graphics.setColor(self.color)
-            love.graphics.print(self.text, self.x, self.y)
-            love.graphics.setColor(1,1,1,1)
-        end,
-    }
-    table.insert(self.items, item)
-    return item
+    table.insert(self.floatTexts, { text = gtext, duration = duration, vy = vy })
+end
+
+function FloatUI:createDialogBox(text, player)
+    -- 创建第一个对话框（使用默认样式）
+    local dialog1 = dialogueBox:new(
+        text, -- 文字
+        150, 100, -- 对话框位置
+        200, 180 -- 尾巴指向位置
+    )
+
+    table.insert(self.dialogBoxs, dialog1)
 end
 
 -- 创建一个简单的弹窗（若 Glove.Window 可用则使用之）
@@ -79,10 +69,9 @@ function FloatUI:createPopup(text, x, y, opts)
 
         self:addStack(win)
         if duration and duration > 0 then
-            table.insert(self.timers, {t = 0, duration = duration, target = win, type = "window"})
+            table.insert(self.timers, { t = 0, duration = duration, target = win, type = "window" })
         end
         return win
-
     elseif Glove and Glove.Window then
         -- legacy Glove.Window path
         local win = Glove.Window:new(title)
@@ -113,41 +102,44 @@ function FloatUI:createPopup(text, x, y, opts)
         end
 
         self:addStack(win)
-        local timer = {t = 0, duration = duration, target = win, type = "window"}
+        local timer = { t = 0, duration = duration, target = win, type = "window" }
         table.insert(self.timers, timer)
         return win
     else
         -- fallback simple pop item
         local item = {
             type = "popup",
-            x = x, y = y, w = w, h = h,
+            x = x,
+            y = y,
+            w = w,
+            h = h,
             text = text,
-            t = 0, duration = duration,
+            t = 0,
+            duration = duration,
             update = function(self, dt)
                 self.t = self.t + dt
                 -- small fade and float
                 self.y = self.y - 10 * dt
             end,
             draw = function(self)
-                love.graphics.setColor(0,0,0,0.8)
-                love.graphics.rectangle('fill', self.x, self.y, self.w, self.h, 6,6)
-                love.graphics.setColor(1,1,1,1)
+                love.graphics.setColor(0, 0, 0, 0.8)
+                love.graphics.rectangle('fill', self.x, self.y, self.w, self.h, 6, 6)
+                love.graphics.setColor(1, 1, 1, 1)
                 love.graphics.print(self.text, self.x + 8, self.y + 8)
             end
         }
-        table.insert(self.items, item)
+        table.insert(self.widgets, item)
         return item
     end
 end
 
-
 function FloatUI:update(dt)
     -- update floating items
-    for i = #self.items, 1, -1 do
-        local it = self.items[i]
+    for i = #self.widgets, 1, -1 do
+        local it = self.widgets[i]
         if it.update then it:update(dt) end
         if it.t and it.duration and it.t >= it.duration then
-            table.remove(self.items, i)
+            table.remove(self.widgets, i)
         end
     end
 
@@ -168,8 +160,16 @@ function FloatUI:draw()
     -- draw underlying stacks first
     self:drawStacks()
     -- draw floating items on top
-    for _, it in ipairs(self.items) do
+    for _, it in ipairs(self.widgets) do
         if it.draw then it:draw() end
+    end
+
+    for i, d in ipairs(self.dialogBoxs) do
+        d:draw()
+    end
+
+    for i, t in ipairs(self.floatTexts) do
+        t.text:draw()
     end
 end
 
