@@ -136,6 +136,7 @@ function PlayerSelectUI:draw()
         love.graphics.setColor(0.2,0.2,0.2)
         love.graphics.rectangle("fill", ix, iy, thumbW, thumbH, 4,4)
         if it.image then
+        love.graphics.setColor(1,1,1)
             local iw = it.image:getWidth()
             local ih = it.image:getHeight()
             local scale = math.min(thumbW/iw, thumbH/ih, 1)
