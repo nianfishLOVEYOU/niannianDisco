@@ -8,11 +8,17 @@ function ShadePanel:init(children)
     self.type = "ShadePanel"
     self.w = 60
     self.h = 100
+    self.z=-1
     self.contents = children or {}
     --每个都设置裁剪
     for _, entry in ipairs(self.contents) do
         entry:setShade(self)
     end
+end
+
+function ShadePanel:getPos()
+    local x,y,_= widget.getPos(self)
+    return x, y, -1
 end
 
 function ShadePanel:addContent(content)
@@ -30,10 +36,10 @@ function ShadePanel:removeContent(content)
     end
 end
 
---不会被点击
-function ShadePanel:isOver(x,y)
-    return false
-end
+-- --不会被点击
+-- function ShadePanel:isOver(x,y)
+--     return false
+-- end
 
 function ShadePanel:draw()
     if not self.visible then return end

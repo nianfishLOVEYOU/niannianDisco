@@ -47,6 +47,22 @@ function item:setParentInit()
 end
 
 function item:addChild(child)
+    --避免循环嵌套，要遍历自己的父亲的父亲。。。有没有这个孩子
+
+    -- prevent creating cycles: ensure 'child' is not an ancestor of self
+    if child == self then
+        print("item:addChild: cannot add self as child")
+        return
+    end
+    local p = self
+    while p do
+        if p == child then
+            print("item:addChild: cannot add child — it is an ancestor (would create cycle)")
+            return
+        end
+        p = p.parent
+    end
+
     if child.parent then
         child.parent:removeChild(child)
     end
@@ -120,7 +136,11 @@ function item:setLocalPos(x, y, z)
 end
 
 function item:getLocalPos()
-    return self.localX, self.localY, self.localZ
+    if self.parent then
+        return self.localX, self.localY, self.localZ
+    else
+        return self.x, self.y, self.z
+    end
 end
 
 -- 刷新本地位置
@@ -148,6 +168,7 @@ function item:setPos(x, y, z)
 end
 
 function item:getPos()
+    self:localPosRefresh()
     return self.x, self.y, self.z
 end
 

@@ -23,11 +23,12 @@ function SlidePanel:init(content)
     self.lockOffsetX = true
     self.lockOffsetY = false
 
+    --用来计算拖拽速度
     self.t = 0
     self.dt = 0
     self.viscous = 0.2
     if not self.shadePanel then
-        self.shadePanel = Glove.ShadePanel:new( )
+        self.shadePanel = Glove.ShadePanel:new()
         self.shadePanel:setPos(self.x, self.y)
         self.shadePanel:setSize(self.w, self.h)
     end
@@ -36,7 +37,6 @@ function SlidePanel:init(content)
 
     --设置点击遮罩
 end
-
 
 function SlidePanel:addChild(child)
     self.shadePanel:addContent(child)
@@ -47,7 +47,6 @@ function SlidePanel:removeChild(child)
     self.shadePanel:removeContent(child)
     widget.removeChild(self, child)
 end
-
 
 function SlidePanel:setPos(x, y)
     widget.setPos(self, x, y)
@@ -96,35 +95,13 @@ function SlidePanel:draw()
     self.shadePanel:draw()
 end
 
--- 简化的 Glove 事件接口：点击、拖拽、释放、悬停
-function SlidePanel:onClick(x, y)
-    -- x,y 为全局坐标
-    -- 只有在可视裁剪区内才处理
-    if not self:isOver(x, y) then return end
-    -- 记录按下用于后续 drag/over
-    self._pressed = true
-    local content = self:getContent()
-    if content and content.onClick then
-        local cx, cy = content:getPos()
-        content:onClick(x - cx, y - cy)
-    end
-end
-
 function SlidePanel:onDrag(x, y, dx, dy)
-    if not self._pressed then return end
     -- 仍需保证拖拽点在可视区域内
     if not self:isOver(x, y) then return end
     -- 使用已有的滑动逻辑（传入 dx,dy 即可）
     local content = self:getContent()
     if not content then return end
-    -- forward to content if it handles drag
-    -- if content.onDrag then
-    --     local cx, cy = content:getPos()
-    --     content:onDrag(x - cx, y - cy, dx, dy)
-    -- else
     self:onDragInternal(dx, dy)
-    -- end
-    --print("SlidePanel",dx,dy)
 end
 
 -- internal helper to reuse existing onDrag code
@@ -149,13 +126,21 @@ function SlidePanel:onDragInternal(dx, dy)
 
     --print("SlidePanel", dx, dy)
     local xspace, yspace = self:getSlideSpace()
-    self.progressX = content.localX / (xspace == 0 and 1 or xspace)
-    self.progressY = content.localY / (yspace == 0 and 1 or yspace)
+    self.progressX =- content.localX / (xspace == 0 and 1 or xspace)
+    self.progressY =- content.localY / (yspace == 0 and 1 or yspace)
+    self.progressX = math.min(1, math.max(0, self.progressX))
+    self.progressY = math.min(1, math.max(0, self.progressY))
+    
+    -- self.t = self.t == 0 and love.timer.getTime() or self.t     --如果t为零先初始化
+    -- self.dt = love.timer.getTime() - self.t
+    -- self.t = love.timer.getTime()
+    -- if self.dt ~= 0 then
+    --     self.dx = dx / self.dt
+    --     self.dy = dy / self.dt --获得单位时间速度
+    -- end
 end
 
 function SlidePanel:onDragOver(x, y)
-    if not self._pressed then return end
-    self._pressed = false
     self:dragProgress(x)
     self.t = 0
     self.dt = 0
@@ -167,7 +152,6 @@ function SlidePanel:onDragOver(x, y)
 end
 
 function SlidePanel:onClickOver(x, y)
-    self._pressed = false
     local content = self:getContent()
     if content and content.onClickOver then
         local cx, cy = content:getPos()
@@ -189,7 +173,7 @@ end
 function SlidePanel:getSlideSpace()
     local content = self:getContent()
     if content then
-        local xspace, yspace = self.w - content.w, self.h - content.h
+        local xspace, yspace = content.w- self.w , content.h-self.h
         xspace = xspace < 0 and 0 or xspace
         yspace = yspace < 0 and 0 or yspace
         return xspace, yspace
@@ -305,6 +289,11 @@ end
 
 function SlidePanel:dragProgress(progressX, progressY)
     --如果有拖拽条
+end
+
+function SlidePanel:destroy()
+    widget.destroy(self)
+    self.shadePanel:destroy()
 end
 
 return SlidePanel

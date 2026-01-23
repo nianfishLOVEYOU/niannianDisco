@@ -52,39 +52,31 @@ Glove = {
     return widget == focusedWidget
   end,
 
+
   -- 获得排序最后最上的ui ,type 查找固定的type
-  getFirstWidget = function(mouseX, mouseY, type)
+  getFirstWidget = function(mouseX, mouseY, type ,nottype)
     local clickWidget = nil
     for _, widget in pairs(Glove.widgets) do
-      if widget.type == "HStack" or widget.type == "VStack" then
 
-      elseif widget.visible then
-        local x, y, z = widget:getPos()
-        local width, height = widget:getSize()
-        if x <= mouseX and mouseX <= x + width and
-            y <= mouseY and mouseY <= y + height then
+      if widget.visible then
+        local _, _, z = widget:getPos()
+        if widget:isOver(mouseX, mouseY) and not (nottype and widget.type == nottype) then
           -- 如果控件提供 isOver 方法，则让控件决定该点是否可被点击（用于裁剪区域内外判定）
-          local accept = true
-          if widget.isOver then
-            local ok = widget:isOver(mouseX, mouseY)
-            if not ok then accept = false end
-          end
-          if accept then
-            local issamType
-            if type then
-              issamType = widget.type == type
-            else
-              issamType = true
-            end
 
-            if issamType then
-              if clickWidget == nil then
+          local isFindType
+          if type then
+            isFindType = widget.type == type
+          else
+            isFindType = true
+          end
+
+          if isFindType then
+            if clickWidget == nil then
+              clickWidget = widget
+            else
+              local _, _, cz = clickWidget:getPos()
+              if z >= cz then
                 clickWidget = widget
-              else
-                local _, _, cz = clickWidget:getPos()
-                if z >= cz then
-                  clickWidget = widget
-                end
               end
             end
           end
@@ -99,7 +91,7 @@ Glove = {
     --按照z轴前后点击
     if button ~= 1 then return end
     mouseIsDown1 = true
-    local clickWidget = Glove.getFirstWidget(mouseX, mouseY)
+    local clickWidget = Glove.getFirstWidget(mouseX, mouseY,nil,"SlidePanel")
     if clickWidget then
       clickWidget:onClick(mouseX, mouseY)
       Glove.setFocus(clickWidget)
@@ -115,6 +107,7 @@ Glove = {
     local clickSlidePanel = Glove.getFirstWidget(mouseX, mouseY, "SlidePanel")
     if clickSlidePanel then
       Glove.clickSlidePanel = clickSlidePanel
+      
     else
       --移除焦点
       Glove.clickSlidePanel = nil
@@ -151,7 +144,7 @@ Glove = {
       clickWidget:onClickOver(x, y)
     end
     mouseIsDown1 = false
-    
+
     --滑动条
     if Glove.clickSlidePanel then
       Glove.clickSlidePanel.isDrag = false

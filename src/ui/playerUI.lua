@@ -5,7 +5,6 @@ local PlayerUI = ui:extend()
 
 function PlayerUI:init()
     audio.playlist = globleManager:getGameData("playlist") or {}
-    print(1111)
     self:refresh()
 end
 

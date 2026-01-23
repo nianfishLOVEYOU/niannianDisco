@@ -18,7 +18,7 @@ function widget:setShade(shade)
     print("不能设置自己为裁剪对象!!!!!!!!")
     return
   end
-  local function childSetShade(parent,shade)
+  local function childSetShade(parent, shade)
     parent.shade = shade
     for _, child in pairs(parent.children) do
       childSetShade(child, shade)
@@ -31,6 +31,7 @@ end
 function widget:isOver(mouseX, mouseY)
   --如果有裁剪点到外面就不算
   if self.shade and not self.shade:isOver(mouseX, mouseY) then
+    
     return false
   end
   local width, height = self:getSize()
@@ -44,6 +45,7 @@ function widget:setParentInit()
   end
   self.localX = self.x - self.parent.x
   self.localY = self.y - self.parent.y
+  self.localZ = 1
 end
 
 function widget:destroy()
