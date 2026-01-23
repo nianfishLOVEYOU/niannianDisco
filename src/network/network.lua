@@ -100,7 +100,9 @@ function Network:unicast_mp3(id, path, name)
 end
 
 function Network:info()
-    local pktCh = infoNetworkCh:pop()
+    --必须要0.01没有数据就跳过，不然是阻塞的
+    --窗口焦点切换会降低 Love2D 主线程的调度优先级，系统不再「宽容」这个阻塞请求，而是强制等待 pop() 返回
+    local pktCh = infoNetworkCh:pop(0.01)
     if pktCh then
         -- print("pktCh type : "..pktCh.type )
         if pktCh.type == "audioOk" then
