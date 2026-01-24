@@ -57,7 +57,7 @@ Glove = {
   getFirstWidget = function(mouseX, mouseY, type ,nottype)
     local clickWidget = nil
     for _, widget in pairs(Glove.widgets) do
-
+      
       if widget.visible then
         local _, _, z = widget:getPos()
         if widget:isOver(mouseX, mouseY) and not (nottype and widget.type == nottype) then
@@ -163,6 +163,7 @@ Glove = {
       focusedWidget:removeFocus()
     end
     focusedWidget = widget
+    -- 输入备选字显现
   end,
 }
 
@@ -178,6 +179,13 @@ end
 
 keybordManager:keypressed_regester(function(key)
   Glove.keypressed(key)
+end)
+
+-- forward text input (IME / composed characters) to focused widget
+keybordManager:textinput_regester(function(text)
+  if focusedWidget and focusedWidget.textinput then
+    focusedWidget:textinput(text)
+  end
 end)
 
 mouseManager:mousepressed_regester(function(x, y, button)

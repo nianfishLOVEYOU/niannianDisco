@@ -85,6 +85,7 @@ function Input:onClick(clickX, clickY, button)
   inputCursor = value:utf8len()
 end
 
+--这个应该是新家的用love settext
 function Input:setText(text)
   self.text = text
 end
@@ -105,27 +106,26 @@ function Input:keypressed(keyPressed)
       self.text = value:utf8sub(1, c - 1) .. value:utf8sub(c + 1, #value)
       inputCursor = c - 1
     end
+    if self.onInput then self.onInput(self.text) end
   elseif keyPressed == "left" then
     if c > 0 then inputCursor = c - 1 end
   elseif keyPressed == "right" then
     if c < #value then inputCursor = c + 1 end
   else
-    if keyPressed == "space" then keyPressed = " " end
-
-    -- Only process printable ASCII characters.
-    if #keyPressed == 1 then
-      local head = c == 0 and "" or value:utf8sub(1, c)
-      local tail = value:utf8sub(c + 1, #value)
-      local shift = lk.isDown("lshift") or lk.isDown("rshift")
-      local char = shift and keyPressed:upper() or keyPressed
-      self.text = head .. char .. tail
-      inputCursor = c + 1
-    end
-    --输入函数
-    if self.onInput then
-      self.onInput(self.text)
-    end
+    -- Do not insert printable characters here to avoid duplicate input.
+    -- Character insertion is handled by `textinput` (IME and normal letters).
   end
+end
+
+-- handle IME / composed text input (supports Chinese)
+function Input:textinput(t)
+  local c = inputCursor or 0
+  local value = self.text or ""
+  local head = c == 0 and "" or value:utf8sub(1, c)
+  local tail = value:utf8sub(c + 1, value:utf8len())
+  self.text = head .. t .. tail
+  inputCursor = c + t:utf8len()
+  if self.onInput then self.onInput(self.text) end
 end
 
 return Input

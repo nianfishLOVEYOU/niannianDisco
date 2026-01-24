@@ -13,7 +13,7 @@ end
 
 -- 创建一个渐隐并向上漂移的文字
 -- opts: {duration=1.5, vy= -30, color={1,1,1,1}, font=nil}
-function FloatUI:createFloatText(text, x, y)
+function FloatUI:addFloatText(text, x, y)
     local duration = 1.5
     local vy = -30
     local color = { 1, 1, 1, 1 }
@@ -24,7 +24,7 @@ function FloatUI:createFloatText(text, x, y)
     table.insert(self.floatTexts, { text = gtext, duration = duration, vy = vy })
 end
 
-function FloatUI:createDialogBox(text, player)
+function FloatUI:addDialogeBox(text, player)
     -- 创建第一个对话框（使用默认样式）
     local dialog1 = dialogueBox:new(
         text,     -- 文字
@@ -37,7 +37,7 @@ end
 
 -- 创建一个简单的弹窗（若 Glove.Window 可用则使用之）
 -- opts: {w=200,h=120,duration=2,title=""}
-function FloatUI:createPopup(text, x, y)
+function FloatUI:addWindow(text, x, y)
     -- prefer Glove.widgets.Window if available
 
 

@@ -53,13 +53,12 @@ end
 local pn = 0
 function playerControl:keydown(key)
 
-    -- 交互
-    if self.interactItem then
         if key == 'q' then
-            -- self.interactItem:interact()
+            print("dialogebox create")
+            uiManager:getUI("floatUI"):createDialogBox("hello world ",playerManager.player)
+            --创建一个对话
         end
 
-    end
 end
 
 function playerControl:draw()

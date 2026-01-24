@@ -10,6 +10,8 @@ function Game:init()
     uiManager:addUI("playerUI",playerUI)
     local playerlistUI = require("src.ui.playerlistUI"):new()
     uiManager:addUI("playerlistUI",playerlistUI)
+    local floatUI = require("src.ui.floatUI"):new()
+    uiManager:addUI("floatUI",floatUI)
 
     playerManager:addPlayer(globleManager.map.startPoint.x, globleManager.map.startPoint.y)
     --playerManager:addRemotePlayer(1,"name",map.startPoint.x, map.startPoint.y)
