@@ -15,10 +15,11 @@ local defaultConfig = {
 }
 
 -- 创建新的对话框实例
-function DialogueBox.new(text, x, y, targetX, targetY, config)
+function DialogueBox:new(text, x, y, targetX, targetY, config)
     local self = setmetatable({}, DialogueBox)
     
     -- 合并配置
+    config=config or {}
     self.config = {}
     for k, v in pairs(defaultConfig) do
         self.config[k] = config and config[k] or v

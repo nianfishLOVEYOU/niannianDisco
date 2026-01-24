@@ -5,7 +5,7 @@ local Game = {}
 
 function Game:init()
     --ui
-    mapLoader:loadMap("res/maps/edited.json")
+    mapManager:loadMap("res/maps/edited.json")
     local playerUI = require("src.ui.playerUI"):new()
     uiManager:addUI("playerUI",playerUI)
     local playerlistUI = require("src.ui.playerlistUI"):new()

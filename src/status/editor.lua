@@ -13,7 +13,9 @@ systemManager:draw_regester(function()
 end)
 
 function Editor:init()
-    self.editor = require "src.map.mapEditor"
+    -- 创建一个 mapEditor 实例，并在其中初始化和注册 MapEditorUI
+    local editorModule = require "src.map.mapEditor"
+    self.editor = editorModule
     self.editor:init()
 end
 
@@ -21,11 +23,11 @@ function Editor:update(dt)
     if self.editor then
         self.editor:update(dt)
     end
-    -- 通过 setPosition 把新位置写回摄像机
 end
 
 function Editor:uidraw()
-    if self.editor then
+    -- 现在 UI 完全由 uiManager 里的 MapEditorUI 绘制，这里可以留空或保留兼容接口
+    if self.editor and self.editor.uidraw then
         self.editor:uidraw()
     end
 end
@@ -38,7 +40,7 @@ end
 
 -- 结束生命周期等待下次初始化
 function Editor:leave()
-    if self.editor then
+    if self.editor and self.editor.leave then
         self.editor:leave()
     end
 end

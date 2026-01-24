@@ -3,7 +3,7 @@
 nianDebug={}
 
 local function printCol()
-    love.graphics.setColor(0, 1, 0) -- 白色轮廓
+    love.graphics.setColor(0, 1, 0,0.3) 
     love.graphics.setLineWidth(2)
 
     for _, body in ipairs(world:getBodies()) do
@@ -62,9 +62,12 @@ function nianDebug.DebugPrint()
     -- 计算 FPS
     local fps = love.timer.getFPS()
     -- 在屏幕左上角显示 FPS
-    love.graphics.print("FPS: " .. fps, 10, 10)
-    love.graphics.print("按下b 编辑地图", 10, 20)
-    love.graphics.print("是否开启networklocalmod " .. tostring(commonData.openlocalMod), 10, 30)
+
+    if not commonData.openMapEditorMode then
+        love.graphics.print("FPS: " .. fps, 10, 10)
+        love.graphics.print("按下b 编辑地图", 10, 20)
+        love.graphics.print("是否开启networklocalmod " .. tostring(commonData.openlocalMod), 10, 30)
+    end
     --love.graphics.print("音乐声值："..audio:getMusicSpectrum())
     love.graphics.setColor(1, 1, 1)
 

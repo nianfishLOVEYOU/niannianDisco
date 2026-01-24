@@ -11,7 +11,6 @@ require "src.glove"
 
 network = require "src.network.network"
 audio = require "src.audio"
-mapLoader = require "src.map.mapLoader"
 
 
 
@@ -59,7 +58,6 @@ local function keypressed(k)
     if k == "b" then -- B 键 → 广播
         commonData.openMapEditorMode = true
         statusManager:statusChange("editor")
-        mapLoader:closeMap()
     end
     if k == "n" then -- N 键 → 正常模式
         network:closeNetThread()
@@ -87,14 +85,14 @@ local function drawNoCanvasScene()
 end
 
 function love.draw()
-    if commonData.openMapEditorMode then
-        cameraManager.cam:draw(camDepth)
-        cameraManager.cam:draw(camDraw)
-        systemManager:draw()
-        -- debug
-        nianDebug.DebugPrint()
-        return
-    end
+    -- if commonData.openMapEditorMode then
+    --     cameraManager.cam:draw(camDepth)
+    --     cameraManager.cam:draw(camDraw)
+    --     systemManager:draw()
+    --     -- debug
+    --     nianDebug.DebugPrint()
+    --     return
+    -- end
 
     -- 相机深度绘制
     cameraManager.cam:draw(camDepth)

@@ -89,7 +89,7 @@ function SlidePanel:draw()
     if not content then return end
 
     if not self.isDrag then
-        self:backToCenter()
+        --self:backToCenter()
     end
 
     self.shadePanel:draw()

@@ -19,3 +19,4 @@ bodyManager = require "src.manager.bodyManager"
 cameraManager=require "src.manager.cameraManager"
 
 playlistManager =require "src.manager.playlistManager"
+mapManager = require "src.manager.mapManager"
