@@ -55,7 +55,7 @@ function playerControl:keydown(key)
 
         if key == 'q' then
             print("dialogebox create")
-            uiManager:getUI("floatUI"):createDialogBox("hello world ",playerManager.player)
+            uiManager:getUI("floatUI"):addDialogeBox("hello world ",playerManager.player)
             --创建一个对话
         end
 
