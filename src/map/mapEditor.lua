@@ -126,7 +126,7 @@ function mapEditor:mousemoved(x, y, dx, dy, istouch)
         local posy=floorToPixSize(worldY+mapEditor.dragOffset.y)
         mapEditor.selected:setPos(posx,posy)
     elseif love.mouse.isDown(3) then
-        cameraManager.cam:setPosition(cam.x - dx, cam.y - dy)
+        cameraManager.cam:setPosition(cameraManager.cam.x - dx, cameraManager.cam.y - dy)
     end
 end
 

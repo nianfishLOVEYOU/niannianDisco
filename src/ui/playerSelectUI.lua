@@ -46,6 +46,17 @@ function PlayerSelectUI:init()
 
     self.selected = 1
 
+    -- Check for previously selected player image
+    local lastSelected = globleManager:getGameData("selectedPlayerImage")
+    if lastSelected then
+        for i, img in ipairs(self.images) do
+            if img.path == lastSelected then
+                self.selected = i
+                break
+            end
+        end
+    end
+
     -- register drop and mouse
     local function onFileDrop(file, name, fullname, extend)
         local mx, my = love.mouse.getPosition()
@@ -56,12 +67,12 @@ function PlayerSelectUI:init()
         extend = extend and extend:lower()
         if not (extend == "png" or extend == "jpg" or extend == "jpeg") then return end
 
-        local tmpPath = "tmp/" .. name
+        local tmpPath = "tmp/Image/" .. name
         if fileManager:fileIsExsit(tmpPath) then
             -- already exists, just add
         else
             local data = file:read()
-            love.filesystem.createDirectory("tmp")
+            love.filesystem.createDirectory("tmp/image")
             local ok, msg = love.filesystem.write(tmpPath, data)
             if not ok then print("save drop fail", msg); return end
         end
@@ -93,14 +104,9 @@ function PlayerSelectUI:init()
             local iy = startY + row * (thumbH + pad)
             if x >= ix and x <= ix + thumbW and y >= iy and y <= iy + thumbH then
                 self.selected = i
+                self:confirmSelection()
                 return
             end
-        end
-        -- confirm button
-        local bx = self.x + self.w - 120
-        local by = self.y + self.h - 48
-        if x >= bx and x <= bx + 100 and y >= by and y <= by + 32 then
-            self:confirmSelection()
         end
     end
     eventManager:on("event_mousePressed", onMousePressed)
@@ -113,7 +119,7 @@ function PlayerSelectUI:confirmSelection()
     globleManager:saveGameData("selectedPlayerImage", sel.path)
     -- also set playerManager preview
     playerManager.selectedImage = sel.path
-    uiManager:removeUI("playerSelectUI")
+    --uiManager:removeUI("playerSelectUI")
 end
 
 function PlayerSelectUI:draw()
@@ -148,13 +154,6 @@ function PlayerSelectUI:draw()
         end
     end
 
-    -- draw confirm button
-    local bx = self.x + self.w - 120
-    local by = self.y + self.h - 48
-    love.graphics.setColor(0.1,0.6,0.1)
-    love.graphics.rectangle("fill", bx, by, 100, 32, 6,6)
-    love.graphics.setColor(1,1,1)
-    love.graphics.print("确认", bx + 36, by + 8)
 end
 
 function PlayerSelectUI:destroy()

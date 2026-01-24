@@ -59,7 +59,7 @@ local function keypressed(k)
     if k == "b" then -- B 键 → 广播
         commonData.openMapEditorMode = true
         statusManager:statusChange("editor")
-        closeMap()
+        mapLoader:closeMap()
     end
     if k == "n" then -- N 键 → 正常模式
         network:closeNetThread()
