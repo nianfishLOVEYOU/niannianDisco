@@ -208,6 +208,13 @@ function Network:handleMessage(message, address)
         if soundManager and soundManager.play then
             soundManager:play("res/soundeffects/happybirthday.mp3", 1, false)
         end
+        --找到item中的cake
+        for _, item in pairs(itemManager.items) do
+            if item.type == "cake" then
+                item:handleCakeClickSequence()
+                break
+            end
+        end
     else
         print("## no handle by: " .. message.type)
     end

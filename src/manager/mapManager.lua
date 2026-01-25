@@ -4,7 +4,8 @@ local Item = require "src.item.item"
 
 local mapManager = {}
 
-mapManager.itemTypes = { "floor", "tree", "wall", "mic", "ball", "sofa", "startPoint", "eventZone", "lightpoint", "fire" }
+mapManager.itemTypes = {"floor", "tree", "wall", "mic", "ball", "sofa", "startPoint", "eventZone", "lightpoint", "fire",
+                        "table", "cake", "tree2"}
 mapManager.itemnews = {}
 
 for _, module in ipairs(mapManager.itemTypes) do
@@ -22,7 +23,7 @@ function mapManager.load(mapFile)
     local data = json.decode(raw)
 
     local map = {}
-    --map.background = resourceManager.loadImage(data.background) -- 背景图片
+    -- map.background = resourceManager.loadImage(data.background) -- 背景图片
     map.items = {}
     map.startPoint = {
         x = 0,
@@ -34,11 +35,11 @@ function mapManager.load(mapFile)
         if mapManager.itemnews[it.type] then
             local item = mapManager.itemnews[it.type]:new()
             item:setPos(it.x, it.y, it.z)
-            --特殊的有长宽不定的item
+            -- 特殊的有长宽不定的item
             if it.type == "wall" then
                 item:setSize(it.w, it.h)
             end
-            
+
             table.insert(map.items, item)
         else
             local item = Item:new()
@@ -46,7 +47,7 @@ function mapManager.load(mapFile)
             item:setPos(it.x, it.y, it.z)
             table.insert(map.items, item)
         end
-        --如果有开始位子则记录
+        -- 如果有开始位子则记录
         if it.type == "startPoint" then
             map.startPoint = {
                 x = it.x,
@@ -69,11 +70,10 @@ function mapManager:loadMap(mapPath)
     end
 end
 
-
 function mapManager:closeMap()
     globleManager.map = nil
     itemManager:removeAll()
-    --playerManager:removeAllPlayers()
+    -- playerManager:removeAllPlayers()
 end
 
 function mapManager:saveMap(outFile)
@@ -87,8 +87,8 @@ end
 --- @param outFile 输出路径，例如 "maps/map01.json"
 function mapManager.save(items, outFile)
     local out = {
-        --background = "res/image/map01.png",
-        items = {},
+        -- background = "res/image/map01.png",
+        items = {}
     }
     for k, it in pairs(items) do
         table.insert(out.items, {
@@ -97,7 +97,7 @@ function mapManager.save(items, outFile)
             y = it.y,
             z = it.z,
             w = it.w,
-            h = it.h,
+            h = it.h
         })
     end
 

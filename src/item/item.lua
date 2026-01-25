@@ -10,7 +10,7 @@ end
 function item:init()
     self.name = "n_name"
     self.id = ""
-    self.type = "item"
+    self.type     = "item"
 
     self.x, self.y = 10, 10
     self.z = 0
@@ -36,6 +36,9 @@ function item:init()
     self.children = {}
 
     -- 清理方法
+
+    -- 可交互
+    self.interaction = false
 end
 
 function item:setName(name)

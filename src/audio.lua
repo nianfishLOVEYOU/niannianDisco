@@ -15,7 +15,7 @@ local Audio = {
     targetVolume = 0.3,
     fadeDuration = 1.0,
     fadeTime = 0,
-    fadeType = nil,      -- "in" | "out"
+    fadeType = nil, -- "in" | "out"
     savedVolume = 0.3,
     pausedByCake = false
 }
@@ -24,7 +24,7 @@ function Audio:init()
 end
 
 function Audio:savePlaylist()
-    globleManager:saveGameData("playlist",self.playlist)
+    globleManager:saveGameData("playlist", self.playlist)
 end
 
 systemManager:update_regester(function(dt)
@@ -41,7 +41,7 @@ end
 
 function Audio:isOvered()
     if (self.currentSource) then
-        return self:getCurrentDuration() - Audio:getPosition() < 0.1
+        return self:getCurrentDuration() - Audio:getPosition() < 0.2
     end
     return false
 end
@@ -113,7 +113,9 @@ end
 
 -- 由蛋糕触发的外部暂停：先淡出再暂停
 function Audio:pauseForCake()
-    if not self.currentSource or not self:isPlaying() then return end
+    if not self.currentSource or not self:isPlaying() then
+        return
+    end
     self.pausedByCake = true
     self.savedVolume = self.volume
     self:fadeTo(0.0, self.fadeDuration or 1.0, function()
@@ -123,7 +125,9 @@ end
 
 -- 蛋糕播放结束后恢复：先恢复播放，再淡入目标音量
 function Audio:resumeAfterCake()
-    if not self.currentSource or not self.pausedByCake then return end
+    if not self.currentSource or not self.pausedByCake then
+        return
+    end
     self.pausedByCake = false
     -- 立即恢复播放，但从 0 音量开始淡入
     self:setVolume(0.0)
@@ -211,23 +215,29 @@ function Audio:seek(position)
     end
 end
 
---限制每次播放结束自动下一首只有一人广播
+-- 限制每次播放结束自动下一首只有一人广播
 function Audio:automusicNext()
     -- 从0开始播放
-    if #self.playlist==0 then return end
+    if #self.playlist == 0 then
+        return
+    end
 
-    local nextId =0
-    --还没开始播放的时候播放
-    if self.currentIndex == 0  then
-        nextId=1
+    local nextId = self.currentIndex
+    -- 还没开始播放的时候播放
+    if self.currentIndex == 0 then
+        nextId = 1
     end
     -- 从播放结束之后开始播放
     if self:isOvered() then
-        nextId=((audio.currentIndex) % #audio.playlist) + 1
+        nextId = ((audio.currentIndex) % #audio.playlist) + 1
     end
 
-    if nextId ~=0 and network.userid == self.playlist[nextId].userid then
-        self:next(nextId)
+    if self.playlist[nextId] then
+        if nextId ~= 0 and network.userid == self.playlist[nextId].userid then
+            self:next(nextId)
+        end
+    else
+        print(" ## automusicNext no nextId..", nextId)
     end
 end
 
@@ -266,34 +276,35 @@ function Audio:update(dt)
     if os.time() - waittime > 0.5 then
         waittime = os.time()
 
-        self:automusicNext()
-        --音乐资源等待下载
-        if self.stuck then
-            print("stuck!!")
-            local musicpath = fileManager:getFilePathByName(self.playlist[self.currentIndex].name)
-            if musicpath then
-                self:MusicStart(musicpath, 0)
-                self.downloadProgress = 0
-            end
-        end
 
     else
-        --不是定时的逻辑
+        -- 不是定时的逻辑
+    end
+    
+    self:automusicNext()
+    -- 音乐资源等待下载
+    if self.stuck then
+        print("stuck!!")
+        local musicpath = fileManager:getFilePathByName(self.playlist[self.currentIndex].name)
+        if musicpath then
+            self:MusicStart(musicpath, 0)
+            self.downloadProgress = 0
+        end
     end
 
 end
 
-local spectrumBars = 1    -- 仅获取1个频率能量值
-local fftSize = 64      -- 满足 1024 ≥ 1 即可
-local smoothFactor = 0.2  -- 平滑因子，避免圆形大小突变
-local currentEnergy = 0   -- 当前能量值
+local spectrumBars = 1 -- 仅获取1个频率能量值
+local fftSize = 64 -- 满足 1024 ≥ 1 即可
+local smoothFactor = 0.2 -- 平滑因子，避免圆形大小突变
+local currentEnergy = 0 -- 当前能量值
 function Audio:getMusicSpectrum()
     -- 参数1: 要获取的柱形数量 (spectrumBars)
     -- 参数2: FFT的大小 (通常是 512, 1024, 2048)
     -- 参数3: 结果存放的数组 (可选)
     local spectrum = love.audio.getSpectrum(spectrumBars, fftSize)
-    local rawEnergy = spectrum[1]  -- 数组只有1个元素，取索引1
-    
+    local rawEnergy = spectrum[1] -- 数组只有1个元素，取索引1
+
     -- 平滑处理能量值，让圆形大小变化更自然
     currentEnergy = currentEnergy * smoothFactor + rawEnergy * (1 - smoothFactor)
     return currentEnergy
@@ -349,14 +360,14 @@ function Audio:addPlayMusic(path, duration, name)
 end
 
 function Audio:removePlayMusic(name)
-    print ("remove music ",name)
+    print("remove music ", name)
     if not self:musicExist(name) then
         print(" ## musicNotExist..")
         return
     end
     for index, value in ipairs(self.playlist) do
         if value.name == name then
-            table.remove(self.playlist,index)
+            table.remove(self.playlist, index)
         end
     end
     self:sendUpdatePlayList()
@@ -364,21 +375,20 @@ function Audio:removePlayMusic(name)
     uiManager:refresh("playlistUI")
 end
 
-
 -- 发送列表信息
 function Audio:sendUpdatePlayList(id)
     if id then
         -- 发送列表
         local msg = {
             type = "playlist_update",
-            playlist = self.playlist,
+            playlist = self.playlist
         }
-        network:send_unicast(id,msg)
+        network:send_unicast(id, msg)
     else
         -- 发送列表
         local msg = {
             type = "playlist_update",
-            playlist = self.playlist,
+            playlist = self.playlist
         }
         network:send_Broadcast(msg)
     end
@@ -396,6 +406,5 @@ function Audio:sendUpdatePlayStatus()
     }
     network:send_Broadcast(msg)
 end
-
 
 return Audio

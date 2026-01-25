@@ -28,8 +28,8 @@ end
 local noiseParams = {
     baseSpeed = 0.05,        -- 基础噪声流动速度（越小越稳定）
     noiseScale = 0.2,      -- 噪声缩放（越小越平滑）
-    minBrightness = 0.6,    -- 基础最小亮度（0-1）
-    maxBrightness = 1,    -- 基础最大亮度（0-1）
+    minBrightness = 0.8,    -- 基础最小亮度（0-1）
+    maxBrightness = 1.3,    -- 基础最大亮度（0-1）
     darkChance = 0.004,      -- 突发变暗的概率（每帧触发概率，0.02=2%）
 }
 

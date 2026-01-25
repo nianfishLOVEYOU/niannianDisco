@@ -27,7 +27,7 @@ function PlayerManager:addPlayer(x, y)
     end
     local selected = globleManager:getGameData("selectedPlayerImage")
     local img = selected or "res/image/player1.png"
-    local player = player:new( img)
+    local player = player:new(img)
     player:setPos(x, y)
     player:setName(self.name)
     self.player = player
@@ -51,10 +51,18 @@ end
 
 function PlayerManager:mousePressed(x, y, button)
     -- 如果 Glove 在该位置有 UI 元素，阻断玩家移动
-    if Glove and Glove.getFirstWidget then
-        local w = Glove.getFirstWidget(x, y)
-        if w then return end
+    local w = Glove.getFirstWidget(x, y)
+    if w then
+        return
     end
+
+    -- 如果点击到可交互 item 且在 100 范围内，则不走路，只做 item 操作
+    local wx, wy = cameraManager.cam:toWorld(x, y)
+    local item = itemManager:getFirstItem(wx, wy, true)
+    if item and item.interaction and itemManager.isItemInRange and itemManager:isItemInRange(item) then
+        return
+    end
+
     if self.player then
         playerControl:mousePressed(x, y, button)
     end

@@ -38,7 +38,8 @@ end
 
 -- ---------- 右键菜单状态 ----------
 function MapEditorUI:_ensureEditorUIState()
-    self._ctxMenu = self._ctxMenu or { open = false, x = 0, y = 0 }
+    -- 记录最近一次右键时是否点在选中对象上
+    self._ctxMenu = self._ctxMenu or { open = false, x = 0, y = 0, onSelected = false }
 end
 
 function MapEditorUI:_closeContextMenu()
@@ -48,6 +49,7 @@ function MapEditorUI:_closeContextMenu()
         self._ctxMenuWindow = nil
     end
     self._ctxMenu.open = false
+    self._ctxMenu.onSelected = false
 end
 
 -- 根据 mapManager.itemnews 里的类型生成菜单按钮
@@ -71,14 +73,27 @@ local function buildCreateButtons(self, win)
 
 end
 
+local function isRightClickOnSelected(editor, screenX, screenY)
+    if not (editor and editor.selected and editor.selected.isOver) then
+        return false
+    end
+    local worldX, worldY = cameraManager.cam:toWorld(screenX, screenY)
+    return editor.selected:isOver(worldX, worldY)
+end
+
 function MapEditorUI:_openContextMenu(screenX, screenY)
     if not self.editor then return end
 
     self:_ensureEditorUIState()
+    -- 判断这次右键是否点在当前选中对象上
+    self._ctxMenu.onSelected = isRightClickOnSelected(self.editor, screenX, screenY)
     self._ctxMenu.x, self._ctxMenu.y = screenX, screenY
 
     -- rebuild window
     self:_closeContextMenu()
+    self:_ensureEditorUIState()
+    self._ctxMenu.onSelected = isRightClickOnSelected(self.editor, screenX, screenY)
+    self._ctxMenu.x, self._ctxMenu.y = screenX, screenY
 
     local title = self.editor.selected and "对象操作" or "地图操作"
     local VS = Glove.VStack:new({},0)
@@ -86,7 +101,8 @@ function MapEditorUI:_openContextMenu(screenX, screenY)
     local padX, padY = 10, 10
     local curY = padY
 
-    if self.editor.selected then
+    if self._ctxMenu.onSelected then
+        -- 只有在右键点在已选中的对象上时，才显示“删除对象”
         local delBtn = Glove.Button:new("删除对象", function()
             if self.editor and self.editor.selected then
                 self.editor:removeItem(self.editor.selected)
@@ -97,7 +113,7 @@ function MapEditorUI:_openContextMenu(screenX, screenY)
         delBtn:setSize(0,0)
         VS:layout()
     else
-        -- 根据所有 itemTypes 生成“创建对象”按钮
+        -- 地图操作：根据所有 itemTypes 生成“创建对象”按钮
         buildCreateButtons(self, VS)
 
         local saveBtn = Glove.Button:new("保存地图", function()

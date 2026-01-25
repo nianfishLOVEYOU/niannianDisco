@@ -29,7 +29,43 @@ function Timer:after(delay, callback)
         delay = delay,
         elapsed = 0,       -- 已流逝时间
         callback = callback,
-        isCanceled = false -- 是否取消
+        isCanceled = false, -- 是否取消
+        type = "once"      -- 任务类型：一次性
+    })
+
+    return taskId
+end
+
+-- 在指定时间内不断执行的任务
+-- 参数：
+--   interval: 每次执行间隔（秒）
+--   duration: 总持续时间（秒）
+--   callback: 每次触发执行的函数，签名为 function(passed, remain) end
+--             passed 为已运行时间，remain 为剩余时间
+-- 返回：任务ID（用于取消）
+function Timer:during(interval, duration, callback)
+    if type(interval) ~= "number" or interval <= 0 then
+        error("interval 必须是大于0的数字")
+    end
+    if type(duration) ~= "number" or duration <= 0 then
+        error("duration 必须是大于0的数字")
+    end
+    if type(callback) ~= "function" then
+        error("callback 必须是函数")
+    end
+
+    local taskId = self.nextId
+    self.nextId = self.nextId + 1
+
+    table.insert(self.tasks, {
+        id = taskId,
+        delay = interval,
+        elapsed = 0,
+        passed = 0,         -- 已运行总时间
+        duration = duration,
+        callback = callback,
+        isCanceled = false,
+        type = "interval"  -- 任务类型：在一段时间内循环
     })
 
     return taskId
@@ -68,13 +104,31 @@ function Timer:update(dt)
 
         -- 累计时间
         task.elapsed = task.elapsed + dt
+        if task.type == "interval" then
+            task.passed = task.passed + dt
+        end
 
         -- 时间达标，执行委托回调
         if task.elapsed >= task.delay then
-            -- 执行回调并传递参数
-            task.callback()
-            -- 移除已完成的任务
-            table.remove(self.tasks, i)
+            if task.type == "once" then
+                -- 一次性任务：直接调用并移除
+                task.callback()
+                table.remove(self.tasks, i)
+            elseif task.type == "interval" then
+                -- 在持续时间内循环执行
+                if task.passed <= task.duration then
+                    task.elapsed = task.elapsed - task.delay
+                    local remain = task.duration - task.passed
+                    task.callback(task.passed, remain)
+                    -- 如果已经超过总时长，则移除
+                    if task.passed >= task.duration then
+                        table.remove(self.tasks, i)
+                    end
+                else
+                    -- 超出总时长，直接移除
+                    table.remove(self.tasks, i)
+                end
+            end
         end
 
         ::continue::
