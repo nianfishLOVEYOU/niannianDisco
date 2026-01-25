@@ -13,7 +13,7 @@ function fire:init(imgPath)
     self.color ={ 1, 0.5, 0}
     -- 创建点光源
     if lightShader.isCreatShader then
-       self.light = lightShader.addPointLight({ radius = 350, intensity = 0.8 })
+       self.light = lightShader.addPointLight({ radius = 350, intensity =0.9})
     end
 end
 
@@ -29,7 +29,7 @@ local noiseParams = {
     baseSpeed = 0.05,        -- 基础噪声流动速度（越小越稳定）
     noiseScale = 0.2,      -- 噪声缩放（越小越平滑）
     minBrightness = 0.6,    -- 基础最小亮度（0-1）
-    maxBrightness = 0.93,    -- 基础最大亮度（0-1）
+    maxBrightness = 1,    -- 基础最大亮度（0-1）
     darkChance = 0.004,      -- 突发变暗的概率（每帧触发概率，0.02=2%）
 }
 
@@ -55,7 +55,7 @@ end
 
 function fire:update(dt)
     self.light.intensity=fire:getFireBrightness(0,0,love.timer.getTime()*noiseParams.baseSpeed)
-    self.light.radius=100+250 *self.light.intensity
+    self.light.radius=100+350 *self.light.intensity
     --设置灯光颜色
     self.light.r,self.light.g,self.light.b=self.color[1],self.color[2],self.color[3]
     --父类的方法执行

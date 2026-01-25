@@ -38,32 +38,45 @@ function lightPointEffect.getshader()
             if (texColor.a < 0.1) discard; // 透明像素直接丢弃
 
             // 2. 环境光基础颜色
-            vec3 finalColor = ambientColor * ambientIntensity;
+            vec3 baseLight = ambientColor * ambientIntensity;
+
+            // 我们在 0~1 空间做“概率式”叠加：
+            // final = 1 - Π(1 - contribution)
+            // 这样越接近 1 就越难继续叠加，多个光源重叠时会有衰减效果
+            vec3 oneMinusAccum = vec3(1.0) - baseLight; // 初始剩余“暗度”
 
             // 3. 遍历所有光源，计算光照贡献
             for (int i = 0; i < %d; i++) {
                 if (!lights[i].actived) continue; // 跳过未激活光源
 
-                // 计算像素到光源的距离（归一化到屏幕尺寸）
                 vec2 lightPos = lights[i].position;
                 float distance = length(screenCoord - lightPos);
 
                 // 超出光照半径则跳过
                 if (distance > lights[i].radius) continue;
 
-                // 计算光照衰减（平方衰减 + 线性衰减）
+                // 计算光照衰减（平方衰减 + 边缘线性衰减）
                 float normalizedDist = distance / lights[i].radius;
                 float attenuation = 1.0 / (1.0 + lights[i].falloff * normalizedDist * normalizedDist);
-                attenuation = mix(0.0, 1.0, 1.0 - normalizedDist) * attenuation;
+                float edge = 1.0 - normalizedDist; // 0~1
+                edge = clamp(edge, 0.0, 1.0);
+                attenuation *= edge;
 
-                // 计算该光源对当前像素的颜色贡献
-                vec3 lightContribution = lights[i].color * lights[i].intensity * attenuation;
-                finalColor += lightContribution;
+                // 单个光源的线性贡献（0~1）
+                vec3 contrib = lights[i].color * lights[i].intensity * attenuation;
+                contrib = clamp(contrib, 0.0, 1.0);
+
+                // 概率式叠加：剩余暗度 *= (1 - 贡献)
+                oneMinusAccum *= (vec3(1.0) - contrib);
             }
 
-            // 4. 混合最终颜色（保留Alpha）
-            finalColor = clamp(finalColor, 0.0, 1.0); // 防止过亮
-            return vec4(finalColor * texColor.rgb * baseColor.rgb, texColor.a * baseColor.a);
+            // 4. 由剩余暗度反推出最终光照：
+            vec3 finalLight = vec3(1.0) - oneMinusAccum;
+            finalLight = clamp(finalLight, 0.0, 1.0);
+
+            // 5. 应用到纹理颜色
+            vec3 finalColor = finalLight * texColor.rgb * baseColor.rgb;
+            return vec4(finalColor, texColor.a * baseColor.a);
         }
     ]], lightMaxCount, lightMaxCount))
 
@@ -76,7 +89,7 @@ function lightPointEffect.getshader()
     shadereffect.setScreenSize = false
     --lightShader:send("screenSize", {screenW, screenH})
 
-    lightPointEffect.addPointLight({ x = 200, y = 200, r = 1, g = 0.5, b = 0, radius = 350, intensity = 0.8 })
+   -- lightPointEffect.addPointLight({ x = 200, y = 200, r = 1, g = 0.5, b = 0, radius = 350, intensity = 0.8 })
 
     systemManager:update_regester(lightPointEffect.lightUpdate)
 
