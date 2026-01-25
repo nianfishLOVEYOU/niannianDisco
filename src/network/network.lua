@@ -215,6 +215,25 @@ function Network:handleMessage(message, address)
                 break
             end
         end
+    elseif message.type == "kick_ball" then
+        -- 收到踢球动作广播，找到场景中的球，按发送过来的数据做一次本地踢球
+        for _, item in pairs(itemManager.items) do
+            if item.type == "ball" and item.doKickFromPlayer then
+                -- 这里简单根据广播时记录的球位置来校准一下，避免误踢其他球
+                if not message.ballX or not message.ballY then
+                    item:doKickFromPlayer(nil)
+                else
+                    local bx, by = item:getPos()
+                    local dx = bx - message.ballX
+                    local dy = by - message.ballY
+                    -- 距离太远就认为不是同一个球
+                    if dx * dx + dy * dy < 32 * 32 then
+                        item:doKickFromPlayer(nil)
+                        break
+                    end
+                end
+            end
+        end
     else
         print("## no handle by: " .. message.type)
     end

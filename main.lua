@@ -107,7 +107,7 @@ function love.draw()
     systemManager:draw()
 
     -- debug
-    nianDebug.DebugPrint()
+    --nianDebug.DebugPrint()
 end
 
 function love.quit()

@@ -7,7 +7,7 @@ local commonData = {
 
     ---主要变量------
     openMapEditorMode = false,
-    openlocalMod = true,
+    openlocalMod = false,
 
 }
 return commonData

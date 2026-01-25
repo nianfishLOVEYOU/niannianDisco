@@ -6,6 +6,7 @@ local cake = bodyItem:extend()
 function cake:init(imgPath, bodyInfo)
     self.type = "cake"
     self:setImage("res/image/cake.png")
+    self.interaction = true
     self.layer = 0.3
     self.interaction = true
     self.candleImage = spriteAnimation:new("res/image/candle.png", 0, 0, 0.5, 1)
@@ -58,6 +59,9 @@ function cake:handleCakeClickSequence()
     else
         return
     end
+
+    -- --添加一个球在地图startpoint
+    -- itemManager:addItem()
 end
 
 -- 点击按钮才触发
