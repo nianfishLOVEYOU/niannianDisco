@@ -203,6 +203,11 @@ function Network:handleMessage(message, address)
     elseif message.type == "playerConnectInfo" then
         -- 收到玩家生成信息
         playerManager:addRemotePlayer(message.userid, message.name, message.x, message.y)
+    elseif message.type == "cake_clicked" then
+        -- 收到有人点击蛋糕的广播，在本地播放一次生日快乐歌，实现同步
+        if soundManager and soundManager.play then
+            soundManager:play("res/soundeffects/happybirthday.mp3", 1, false)
+        end
     else
         print("## no handle by: " .. message.type)
     end

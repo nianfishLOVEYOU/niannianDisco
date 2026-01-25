@@ -9,8 +9,15 @@ local Audio = {
     currentIndex = 0,
     volume = 0.3,
     stuck = false,
-    downloadProgress = 100
+    downloadProgress = 100,
 
+    -- 淡入淡出和外部暂停控制
+    targetVolume = 0.3,
+    fadeDuration = 1.0,
+    fadeTime = 0,
+    fadeType = nil,      -- "in" | "out"
+    savedVolume = 0.3,
+    pausedByCake = false
 }
 
 function Audio:init()
@@ -102,6 +109,26 @@ function Audio:stop()
     if self.currentSource then
         self.currentSource:stop()
     end
+end
+
+-- 由蛋糕触发的外部暂停：先淡出再暂停
+function Audio:pauseForCake()
+    if not self.currentSource or not self:isPlaying() then return end
+    self.pausedByCake = true
+    self.savedVolume = self.volume
+    self:fadeTo(0.0, self.fadeDuration or 1.0, function()
+        self:pause()
+    end)
+end
+
+-- 蛋糕播放结束后恢复：先恢复播放，再淡入目标音量
+function Audio:resumeAfterCake()
+    if not self.currentSource or not self.pausedByCake then return end
+    self.pausedByCake = false
+    -- 立即恢复播放，但从 0 音量开始淡入
+    self:setVolume(0.0)
+    self:resume()
+    self:fadeTo(self.savedVolume, self.fadeDuration or 1.0)
 end
 
 function Audio:setStuck(stuck)
@@ -204,8 +231,37 @@ function Audio:automusicNext()
     end
 end
 
+-- 淡入淡出辅助
+function Audio:fadeTo(target, duration, onComplete)
+    self.fadeType = (target > (self.volume or 0)) and "in" or "out"
+    self.fadeDuration = math.max(0.01, duration or 1.0)
+    self.fadeTime = 0
+    self.fadeStartVolume = self.volume or 0
+    self.targetVolume = target
+    self.fadeOnComplete = onComplete
+end
+
 local waittime = os.time()
 function Audio:update(dt)
+    -- 处理音量淡入淡出
+    if self.fadeType and self.currentSource then
+        self.fadeTime = self.fadeTime + dt
+        local t = math.min(1, self.fadeTime / self.fadeDuration)
+        -- 简单缓入缓出（easeInOutQuad）
+        local eased = t < 0.5 and 2 * t * t or -1 + (4 - 2 * t) * t
+        local newVol = self.fadeStartVolume + (self.targetVolume - self.fadeStartVolume) * eased
+        self.volume = newVol
+        self.currentSource:setVolume(self.volume)
+        if t >= 1 then
+            self.fadeType = nil
+            if self.fadeOnComplete then
+                local cb = self.fadeOnComplete
+                self.fadeOnComplete = nil
+                cb()
+            end
+        end
+    end
+
     -- 如果没有音乐资源就等待，直到下载好
     if os.time() - waittime > 0.5 then
         waittime = os.time()
@@ -227,8 +283,6 @@ function Audio:update(dt)
 
 end
 
-
-
 local spectrumBars = 1    -- 仅获取1个频率能量值
 local fftSize = 64      -- 满足 1024 ≥ 1 即可
 local smoothFactor = 0.2  -- 平滑因子，避免圆形大小突变
@@ -245,11 +299,17 @@ function Audio:getMusicSpectrum()
     return currentEnergy
 end
 
--- 开启音乐播放
+-- 开启音乐播放（带淡入）
 function Audio:MusicStart(path, delay)
     timer:after(delay, function()
         self:loadMusic(path)
-        self:play(0)
+        if self.currentSource then
+            -- 从 0 音量淡入到配置音量
+            self.currentSource:setVolume(0)
+            self.volume = 0
+            self:play(0)
+            self:fadeTo(self.targetVolume or 0.3, self.fadeDuration or 1.0)
+        end
         uiManager:refresh("playlistUI")
     end)
 end
@@ -260,7 +320,6 @@ function Audio:setVolume(vol)
         self.currentSource:setVolume(self.volume)
     end
 end
-
 
 function Audio:musicExist(name)
     for k, v in pairs(self.playlist) do

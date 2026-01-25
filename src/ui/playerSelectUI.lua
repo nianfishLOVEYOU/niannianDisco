@@ -17,8 +17,8 @@ end
 local DEFAULTS = {
     "res/image/player1.png",
     "res/image/player2.png",
-    "res/image/nian.png",
-    "res/image/mic.png",
+    "res/image/sher.png",
+    "res/image/shaoge.png",
 }
 
 function PlayerSelectUI:init()
