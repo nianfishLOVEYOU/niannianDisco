@@ -21,6 +21,7 @@ function HStack:init(childrenTB, spacing, align)
 end
 
 function HStack:draw()
+    self:localPosRefresh()
     for _, child in ipairs(self.children) do
         child:draw()
     end

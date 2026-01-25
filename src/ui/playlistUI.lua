@@ -30,7 +30,9 @@ local musicInput = function(file, name, fullname, extend)
     end
 
     local music = love.audio.newSource(tmpPath, "stream")
+    playlistManager:addMusic(name,tmpPath,"tmp",  music:getDuration(),"self")
     audio:addPlayMusic(tmpPath, music:getDuration(), name)
+    uiManager:refresh("playlistUI")
     music = nil
 end
 
@@ -89,6 +91,7 @@ function PlaylistUI:getlocalPlayListStack()
     local slidePanel = Glove.SlidePanel:new(vstack)
     slidePanel:setPos(self.posx - 250, self.posy, self.z)
     slidePanel:setSize(200, 300)
+    vstack:setPos(0, 0) --大概是拖拽条的限制归为问题
     return slidePanel
 end
 
@@ -125,6 +128,7 @@ function PlaylistUI:getvstack()
     local slidePanel = Glove.SlidePanel:new(vstack)
     slidePanel:setPos(self.posx, self.posy, self.z)
     slidePanel:setSize(200, 300)
+    vstack:setPos(0, 0) --大概是拖拽条的限制归为问题
     return slidePanel
 end
 

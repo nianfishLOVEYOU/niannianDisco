@@ -20,6 +20,7 @@ function VStack:init(childrenTB, spacing, align)
 end
 
 function VStack:draw()
+    self:localPosRefresh()
     for _, child in ipairs(self.children) do
         child:draw()
     end
