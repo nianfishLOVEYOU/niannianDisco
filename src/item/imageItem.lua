@@ -20,6 +20,10 @@ function imageItem:init(imgPath)
         if self.h == 0 then
             self.h = self.image.originalH * pixSize
         end
+    else
+        self.image = spriteAnimation:new("res/image/nian.png", 0, 0, 0.5, 1)
+        self.w = self.image.originalW * pixSize
+        self.h = self.image.originalH * pixSize
     end
 end
 

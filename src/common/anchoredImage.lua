@@ -45,7 +45,6 @@ function AnchoredImage:init(path, x, y, anchorX, anchorY)
     self.depth = 0
     self.depthByY = true
 
-    return self
 end
 
 function AnchoredImage:setAnchor(AnchorX, AnchorY)
