@@ -20,3 +20,5 @@ cameraManager=require "src.manager.cameraManager"
 
 playlistManager =require "src.manager.playlistManager"
 mapManager = require "src.manager.mapManager"
+
+soundManager = require "src.manager.soundManager"

@@ -1,10 +1,11 @@
 local FileManager = {
 }
 
+local commonData = require "src.common.commonData"
+
 systemManager:init_regester(function()
     -- 创建目录
-    FileManager.createDir(commonData.tmpPath)
-    FileManager.createDir("info/")
+    FileManager:init()
 end)
 
 systemManager:quit_regester(function()
@@ -30,6 +31,18 @@ FileManager.createDir = function(dirpath)
         love.filesystem.createDirectory(directory)
     else
         print("! dir exsit !" .. dirpath)
+    end
+end
+
+function FileManager:init()
+    -- 遍历 commonData 中所有以 Path 结尾的字段，自动创建对应目录
+    for key, path in pairs(commonData) do
+        if type(path) == "string" and key:match("Path$") then
+            -- 使用 LÖVE 的内部存储目录
+            if not love.filesystem.getInfo(path, "directory") then
+                love.filesystem.createDirectory(path)
+            end
+        end
     end
 end
 

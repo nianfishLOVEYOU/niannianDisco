@@ -46,6 +46,7 @@ function Game:leave()
     uiManager:removeUI("playlistUI")
     uiManager:removeUI("playerUI")
     uiManager:removeUI("playerlistUI")
+    uiManager:removeUI("floatUI")
 end
 
 return Game
