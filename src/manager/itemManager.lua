@@ -1,23 +1,67 @@
-local ItemManager={
-    items={},
-    focusedItem=nil,
-    clickItem=nil,
-    canInteractItem=nil,
-    mouseLeftDown=false,
+local ItemManager = {
+    items = {},
+    focusedItem = nil,
+    clickItem = nil,
+    canInteractItem = nil,
+    mouseLeftDown = false,
 }
 
-systemManager:update_regester(function (dt)
+systemManager:update_regester(function(dt)
     ItemManager:update(dt)
 end)
-systemManager:camdraw_regester(function ()
+systemManager:camdraw_regester(function()
     ItemManager:draw()
 end)
+
+--初始化获取item文件夹下的所有编辑好的item
+local function loadItemsFromFolder()
+    ItemManager.itemnews = {}
+    local items = {}
+
+    -- 使用 Love2D 的文件系统
+    local files = love.filesystem.getDirectoryItems("src/item")
+
+    for _, filename in ipairs(files) do
+        -- 检查是否是 .lua 文件
+        if filename:match("%.lua$") then
+            local itemname = filename:gsub("%.lua$", "")
+
+            -- 跳过 init.lua 或其他特殊文件
+            if itemname ~= "init" and itemname ~= "item" and itemname~="bodyItem" and itemname~="imageItem"then
+                table.insert(items, itemname)
+
+                -- 尝试加载模块
+                local success, module = pcall(function()
+                    return require("src.item." .. itemname)
+                end)
+
+                if success and module then
+                    ItemManager.itemnews[itemname] = module
+                    print("成功加载物品: " .. itemname)
+                else
+                    print("警告: 无法加载物品 " .. itemname .. ": " .. tostring(module))
+                    ItemManager.itemnews[itemname] = nil
+                end
+            end
+        end
+    end
+
+    -- 排序并保存物品类型列表
+    table.sort(items)
+    ItemManager.itemTypes = items
+
+    return ItemManager.itemnews
+end
+
+-- 加载物品
+loadItemsFromFolder()
+
 
 -- 注册鼠标事件，用于管理 item 的点击/拖拽/松开交互
 mouseManager:mousepressed_regester(function(x, y, button)
     if button ~= 1 then return end
     ItemManager.mouseLeftDown = true
-    x,y=cameraManager.cam:toWorld(x, y)
+    x, y = cameraManager.cam:toWorld(x, y)
     local clickItem = ItemManager:getFirstItem(x, y)
     if clickItem and ItemManager:isItemInRange(clickItem) then
         ItemManager.focusedItem = clickItem
@@ -92,26 +136,26 @@ end
 
 function ItemManager:addItem(item)
     if item then
-        table.insert(self.items,item)
+        table.insert(self.items, item)
     else
-        print("id:"..id.." item exsit !")
+        print("id:" .. id .. " item exsit !")
     end
 end
 
 function ItemManager:removeItem(id)
-    local index=0
+    local index = 0
     for i, v in ipairs(self.items) do
-        if v.id==id then
-            index=i
+        if v.id == id then
+            index = i
         end
     end
-    table.remove(self.items,index)
+    table.remove(self.items, index)
 end
 
 function ItemManager:removeAll()
-    for i =#self.items , 1, -1 do
+    for i = #self.items, 1, -1 do
         self.items[i]:destroy()
-        table.remove(self.items,i)
+        table.remove(self.items, i)
     end
 end
 
@@ -165,12 +209,12 @@ function ItemManager:draw()
             end
             local x, y = v:getPos()
             local w, h = v:getSize()
-            local iw, ih = self.infoImage:getWidth()*pixSize
-            , self.infoImage:getHeight()*pixSize
-            local drawX = x + w  - iw / 2
+            local iw, ih = self.infoImage:getWidth() * pixSize
+            , self.infoImage:getHeight() * pixSize
+            local drawX = x + w - iw / 2
             local drawY = y - h / 2 - ih
-            love.graphics.setColor(1,1,1,1)
-            love.graphics.draw(self.infoImage, drawX, drawY,0,pixSize, pixSize)
+            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.draw(self.infoImage, drawX, drawY, 0, pixSize, pixSize)
         end
     end
 end
