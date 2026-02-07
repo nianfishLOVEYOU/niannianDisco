@@ -1,9 +1,13 @@
 --专门用来检测错误
+local debugManager = require("src.manager.debugManager")
 
-nianDebug={}
+-- 第二步：初始化全局错误捕获
+debugManager.init()
+
+nianDebug = {}
 
 local function printCol()
-    love.graphics.setColor(0, 1, 0,0.3) 
+    love.graphics.setColor(0, 1, 0, 0.3)
     love.graphics.setLineWidth(2)
 
     for _, body in ipairs(world:getBodies()) do
@@ -18,10 +22,10 @@ local function printCol()
                 love.graphics.circle("line", x, y, radius)
             elseif shapeType == "polygon" then
                 -- shape:getPoints() 返回局部坐标序列
-                local points = {body:getWorldPoints(shape:getPoints())}
+                local points = { body:getWorldPoints(shape:getPoints()) }
                 love.graphics.polygon("line", points)
             elseif shapeType == "edge" then
-                local points = {body:getWorldPoints(shape:getPoints())}
+                local points = { body:getWorldPoints(shape:getPoints()) }
                 love.graphics.line(points)
             end
         end
@@ -84,11 +88,12 @@ function nianDebug.DebugPrint()
 
     -- 显示深度图
     love.graphics.setColor(1, 1, 1)
-    local deepSize =0.1
-    love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() *deepSize, 0, 0,
+    local deepSize = 0.1
+    love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * deepSize, 0, 0,
         deepSize, deepSize)
-end
 
+    debugManager.draw()
+end
 
 -- 方法1：在love.update里加帧率监控，判断是否阻塞
 local lastTime = 0

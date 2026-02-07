@@ -1,0 +1,23 @@
+安卓下载love2dapk  https://github.com/love2d/love-android/releases                
+	love-11.5-android-embed.apk-用apk编辑器改了才能安装
+
+
+用apk编辑器改变love2dapk内容   https://qwertycube.com/apk-editor-studio/download/
+	或者 APK Editor Studio   游戏包重命名为game.love    安装 Java 运行时（JRE）
+
+打开 APK Editor Studio → 「文件」→「打开」，选中目标 APK
+左侧文件树找到assets文件夹，展开，删除里面默认的空game.love
+右键assets → 「添加文件」，选择你自己的game.love
+改图标 / 应用名（可选）：
+图标：res/mipmap文件夹，替换对应尺寸 PNG
+应用名：打开AndroidManifest.xml，改android:label="LÖVE"为你的游戏名
+点「构建」→「构建 APK」，工具自动重打包 + 签名
+构建完成，拿到新 APK，直接装手机就能用 —— 一个图标，点开直接进游戏
+
+
+
+Love2D 11.5
+
+
+
+
