@@ -4,7 +4,7 @@ function love.conf(t)
     t.window.title = "nianListenStream"
     t.window.width = 600
     t.window.height = 450
-    t.window.resizable = false  -- 禁止调整窗口大小
+    t.window.resizable = true  -- 禁止调整窗口大小
     t.modules.audio = true
     t.modules.sound = true
     t.modules.math = true

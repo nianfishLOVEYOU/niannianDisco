@@ -28,7 +28,8 @@ local rooms = {}
 local addressToRooms = {}
 --local peers = {}
 
-local function roomAddPeer(code, ip, port,peer)
+local function roomAddPeer(code, ip, port,peer,peerKey)
+    local key =peerKey
     local addr = ip .. ":" .. port
     local roomPeers --房间成员列表
     if rooms[code] then
@@ -43,19 +44,21 @@ local function roomAddPeer(code, ip, port,peer)
     end
 
     -- 查找是否之前在房间里面
-    local perpeer, perid
-    for id, rp in pairs(roomPeers) do
-        if rp.addr == addr then
+    local perpeer, perkey
+    for _, rp in pairs(roomPeers) do
+        if rp.key == key then
             perpeer = rp
-            perid = id
+            perkey = key
         end
     end
 
+    --找到了
     if perpeer then
         perpeer = peer
         perpeer.islive = true
-        print(string.format("[REGISTER BACK] id=%d, %s:%d ,room :%s", perid, ip, port, code))
+        print(string.format("[REGISTER BACK] id=%d, %s:%d ,room :%s", perkey, ip, port, code))
     else
+        --没找到
         --设置这个成员信息
         local id = rooms[code].next_id
         rooms[code].next_id = id + 1
@@ -141,6 +144,7 @@ while true do
                 ----------------------------------------------------------------
                 if msg.type == "signalingRegister" then
                     local code = msg.code
+                    local key = msg.key
 
                     local ip, port = msg.addr:match("([^:]+):(%d+)")
                     if not ip then
@@ -151,7 +155,7 @@ while true do
                         --房间成员列表
                         --如果没有这个房间就添加房间，添加成员
 
-                        roomAddPeer(code, ip, port,ev.peer)
+                        roomAddPeer(code, ip, port,ev.peer,key)
 
                         --加入索引  --忘记这里干嘛的了
                         local addr = tostring(ev.peer)

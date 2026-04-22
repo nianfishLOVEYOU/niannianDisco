@@ -5,9 +5,5 @@ local commonData = {
     soundeffectPath = "res/soundeffects/",
     infoPath = "info/",
 
-    ---主要变量------
-    openMapEditorMode = false,
-    openlocalMod = false,
-
 }
 return commonData

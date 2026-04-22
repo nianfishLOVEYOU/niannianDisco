@@ -1,8 +1,13 @@
 --path
+
+
 GlobleManager = {
+    config ={},
     allData = {},
     map=nil, --地图
 }
+
+config=require "src.manager.config"
 
 systemManager:init_regester(function()
     GlobleManager:init()
@@ -15,7 +20,28 @@ function GlobleManager:init()
         self.allData = {}
         fileManager:saveTable("allData", GlobleManager.allData)
     end
+
+    -- game
+    -- debug
+    -- srceen
+    self.config = config.load();
+
+    print("[GlobleManager] 初始化完成，当前config：")
+    for k, v in pairs(self.config) do
+        print(string.format("  %s = %s", k, tostring(v)))
+    end
 end
+
+-- 获取配置
+function GlobleManager.getConfig(group, key)
+    if GlobleManager.config[group] and GlobleManager.config[group][key] ~= nil then
+        return GlobleManager.config[group][key]
+    else
+        print(string.format("[GlobleManager] 获取配置失败：group=%s, key=%s 不存在", tostring(group), tostring(key)))
+        return nil
+    end
+end
+
 
 -- 保存数据到本地 value 支持数字，字符串，table
 function GlobleManager:saveGameData(key, value)

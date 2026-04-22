@@ -4,7 +4,8 @@ local Network = {
     connects = {},
     peers = {},
     musicTransfering = 0,
-    enterRoom = false
+    enterRoom = false,
+    signalKey =nil
 }
 
 -- 初始化挂起
@@ -18,6 +19,11 @@ end)
 function Network:init()
     ctrlNetworkCh = love.thread.getChannel("ctrlNetwork")
     infoNetworkCh = love.thread.getChannel("infoNetwork")
+    self.signalKey = globleManager:getGameData("signalKey")
+    if not self.signalKey then
+        self.signalKey = globleManager:guid()
+        globleManager:saveGameData("signalKey", self.signalKey)
+    end
 end
 
 function Network:update(dt)
@@ -42,10 +48,12 @@ function Network:startNetThread(code)
         ctrlNetworkCh:push{
             cmd = "start",
             code = code,
-            localmod = commonData.openlocalMod
+            key = self.signalKey,
+            localmod = globleManager.getConfig("debug","local_Mod")
         }
         self.netThreadIsStart = true
         
+        -- print("网络线程已启动")
     end
 end
 

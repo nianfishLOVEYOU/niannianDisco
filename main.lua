@@ -24,7 +24,11 @@ function love.load()
 
     systemManager:init()
 
-    statusManager:statusChange("menu")
+    if globleManager.getConfig("debug","mapEditor_Mode") then
+        statusManager:statusChange("editor")
+    else
+        statusManager:statusChange("menu")
+    end
 
 end
 
@@ -55,11 +59,10 @@ function love.focus(focus)
 end
 
 local function keypressed(k)
-    if k == "b" then -- B 键 → 广播
-        commonData.openMapEditorMode = true
-        statusManager:statusChange("editor")
+    if k == "b" then -- B 键 - 切换地图编辑模式
+        --statusManager:statusChange("editor")
     end
-    if k == "n" then -- N 键 → 正常模式
+    if k == "n" then -- N 键 - 关闭网络线程
         network:closeNetThread()
     end
 end
@@ -107,7 +110,7 @@ function love.draw()
     systemManager:draw()
 
     -- debug
-    --nianDebug.DebugPrint()
+    nianDebug.DebugPrint()
 end
 
 function love.quit()

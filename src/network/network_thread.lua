@@ -12,6 +12,7 @@ local infoNetworkCh = love.thread.getChannel("infoNetwork")
 
 -- 房间号
 local code = ""
+local key ="" --唯一辨识自己的id，避免被冒充或者重复登录
 local localmod = false
 while true do
     local cmd = ctrlNetworkCh:pop()
@@ -20,6 +21,7 @@ while true do
             return
         elseif cmd.cmd == "start" then
             code = cmd.code
+            key = cmd.key
             localmod = cmd.localmod
             print("code =", code)
             break
@@ -138,7 +140,8 @@ else
     local pkt = json.encode {
         type = "signalingRegister",
         addr = myAddr.ip .. ":" .. myAddr.port,
-        code = code
+        code = code,
+        key =key
     }
     sigPeer:send(pkt) -- 简单文本协议
     print("signaling :", SIGNAL_HOST .. ":" .. SIGNAL_PORT)

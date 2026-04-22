@@ -1,4 +1,4 @@
---专门用来检测错误
+-- 专门用来检测错误
 local debugManager = require("src.manager.debugManager")
 
 -- 第二步：初始化全局错误捕获
@@ -6,6 +6,7 @@ debugManager.init()
 
 nianDebug = {}
 
+-- 显示碰撞体积
 local function printCol()
     love.graphics.setColor(0, 1, 0, 0.3)
     love.graphics.setLineWidth(2)
@@ -22,10 +23,10 @@ local function printCol()
                 love.graphics.circle("line", x, y, radius)
             elseif shapeType == "polygon" then
                 -- shape:getPoints() 返回局部坐标序列
-                local points = { body:getWorldPoints(shape:getPoints()) }
+                local points = {body:getWorldPoints(shape:getPoints())}
                 love.graphics.polygon("line", points)
             elseif shapeType == "edge" then
-                local points = { body:getWorldPoints(shape:getPoints()) }
+                local points = {body:getWorldPoints(shape:getPoints())}
                 love.graphics.line(points)
             end
         end
@@ -55,42 +56,45 @@ end
 -- debug 输出
 function nianDebug.DebugPrint()
     -- 显示碰撞体积
-    if commonData.openMapEditorMode then
+    if globleManager.getConfig("debug","showDebugData") then
+        -- 计算 FPS
+        local fps = love.timer.getFPS()
+        love.graphics.setColor(1, 1, 0)
+        love.graphics.print("FPS: " .. fps, 10, 10)
+        -- love.graphics.print("音乐声值："..audio:getMusicSpectrum())
+        love.graphics.setColor(1, 1, 1)
+        -- 显示鼠标位置
+        if love.mouse.isDown(2) then
+            local x, y = love.mouse.getPosition()
+            local wx, wy = cameraManager.cam:toWorld(x, y)
+            love.graphics.setColor(1, 0, 0)
+            love.graphics.circle("fill", x, y, 3)
+            love.graphics.setColor(1, 1, 1)
+
+            love.graphics.print("mouse screen: " .. x .. "," .. y, x + 10, y - 10)
+            love.graphics.print("mouse world: " .. wx .. "," .. wy, x + 10, y)
+        end
+    end
+
+    if globleManager.getConfig("debug","showCollision") then
+        --------------物理碰撞体积----------------
         cameraManager.cam:draw(printCol)
     end
 
-    --uidebug体积
-    --ebugPrintUi()
-
-    love.graphics.setColor(1, 1, 0)
-    -- 计算 FPS
-    local fps = love.timer.getFPS()
-    -- 在屏幕左上角显示 FPS
-
-    if not commonData.openMapEditorMode then
-        love.graphics.print("FPS: " .. fps, 10, 10)
-        love.graphics.print("按下b 编辑地图", 10, 20)
-        love.graphics.print("是否开启networklocalmod " .. tostring(commonData.openlocalMod), 10, 30)
+    if globleManager.getConfig("debug","showUiCollision") then
+        --------------ui碰撞体积----------------
+        debugPrintUi()
     end
-    --love.graphics.print("音乐声值："..audio:getMusicSpectrum())
-    love.graphics.setColor(1, 1, 1)
 
-    --显示鼠标位置
-    if love.mouse.isDown(2) then
-        local x, y = love.mouse.getPosition()
-        local wx, wy = cameraManager.cam:toWorld(x, y)
-        love.graphics.setColor(1, 0, 0)
-        love.graphics.circle("fill", x, y, 3)
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.print("mouse screen: " .. x .. "," .. y, x + 10, y - 10)
-        love.graphics.print("mouse world: " .. wx .. "," .. wy, x + 10, y)
+    if globleManager.getConfig("debug","mapEditor_Mode") then
+        love.graphics.print("按下b 编辑地图", 10, 20)
     end
 
     -- 显示深度图
     love.graphics.setColor(1, 1, 1)
     local deepSize = 0.1
-    love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * deepSize, 0, 0,
-        deepSize, deepSize)
+    love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * deepSize, 0,
+        0, deepSize, deepSize)
 
     debugManager.draw()
 end
