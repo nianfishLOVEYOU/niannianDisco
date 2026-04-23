@@ -4,12 +4,26 @@ local Item = require "src.item.item"
 
 local mapManager = {}
 
-mapManager.itemTypes = {"floor", "tree", "wall", "mic", "ball", "sofa", "startPoint", "eventZone", "lightpoint", "fire",
-                        "table", "cake", "tree2"}
+mapManager.itemTypes = {}
 mapManager.itemnews = {}
 
-for _, module in ipairs(mapManager.itemTypes) do
-    mapManager.itemnews[module] = require("src.item." .. module)
+-- 自动加载 src/item 目录下的所有 Lua 文件，注册为可用的 item 类型
+local itemFiles = love.filesystem.getDirectoryItems("src/item")
+table.sort(itemFiles)
+local excludedModules = {
+    item = true,
+    bodyItem = true,
+    imageItem = true
+}
+
+for _, file in ipairs(itemFiles) do
+    if file:match("%.lua$") then
+        local module = file:gsub("%.lua$", "")
+        if not excludedModules[module] then
+            table.insert(mapManager.itemTypes, module)
+            mapManager.itemnews[module] = require("src.item." .. module)
+        end
+    end
 end
 
 --- 读取并解析地图文件
@@ -59,6 +73,8 @@ function mapManager.load(mapFile)
     return map
 end
 
+
+--加载地图到游戏中，先关闭当前地图（如果有），然后读取新地图并创建物体
 function mapManager:loadMap(mapPath)
     self:closeMap()
     if love.filesystem.getInfo(mapPath) then

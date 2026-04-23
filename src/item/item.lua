@@ -34,7 +34,8 @@ function item:init()
     self.parent = nil
     -- 子对象
     self.children = {}
-
+    -- 改动是否保存到地图
+    self.isSaveInMap = false 
     -- 清理方法
 
     -- 可交互
@@ -43,6 +44,35 @@ end
 
 function item:setName(name)
     self.name = name
+end
+
+-- 【关键】序列化只导出纯数据
+function item:serialize()
+    return {
+        name = self.name,
+        type = self.type,
+        id = self.id,
+        x = self.x,
+        y = self.y,
+        z = self.z,
+        w = self.w,
+        h = self.h,
+        visiable = self.visiable,
+    }
+end
+
+-- 【关键】序列化只导出纯数据
+function item:deSerialize(data)
+    self.name = data.name or self.name
+    self.type = data.type or self.type
+    self.id = data.id or self.id
+    self.x = data.x or self.x
+    self.y = data.y or self.y
+    self.z = data.z or self.z
+    self.w = data.w or self.w
+    self.h = data.h or self.h
+    self.visiable = data.visiable == nil and self.visiable or data.visiable
+
 end
 
 function item:setParentInit()
