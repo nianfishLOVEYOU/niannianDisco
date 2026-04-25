@@ -48,6 +48,7 @@ function debugManager.init()
         
         -- 5. 不中断游戏：注释掉默认的崩溃退出逻辑
         -- love.event.quit() -- 禁用默认退出
+        return debugManager.originalErrhand(msg)
     end
 
     -- 额外：捕获require/函数调用的局部错误（可选）

@@ -1,9 +1,17 @@
 -- src/main_editor.lua
 local Item = require "src.item.item"
 local MapEditorUI = require "src.ui.editor.mapEdiorUI"
-local historyManager = require "src.manager.historyManager"
 
-local mapEditor = {}
+local itemFactory = require "src.map.itemFactory"
+local wallFactory = require "src.map.wallFactory"
+local gridFactory = require "src.map.gridFactory"
+
+local mapEditor = {
+    brushOpen = false, --是否打开右键菜单
+    brushSize = 1, --画笔大小，默认为1格
+    brush = 0 --0=物体 1=墙 2=地板
+}
+
 local history = {}
 
 mouseManager:mousepressed_regester(function(x, y, button)
@@ -22,17 +30,10 @@ keybordManager:keypressed_regester(function(key)
     mapEditor:keypressed(key)
 end)
 
-local itemTypes = mapManager.itemTypes
-local itemnews = mapManager.itemnews
-
-mapEditor.ItemIndex = 1
+ 
 
 function mapEditor:init()
     print("开始地图编辑")
-
-    for _, module in ipairs(itemTypes) do
-        itemnews[module] = require("src.item." .. module)
-    end
 
     mapManager:loadMap("res/maps/edited.json")
 
@@ -100,38 +101,14 @@ end
 
 function mapEditor:addItem(type, x, y)
     print("mapEditor:addItem", type, x, y, mapEditor.selected)
-    local cls = itemnews[type] or itemnews[itemTypes[self.ItemIndex]]
-    if not cls then
+    local itemType = type 
+    if not itemType or not itemFactory.news[itemType] then
         return
     end
-    local newItem = cls:new()
-    local px = floorToPixSize(x)
-    local py = floorToPixSize(x)
+    local newItem = itemFactory:newItem(itemType)
+    local px, py = mapManager:getMapGridIndex(x, y)
     newItem:setPos(px, py)
-    -- newItem:setSize(64, 64)
     itemManager:addItem(newItem)
-
-    -- 记录历史：创建
-    historyManager:push({
-        type = "create",
-        item = newItem,
-        undo = function(self)
-            print("undo create item")
-            if not self.item then
-                return
-            end
-            for i = #itemManager.items, 1, -1 do
-                if itemManager.items[i] == self.item then
-                    itemManager.items[i]:destroy()
-                    table.remove(itemManager.items, i)
-                    break
-                end
-            end
-            if mapEditor.selected == self.item then
-                mapEditor.selected = nil
-            end
-        end
-    })
 
     -- 新建物体时重置拖拽偏移
     mapEditor.dragOffset.x = 0
@@ -154,44 +131,6 @@ function mapEditor:removeItem(item)
         end
     end
 
-    historyManager:push({
-        type = "delete",
-        snapshot = {
-            clsName = clsName,
-            x = x,
-            y = y,
-            z = z,
-            w = w,
-            h = h,
-            layer = layer,
-            index = index
-        },
-        undo = function(self)
-            print("undo delete item")
-            local s = self.snapshot
-            if not s or not s.clsName then
-                return
-            end
-
-            -- 找到对应类
-            local cls = itemnews[s.clsName]
-            if not cls then
-                print("undo error : class not found ", s.clsName)
-                return
-            end
-
-            local newItem = cls:new()
-            -- 还原基础属性
-            newItem:setPos(s.x, s.y, s.z)
-            newItem:setSize(s.w, s.h)
-            newItem.layer = s.layer or newItem.layer
-
-            -- 按原来索引插回去
-            itemManager:addItem(newItem)
-        end
-    })
-
-
     -- 真正删除
     for i = #itemManager.items, 1, -1 do
         if itemManager.items[i] == item then
@@ -205,6 +144,23 @@ function mapEditor:removeItem(item)
     end
 end
 
+
+function mapEditor:addWall(x,y,type)
+    
+end
+
+function mapEditor:removeWall(x,y)
+    
+end
+
+function mapEditor:addGrid(x,y,type)
+    
+end
+
+function mapEditor:removeGrid(x,y)
+    
+end
+
 function mapEditor:mousereleased(x, y, button)
     if button == 1 then
         if (mapEditor.selected) then
@@ -216,29 +172,6 @@ function mapEditor:mousereleased(x, y, button)
             local ex, ey = mapEditor.selected.x, mapEditor.selected.y
             if sx ~= ex or sy ~= ey then
                 local target = mapEditor.selected
-                historyManager:push({
-                    type = "move",
-                    item = target,
-                    from = {
-                        x = sx,
-                        y = sy
-                    },
-                    to = {
-                        x = ex,
-                        y = ey
-                    },
-                    undo = function(self)
-                        if not (self.item and self.item.setPos) then
-                            return
-                        end
-                        self.item:setPos(self.from.x, self.from.y)
-                        if mapEditor.selected == self.item then
-                            -- 同步编辑器内状态
-                            mapEditor.dragOffset.x = 0
-                            mapEditor.dragOffset.y = 0
-                        end
-                    end
-                })
             end
         end
         mapEditor.dragging = false
@@ -257,39 +190,10 @@ function mapEditor:mousemoved(x, y, dx, dy, istouch)
 end
 
 function mapEditor:wheelmoved(dx, dy)
-    if mapEditor.selected then
-        return
-    end
-    if dy > 0 then
-        self.ItemIndex = self.ItemIndex - 1
-        if self.ItemIndex < 1 then
-            self.ItemIndex = #itemTypes
-        end
-    elseif dy < 0 then
-        self.ItemIndex = (self.ItemIndex % #itemTypes) + 1
-    end
-    print("ItemIndex : " .. self.ItemIndex)
+
 end
 
 function mapEditor:keypressed(key)
-    -- 尺寸修改暂不进历史
-    if mapEditor.selected then
-        if key == "=" then
-            mapEditor.selected.h = mapEditor.selected.h + pixSize * 2
-        elseif key == "-" then
-            mapEditor.selected.h = mapEditor.selected.h - pixSize * 2
-        elseif key == "]" then
-            mapEditor.selected.w = mapEditor.selected.w + pixSize * 2
-        elseif key == "[" then
-            mapEditor.selected.w = mapEditor.selected.w - pixSize * 2
-        end
-    end
-
-    -- Ctrl+Z 撤销
-    if key == "z" and (love.keyboard.isDown("lctrl") or love.keyboard.isDown("rctrl")) then
-        historyManager:undo()
-        return
-    end
 
     if key == "s" then
         mapManager:saveMap("res/maps/edited.json")
@@ -322,7 +226,6 @@ function mapEditor:draw()
                 -- 普通项：半透明绿色
                 lg.setColor(1, 0, 1, 1)
             end
-
             -- 注意：item 的 pos 在 item:draw 里是中心点，所以这里也以中心点来画
             lg.rectangle("line", x - w / 2, y - h, w, h)
         end

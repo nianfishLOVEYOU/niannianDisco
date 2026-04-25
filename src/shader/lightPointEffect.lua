@@ -84,8 +84,8 @@ function lightPointEffect.getshader()
 
     shadereffect = ShaderEffect:new(lightShader, "Blur", drawFunc)
 
-    shadereffect:setUniform("ambientColor", { 0.2, 0.2, 0.2 }) -- 环境光颜色（暗灰色）
-    shadereffect:setUniform("ambientIntensity", 0.3)           -- 环境光强度
+    shadereffect:setUniform("ambientColor", {1, 1, 1}) -- 环境光颜色（暗灰色）
+    shadereffect:setUniform("ambientIntensity", 0.5)           -- 环境光强度
     shadereffect.setScreenSize = false
     --lightShader:send("screenSize", {screenW, screenH})
 

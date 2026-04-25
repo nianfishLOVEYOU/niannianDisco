@@ -1,15 +1,21 @@
 local ui = require "src.ui.ui"
+local MapEditorUI = ui:extend()
 
 local mapManager = mapManager
-local itemTypes = mapManager.itemTypes
-local itemnews = mapManager.itemnews
+local itemFactory = require "src.map.itemFactory"
+local wallFactory = require "src.map.wallFactory"
+local gridFactory = require "src.map.gridFactory"
 
-local MapEditorUI = ui:extend()
+local itemTypes = itemFactory.types
+local itemnews = itemFactory.news
+
+
 
 function MapEditorUI:init(editor)
     -- editor 是逻辑层的 mapEditor（src/map/mapEditor.lua）
     self.editor = editor
     self:refresh()
+
 end
 
 function MapEditorUI:refresh()
@@ -25,11 +31,6 @@ function MapEditorUI:draw()
     if not self.editor then return end
 
     local width, height = love.graphics.getDimensions()
-
-    love.graphics.setColor(1, 0, 0, 0.9)
-    love.graphics.print("创建 : " .. (itemTypes[self.editor.ItemIndex or 1] or ""), 10, 10)
-    love.graphics.print("操作: 右键=菜单  左键=选择/关闭菜单  滚轮=切换创建物  S=保存  Delete=删除选中", 10, 28)
-    love.graphics.setColor(1, 1, 1, 1)
 
     love.graphics.setColor(1, 0, 0, 0.9)
     love.graphics.print("左键：选中  右键：创建/菜单  滚轮：切换  S：保存  Delete：删除选中块", 10, height - 30)
@@ -73,6 +74,7 @@ local function buildCreateButtons(self, win)
 
 end
 
+-- ---------- 右键菜单事件 ----------
 local function isRightClickOnSelected(editor, screenX, screenY)
     if not (editor and editor.selected and editor.selected.isOver) then
         return false
@@ -81,6 +83,7 @@ local function isRightClickOnSelected(editor, screenX, screenY)
     return editor.selected:isOver(worldX, worldY)
 end
 
+-- 打开右键菜单，参数是点击位置（屏幕坐标）
 function MapEditorUI:_openContextMenu(screenX, screenY)
     if not self.editor then return end
 
