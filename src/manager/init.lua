@@ -1,4 +1,4 @@
-require "src.manager.fontSet"
+require "src.manager.extend.fontSet"
 
 eventManager = require "src.manager.eventManager"
 systemManager = require "src.manager.systemManager"
