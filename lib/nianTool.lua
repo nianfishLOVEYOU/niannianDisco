@@ -259,3 +259,41 @@ initStringExtensions()
 -- 使用io读取文件的方法
 -- local dir = love.filesystem.getSaveDirectory():gsub("/", "\\")
 -- local f = io.open(dir .. "\\" .. cmd.path, "rb")
+
+
+
+--- 画箭头
+-- 画箭头函数：起点(x1,y1)，终点(x2,y2)，可选颜色、线宽、箭头大小
+function drawArrow(x1, y1, x2, y2, r, g, b, a, lineWidth, arrowSize)
+    -- 默认值（不传参数也能用）
+    r = r or 1
+    g = g or 1
+    b = b or 1
+    a = a or 1
+    lineWidth = lineWidth or 2
+    arrowSize = arrowSize or 15
+
+    -- 计算方向
+    local dx = x2 - x1
+    local dy = y2 - y1
+    local angle = math.atan2(dy, dx)
+
+    love.graphics.setColor(r, g, b, a)
+    love.graphics.setLineWidth(lineWidth)
+
+    -- 画箭身
+    love.graphics.line(x1, y1, x2, y2)
+
+    -- 画箭头两翼
+    local wing1x = x2 - arrowSize * math.cos(angle - math.pi / 6)
+    local wing1y = y2 - arrowSize * math.sin(angle - math.pi / 6)
+    local wing2x = x2 - arrowSize * math.cos(angle + math.pi / 6)
+    local wing2y = y2 - arrowSize * math.sin(angle + math.pi / 6)
+
+    love.graphics.line(x2, y2, wing1x, wing1y)
+    love.graphics.line(x2, y2, wing2x, wing2y)
+
+    -- 恢复默认
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.setLineWidth(1)
+end

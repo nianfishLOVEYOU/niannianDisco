@@ -1,5 +1,5 @@
 -- 专门用来检测错误初始化全局错误捕获
-local debugLogExtend = require "src.common.debugLogExtend"
+local debugLogExtend = require "lib.debugLogExtend"
 debugLogExtend.init()
 
 nianDebug = {}
@@ -31,6 +31,7 @@ local function printCol()
     end
 end
 
+
 local function debugPrintUi()
     love.graphics.setLineWidth(2)
 
@@ -51,10 +52,10 @@ local function debugPrintUi()
     end
 end
 
--- debug 输出
+-- debug 输出 主要函数
 function nianDebug.DebugPrint()
     -- 显示碰撞体积
-    if globleManager.getConfig("debug","showDebugData") then
+    if globleManager.getConfig("debug", "showDebugData") then
         -- 计算 FPS
         local fps = love.timer.getFPS()
         love.graphics.setColor(1, 1, 0)
@@ -74,17 +75,17 @@ function nianDebug.DebugPrint()
         end
     end
 
-    if globleManager.getConfig("debug","showCollision") then
+    if globleManager.getConfig("debug", "showCollision") then
         --------------物理碰撞体积----------------
         cameraManager.cam:draw(printCol)
     end
 
-    if globleManager.getConfig("debug","showUiCollision") then
+    if globleManager.getConfig("debug", "showUiCollision") then
         --------------ui碰撞体积----------------
         debugPrintUi()
     end
 
-    if globleManager.getConfig("debug","mapEditor_Mode") then
+    if globleManager.getConfig("debug", "mapEditor_Mode") then
         love.graphics.print("按下b 编辑地图", 10, 20)
     end
 
@@ -94,7 +95,7 @@ function nianDebug.DebugPrint()
     love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * deepSize, 0,
         0, deepSize, deepSize)
 
-    debugManager.draw()
+    debugLogExtend.draw()
 end
 
 -- 方法1：在love.update里加帧率监控，判断是否阻塞

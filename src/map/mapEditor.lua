@@ -207,6 +207,19 @@ function mapEditor:keypressed(key)
     end
 end
 
+-- 绘制物体中心点
+function mapEditor:printItemCenter()
+    love.graphics.setColor(1, 0, 0)
+    for _, item in ipairs(itemManager.items) do
+        if item.getPos then
+            local x, y = item:getPos()
+            drawArrow(x, y, x + 50, y,1,0,0) -- 示例箭头，实际参数根据需求调整
+            drawArrow(x, y, x , y-50 ,1,0,0) -- 示例箭头，实际参数根据需求调整
+            love.graphics.circle("fill", x, y, 3)
+        end
+    end
+end
+
 function mapEditor:draw()
 
     love.graphics.setLineWidth(2)
@@ -257,6 +270,8 @@ function mapEditor:draw()
     lg.line(worldLeft, 0, worldRight, 0) -- X 轴
     lg.line(0, worldTop, 0, worldBottom) -- Y 轴
 
+    -- 绘制物体中心点
+    mapEditor:printItemCenter()
     -- 画完辅助框后恢复颜色
     lg.setColor(1, 1, 1, 1)
 end
