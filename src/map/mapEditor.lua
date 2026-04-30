@@ -1,15 +1,14 @@
 -- src/main_editor.lua
 local Item = require "src.item.item"
-local MapEditorUI = require "src.ui.editor.mapEdiorUI"
+local MapEditorUI = require "src.ui.editor.mapEditorUI"
 
 local itemFactory = require "src.map.itemFactory"
-local wallFactory = require "src.map.wallFactory"
 local gridFactory = require "src.map.gridFactory"
 
 local mapEditor = {
-    brushOpen = false, --是否打开右键菜单
-    brushSize = 1, --画笔大小，默认为1格
-    brush = 0 --0=物体 1=墙 2=地板
+    brushOpen = false, -- 是否打开右键菜单
+    brushSize = 1, -- 画笔大小，默认为1格
+    brush = 0 -- 0=物体 2=地板
 }
 
 local history = {}
@@ -30,15 +29,12 @@ keybordManager:keypressed_regester(function(key)
     mapEditor:keypressed(key)
 end)
 
- 
-
 function mapEditor:init()
     print("开始地图编辑")
 
     mapManager:loadMap("res/maps/edited.json")
 
     -- keep a direct reference for convenience
-    mapEditor.map = globleManager.map
 
     mapEditor.selected = nil -- 当前选中的块
     mapEditor.dragOffset = {
@@ -56,6 +52,7 @@ function mapEditor:init()
         local ui = MapEditorUI:new(self)
         uiManager:addUI("mapEditorUI", ui)
     end
+
 end
 
 function mapEditor:update(dt)
@@ -99,66 +96,67 @@ function mapEditor:mousepressed(x, y, button)
     end
 end
 
+-- 添加物体
 function mapEditor:addItem(type, x, y)
-    print("mapEditor:addItem", type, x, y, mapEditor.selected)
-    local itemType = type 
+    print("mapEditor:addItem", type, x, y)
+    local itemType = type
     if not itemType or not itemFactory.news[itemType] then
         return
     end
+    local indexX, indexY = mapManager:toGridIndex(x, y)
+    local px, py = mapManager:toGridPos(indexX, indexY)
+    if (mapManager:getMapItem(x, y)) then
+        print("当前位置已有物体，无法创建")
+        return
+    end
     local newItem = itemFactory:newItem(itemType)
-    local px, py = mapManager:getMapGridIndex(x, y)
     newItem:setPos(px, py)
     itemManager:addItem(newItem)
+    mapManager.map.items[indexX][indexY] = newItem
 
     -- 新建物体时重置拖拽偏移
     mapEditor.dragOffset.x = 0
     mapEditor.dragOffset.y = 0
 end
 
-function mapEditor:removeItem(item)
-    local target = mapEditor.selected
+-- 删除物体
+function mapEditor:removeItem(indexx, indexy)
+    -- local target = mapEditor.selected
 
-    -- 记录删除前的信息（类型 + 位置 + 尺寸等）
-    local clsName = target.type or target.name -- 你这里真实的类型字段自己调整
-    local x, y, z = target.x, target.y, target.z
-    local w, h = target.w, target.h
-    local layer = target.layer
-    local index
-    for i = #itemManager.items, 1, -1 do
-        if itemManager.items[i] == target then
-            index = i
-            break
-        end
+    local item = mapManager:getMapItem(indexx, indexy)
+    if item then
+        print("删除物体：", item.type, "坐标：", indexx, indexy)
+        itemManager.removeItem(item.id)
+        mapManager.map.items[indexx][indexy]:destroy()
+        mapManager.map.items[indexx][indexy] = nil
+    end
+    -- if mapEditor.selected == item then
+    --     mapEditor.selected = nil
+    -- end
+end
+
+-- 地块添加
+function mapEditor:addGrid(type, indexx, indexy)
+    print("mapEditor:addGrid", type, indexx, indexy)
+    if not type or not gridFactory.news[type] then
+        return
+    end
+    local px, py = mapManager:toGridPos(indexx, indexy)
+    if (mapManager:getMapItem(px, py)) then
+        print("当前位置已有物体，无法创建")
+        return
     end
 
-    -- 真正删除
-    for i = #itemManager.items, 1, -1 do
-        if itemManager.items[i] == item then
-            itemManager.items[i]:destroy()
-            table.remove(itemManager.items, i)
-            break
-        end
-    end
-    if mapEditor.selected == item then
-        mapEditor.selected = nil
-    end
+    local image = gridFactory:newGrid(type)
+    image:setPos(px, py)
+    gridManager:addGrid(image, indexx, indexy)
+    mapManager.map.grids[indexx][indexy] = image
 end
 
-
-function mapEditor:addWall(x,y,type)
-    
-end
-
-function mapEditor:removeWall(x,y)
-    
-end
-
-function mapEditor:addGrid(x,y,type)
-    
-end
-
-function mapEditor:removeGrid(x,y)
-    
+-- 地块删除
+function mapEditor:removeGrid(indexx, indexy)
+    mapManager.map.grids[indexx][indexy] = nil
+    gridManager:removeGrid(indexx, indexy)
 end
 
 function mapEditor:mousereleased(x, y, button)
@@ -210,9 +208,12 @@ function mapEditor:keypressed(key)
 end
 
 function mapEditor:draw()
+
+    love.graphics.setLineWidth(2)
     -- 这里仅绘制编辑辅助信息：每个 item 的包围框 & 选中高亮
     local lg = love.graphics
 
+    -- 绘制所有 item 的包围框，选中项高亮
     for _, it in ipairs(itemManager.items) do
         if it.getPos and it.getSize then
             local x, y = it:getPos()
@@ -230,6 +231,31 @@ function mapEditor:draw()
             lg.rectangle("line", x - w / 2, y - h, w, h)
         end
     end
+
+    -- 绘制网格线
+    lg.setColor(1, 1, 1, 1)
+    -- 绘制grid网格线,在世界空间下
+    local cam = cameraManager.cam
+    local x, y = cam:toScreen(0, 0)
+    local sizeS = mapManager.map.gridSize
+
+    for g_x = 0, mapManager.map.size.width do
+        for g_y = 0, mapManager.map.size.height do
+            local posx, posy = g_x * mapManager.map.gridSize, g_y * mapManager.map.gridSize
+            -- print("网格线坐标：", posx, posy, "格子坐标：", g_x, g_y)
+            lg.rectangle("line", posx, posy, sizeS, sizeS)
+        end
+    end
+
+    -- 世界坐标中线
+    lg.setColor(1, 0, 0, 1)
+    local cam = cameraManager.cam
+    local screenW, screenH = love.graphics.getDimensions()
+    local worldLeft, worldTop = cam:toWorld(0, 0)
+    local worldRight, worldBottom = cam:toWorld(screenW, screenH)
+    -- 绘制世界坐标系的 X 和 Y 轴
+    lg.line(worldLeft, 0, worldRight, 0) -- X 轴
+    lg.line(0, worldTop, 0, worldBottom) -- Y 轴
 
     -- 画完辅助框后恢复颜色
     lg.setColor(1, 1, 1, 1)

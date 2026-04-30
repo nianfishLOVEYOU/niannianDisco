@@ -17,7 +17,6 @@ local Audio = {
     fadeTime = 0,
     fadeType = nil, -- "in" | "out"
     savedVolume = 0.3,
-    pausedByCake = false
 }
 
 function Audio:init()
@@ -111,29 +110,6 @@ function Audio:stop()
     end
 end
 
--- 由蛋糕触发的外部暂停：先淡出再暂停
-function Audio:pauseForCake()
-    if not self.currentSource or not self:isPlaying() then
-        return
-    end
-    self.pausedByCake = true
-    self.savedVolume = self.volume
-    self:fadeTo(0.0, self.fadeDuration or 1.0, function()
-        self:pause()
-    end)
-end
-
--- 蛋糕播放结束后恢复：先恢复播放，再淡入目标音量
-function Audio:resumeAfterCake()
-    if not self.currentSource or not self.pausedByCake then
-        return
-    end
-    self.pausedByCake = false
-    -- 立即恢复播放，但从 0 音量开始淡入
-    self:setVolume(0.0)
-    self:resume()
-    self:fadeTo(self.savedVolume, self.fadeDuration or 1.0)
-end
 
 function Audio:setStuck(stuck)
 

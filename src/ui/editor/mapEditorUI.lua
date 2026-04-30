@@ -1,9 +1,7 @@
 local ui = require "src.ui.ui"
 local MapEditorUI = ui:extend()
 
-local mapManager = mapManager
 local itemFactory = require "src.map.itemFactory"
-local wallFactory = require "src.map.wallFactory"
 local gridFactory = require "src.map.gridFactory"
 
 local itemTypes = itemFactory.types
@@ -154,9 +152,17 @@ end
 
 -- UI 接管鼠标事件（由 uiManager 分发）
 function MapEditorUI:mousePressed(x, y, button)
+
     if button == 2 then
-        -- 右键总是打开/重建菜单
-        self:_openContextMenu(x, y)
+        local screenX, screenY = x, y
+        local indexx, indexy = mapManager:toGridIndex(cameraManager.cam:toWorld(screenX, screenY))
+        if(indexx and indexy) then
+            print("右键点击地图网格：", indexx, indexy)
+            self:_openContextMenu(screenX, screenY)
+        else
+            print("右键点击地图外部，关闭菜单")
+            self:_closeContextMenu()
+        end
     elseif button == 1 then
         -- 左键：只有在点到菜单外面时才关闭菜单
         if self._ctxMenuWindow and self._ctxMenu and self._ctxMenu.open then

@@ -4,7 +4,6 @@
 GlobleManager = {
     config ={},
     allData = {},
-    map=nil, --地图
 }
 
 config=require "src.manager.config"
