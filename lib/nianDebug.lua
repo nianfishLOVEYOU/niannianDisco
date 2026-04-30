@@ -1,8 +1,6 @@
--- 专门用来检测错误
-local debugManager = require("src.manager.debugManager")
-
--- 第二步：初始化全局错误捕获
-debugManager.init()
+-- 专门用来检测错误初始化全局错误捕获
+local debugLogExtend = require "src.common.debugLogExtend"
+debugLogExtend.init()
 
 nianDebug = {}
 

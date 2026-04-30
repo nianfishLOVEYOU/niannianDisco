@@ -1,7 +1,7 @@
--- debugManager.lua - LOVE2D安卓全局错误捕获模块
+-- debugLogExtend.lua - LOVE2D安卓全局错误捕获模块
 -- 功能：捕获所有错误、保存日志、屏幕显示错误、不中断游戏
 
-local debugManager = {
+local debugLogExtend = {
     -- 错误信息存储
     errorLog = "",
     errorTime = "",
@@ -21,90 +21,90 @@ local debugManager = {
 }
 
 -- 初始化：重写LOVE2D全局错误处理函数
-function debugManager.init()
+function debugLogExtend.init()
     -- 备份原始错误处理函数（可选恢复）
-    debugManager.originalErrhand = love.errhand
+    debugLogExtend.originalErrhand = love.errhand
     
     -- 重写全局错误处理
     love.errhand = function(msg)
         -- 1. 格式化错误信息（包含时间）
         local currentTime = os.date("%Y-%m-%d %H:%M:%S")
-        debugManager.errorTime = currentTime
-        debugManager.errorLog = string.format(
-            "[%s] 错误信息：%s\n调用栈：\n%s",
+        debugLogExtend.errorTime = currentTime
+        debugLogExtend.errorLog = string.format(
+            "[%s] 错误信息：%s\n调用堆栈：\n%s",
             currentTime,
             tostring(msg),
             debug.traceback() -- 获取完整调用栈
         )
         
         -- 2. 标记有错误
-        debugManager.isError = true
+        debugLogExtend.isError = true
         
         -- 3. 保存错误日志到文件（安卓本地）
-        debugManager.saveLog()
+        debugLogExtend.saveLog()
         
         -- 4. 打印到控制台（电脑端可见，安卓端可通过adb logcat查看）
-        print("[GAME ERROR] " .. debugManager.errorLog)
+        print("[GAME ERROR] " .. debugLogExtend.errorLog)
         
         -- 5. 不中断游戏：注释掉默认的崩溃退出逻辑
         -- love.event.quit() -- 禁用默认退出
-        return debugManager.originalErrhand(msg)
+        return debugLogExtend.originalErrhand(msg)
     end
 
     -- 额外：捕获require/函数调用的局部错误（可选）
     -- 封装安全调用函数，用于包裹可能出错的代码
-    function debugManager.safeCall(func, ...)
+    function debugLogExtend.safeCall(func, ...)
         local args = {...}
         return xpcall(function()
             return func(unpack(args))
         end, function(err)
             -- 局部错误也记录到全局日志
             local errMsg = string.format("[局部错误] %s\n%s", err, debug.traceback())
-            debugManager.errorLog = debugManager.errorLog .. "\n" .. errMsg
-            debugManager.saveLog()
-            debugManager.isError = true
+            debugLogExtend.errorLog = debugLogExtend.errorLog .. "\n" .. errMsg
+            debugLogExtend.saveLog()
+            debugLogExtend.isError = true
             print(errMsg)
         end)
     end
 end
 
 -- 保存错误日志到安卓文件
-function debugManager.saveLog()
+function debugLogExtend.saveLog()
     -- LOVE2D安卓版需要先创建文件（如果不存在）
-    if not love.filesystem.getInfo(debugManager.logPath) then
-        love.filesystem.write(debugManager.logPath, "游戏错误日志\n====================\n")
+    if not love.filesystem.getInfo(debugLogExtend.logPath) then
+        love.filesystem.write(debugLogExtend.logPath, "游戏错误日志\n====================\n")
     end
     
     -- 追加错误信息到日志文件
-    local logContent = "\n" .. debugManager.errorLog .. "\n====================\n"
-    love.filesystem.append(debugManager.logPath, logContent)
+    local logContent = "\n" .. debugLogExtend.errorLog .. "\n====================\n"
+    love.filesystem.append(debugLogExtend.logPath, logContent)
 end
 
 -- 屏幕绘制错误信息（在draw函数中调用）
-function debugManager.draw()
-    if not debugManager.isError or debugManager.errorLog == "" then
+function debugLogExtend.draw()
+    if not debugLogExtend.isError or debugLogExtend.errorLog == "" then
         return -- 无错误则不绘制
     end
 
     -- 绘制背景框
-    love.graphics.setColor(debugManager.drawConfig.bgColor)
+    love.graphics.setColor(debugLogExtend.drawConfig.bgColor)
     love.graphics.rectangle(
         "fill",
-        debugManager.drawConfig.x,
-        debugManager.drawConfig.y,
-        debugManager.drawConfig.width,
-        debugManager.drawConfig.height
+        debugLogExtend.drawConfig.x,
+        debugLogExtend.drawConfig.y,
+        debugLogExtend.drawConfig.width,
+        debugLogExtend.drawConfig.height
     )
 
     -- 绘制错误文本（自动换行）
-    love.graphics.setColor(debugManager.drawConfig.color)
-    love.graphics.setFont(debugManager.drawConfig.font)
+    love.graphics.setColor(debugLogExtend.drawConfig.color)
+    love.graphics.setFont(debugLogExtend.drawConfig.font)
     
     -- 拆分文本为多行（适配屏幕宽度）
-    local maxWidth = debugManager.drawConfig.width - 10
+    local maxWidth = debugLogExtend.drawConfig.width - 10
     local lines = {}
     local currentLine = ""
-    for word in string.gmatch(debugManager.errorLog, "%S+") do
+    for word in string.gmatch(debugLogExtend.errorLog, "%S+") do
         local testLine = currentLine .. " " .. word
         if love.graphics.getFont():getWidth(testLine) > maxWidth then
             table.insert(lines, currentLine)
@@ -116,29 +116,29 @@ function debugManager.draw()
     table.insert(lines, currentLine)
 
     -- 逐行绘制
-    local y = debugManager.drawConfig.y + 5
+    local y = debugLogExtend.drawConfig.y + 5
     for i, line in ipairs(lines) do
-        if y > debugManager.drawConfig.y + debugManager.drawConfig.height - 20 then
+        if y > debugLogExtend.drawConfig.y + debugLogExtend.drawConfig.height - 20 then
             break -- 超出高度则停止绘制
         end
-        love.graphics.print(line, debugManager.drawConfig.x + 5, y)
+        love.graphics.print(line, debugLogExtend.drawConfig.x + 5, y)
         y = y + 20 -- 行间距
     end
 end
 
 -- 清除错误信息（可选：游戏内手动调用）
-function debugManager.clearError()
-    debugManager.errorLog = ""
-    debugManager.isError = false
+function debugLogExtend.clearError()
+    debugLogExtend.errorLog = ""
+    debugLogExtend.isError = false
 end
 
 -- 读取错误日志文件内容（可选）
-function debugManager.getLogContent()
-    if love.filesystem.getInfo(debugManager.logPath) then
-        return love.filesystem.read(debugManager.logPath)
+function debugLogExtend.getLogContent()
+    if love.filesystem.getInfo(debugLogExtend.logPath) then
+        return love.filesystem.read(debugLogExtend.logPath)
     else
         return "暂无错误日志"
     end
 end
 
-return debugManager
+return debugLogExtend
