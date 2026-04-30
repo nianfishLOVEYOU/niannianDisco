@@ -1,8 +1,6 @@
 require "src.manager.fontSet"
 
 eventManager = require "src.manager.eventManager"
-mouseManager = require "src.manager.mouseManager"
-keybordManager = require "src.manager.keybordManager"
 systemManager = require "src.manager.systemManager"
 
 fileManager = require "src.manager.fileManager"

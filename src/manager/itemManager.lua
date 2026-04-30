@@ -15,7 +15,7 @@ end)
 
 
 -- 注册鼠标事件，用于管理 item 的点击/拖拽/松开交互
-mouseManager:mousepressed_regester(function(x, y, button)
+systemManager:mousepressed_regester(function(x, y, button)
     if button ~= 1 then return end
     ItemManager.mouseLeftDown = true
     x, y = cameraManager.cam:toWorld(x, y)
@@ -32,7 +32,7 @@ mouseManager:mousepressed_regester(function(x, y, button)
     end
 end)
 
-mouseManager:mouseMoved_regester(function(x, y, dx, dy)
+systemManager:mouseMoved_regester(function(x, y, dx, dy)
     -- 不再用鼠标位置决定 canInteractItem，只处理拖拽/悬停
     local item = ItemManager.focusedItem
     if item and item.interaction and ItemManager:isItemInRange(item) then
@@ -45,7 +45,7 @@ mouseManager:mouseMoved_regester(function(x, y, dx, dy)
     end
 end)
 
-mouseManager:mouseLeased_regester(function(x, y, button)
+systemManager:mouseLeased_regester(function(x, y, button)
     if button ~= 1 then return end
     ItemManager.mouseLeftDown = false
     local item = ItemManager.focusedItem

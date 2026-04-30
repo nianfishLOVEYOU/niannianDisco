@@ -2,7 +2,6 @@
 local love = require "love"
 local colors = require "src.glove.colors"
 require "src.glove.string-extensions"
-require "src.manager.mouseManager"
 
 local focusedWidget = nil
 local g = love.graphics
@@ -177,25 +176,25 @@ for _, module in ipairs(widgets) do
   Glove[module] = require("src.glove.widgets." .. module)
 end
 
-keybordManager:keypressed_regester(function(key)
+systemManager:keypressed_regester(function(key)
   Glove.keypressed(key)
 end)
 
 -- forward text input (IME / composed characters) to focused widget
-keybordManager:textinput_regester(function(text)
+systemManager:textinput_regester(function(text)
   if focusedWidget and focusedWidget.textinput then
     focusedWidget:textinput(text)
   end
 end)
 
-mouseManager:mousepressed_regester(function(x, y, button)
+systemManager:mousepressed_regester(function(x, y, button)
   Glove.mousePressed(x, y, button)
 end)
 
-mouseManager:mouseMoved_regester(function(x, y, dx, dy)
+systemManager:mouseMoved_regester(function(x, y, dx, dy)
   Glove.mousemoved(x, y, dx, dy)
 end)
 
-mouseManager:mouseLeased_regester(function(x, y, button)
+systemManager:mouseLeased_regester(function(x, y, button)
   Glove.mousereleased(x, y, button)
 end)

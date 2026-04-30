@@ -13,19 +13,19 @@ local mapEditor = {
 
 local history = {}
 
-mouseManager:mousepressed_regester(function(x, y, button)
+systemManager:mousepressed_regester(function(x, y, button)
     mapEditor:mousepressed(x, y, button)
 end)
-mouseManager:mouseMoved_regester(function(x, y, dx, dy)
+systemManager:mouseMoved_regester(function(x, y, dx, dy)
     mapEditor:mousemoved(x, y, dx, dy)
 end)
-mouseManager:mouseLeased_regester(function(x, y, button)
+systemManager:mouseLeased_regester(function(x, y, button)
     mapEditor:mousereleased(x, y, button)
 end)
-mouseManager:wheelMoved_regester(function(x, y)
+systemManager:wheelMoved_regester(function(x, y)
     mapEditor:wheelmoved(x, y)
 end)
-keybordManager:keypressed_regester(function(key)
+systemManager:keypressed_regester(function(key)
     mapEditor:keypressed(key)
 end)
 

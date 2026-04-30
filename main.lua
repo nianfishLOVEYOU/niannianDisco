@@ -67,7 +67,7 @@ local function keypressed(k)
     end
 end
 -- debug输入方案
-keybordManager:keypressed_regester(function(key)
+systemManager:keypressed_regester(function(key)
     keypressed(key)
 end)
 
