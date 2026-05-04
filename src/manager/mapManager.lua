@@ -2,55 +2,51 @@
 local json = require "lib.json" -- 需要放入 json.lua（常用的纯 Lua JSON 库）
 local Item = require "src.item.item"
 
-local mapManager = {
-}
+local mapManager = {}
 
 local itemFactory = require "src.map.itemFactory"
 local gridFactory = require "src.map.gridFactory"
 
---转网格坐标
-function mapManager:toGridIndex(worldx,worldy)
+-- 转网格坐标
+function mapManager:toGridIndex(worldx, worldy)
     if (self.map) then
         local gridx = math.ceil(worldx / self.map.gridSize)
         local gridy = math.ceil(worldy / self.map.gridSize)
-        print("获得map grid index：", gridx, gridy)
-        if(gridx < 1 or gridy < 1 or gridx > self.map.size.width or gridy > self.map.size.height) then
+        if (gridx < 1 or gridy < 1 or gridx > self.map.size.width or gridy > self.map.size.height) then
             return nil, nil
         end
         return gridx, gridy
     end
 end
 
-function mapManager:toGridPos(indexx,indexy)
+function mapManager:toGridPos(indexx, indexy)
     if (self.map) then
-        local worldx = (indexx - 1) * self.map.gridSize
-        local worldy = (indexy - 1) * self.map.gridSize
+        local worldx = (indexx - 1) * self.map.gridSize + self.map.gridSize / 2
+        local worldy = (indexy) * self.map.gridSize
         return worldx, worldy
     end
 end
 
-
---获得地块
+-- 获得地块
 function mapManager:getMapGrid(indexx, indexy)
-    if (self.map and self.map.grids[indexx] and self.map.grids[indexx][indexy]) then
+    if (self.map and self.map.grids[indexx] and self.map.grids[indexx][indexy] and self.map.grids[indexx][indexy] ~= 0) then
         return self.map.grids[indexx][indexy]
     end
     return nil
 end
 
---获得物体
+-- 获得物体
 function mapManager:getMapItem(indexx, indexy)
-    if (self.map and self.map.items[indexx] and self.map.items[indexx][indexy]) then
+    if (self.map and self.map.items[indexx] and self.map.items[indexx][indexy] and self.map.items[indexx][indexy] ~= 0) then
         return self.map.items[indexx][indexy]
     end
     return nil
 end
 
-
 --- 读取并解析地图文件
 --- @param mapFile 相对根目录的 JSON 路径，例如 "maps/map01.json"
 --- @return table 包含 fields: backgroundImage (Image), items (list of Item)
-function mapManager.loadMapFile(mapFile)
+function mapManager:_loadMapFile(mapFile)
     local raw = love.filesystem.read(mapFile)
     if not raw then
         error("无法读取地图文件：" .. mapFile .. "，创建一个空地图")
@@ -59,65 +55,104 @@ function mapManager.loadMapFile(mapFile)
     print("加载地图文件:", mapFile)
     local data = json.decode(raw)
 
-    local map = data 
+    self.map = data
 
     local w = data.size.width
     local h = data.size.height
     print("地图大小：", w, h)
 
     -- 解析 items
-    if map.items and #map.items > 0 then
-        for x, itemsCol in ipairs(map.items) do
+    if self.map.items and #self.map.items > 0 then
+        for x, itemsCol in ipairs(self.map.items) do
             for y, itemdata in ipairs(itemsCol) do
-                if itemdata ~= nil then
-                    print("mapLoad:", itemdata.type)
-
-                    if itemFactory.types[itemdata.type] then
-
-                        local item = itemFactory:newItem(itemdata.type)
-                        item:setPos(itemdata.x, itemdata.y, itemdata.z)
-                        -- 特殊的有长宽不定的item
-                        map.items[x][y] = item
-                    else
-                        local item = Item:new()
-                        item:setSize(itemdata.w, itemdata.h)
-                        item:setPos(itemdata.x, itemdata.y, itemdata.z)
-                        map.items[x][y] = item
-                    end
+                if itemdata ~= 0 then
+                    
+                    print("load 创建物体：", itemdata.type, "坐标：", x, y)
+                    self:addItem(itemdata.type, x, y,true)
                 end
             end
         end
     end
 
     -- 解析 grids
-    if map.grids and #map.grids > 0 then
-        for x, gridCol in ipairs(map.grids) do
+    if self.map.grids and #self.map.grids > 0 then
+        for x, gridCol in ipairs(self.map.grids) do
             for y, gridType in ipairs(gridCol) do
-                if gridType ~= nil then
-                    map.grids[x][y] = gridFactory:newGrid(gridType)
+                if gridType ~= 0 then
+                    print("load 创建地块：", gridType, "坐标：", x, y)
+                    self:addGrid(gridType, x, y,true)
                 end
             end
         end
     end
 
     -- 解析背景图片
-    if map.background and map.background ~= "" then
-        map.background = love.graphics.newImage(map.background)
+    if self.map.background and self.map.background ~= "" then
+        self.map.background = love.graphics.newImage(self.map.background)
     end
 
-    return map
+end
+
+-- 添加物体
+function mapManager:addItem(type, indexx, indexy, isLoading)
+    local itemType = type
+    local x, y = mapManager:toGridPos(indexx, indexy)
+
+    if not isLoading and  mapManager:getMapItem(indexx, indexy) then
+        return
+    end
+    print("addItem xy:", indexx, indexy, "物体类型：", itemType)
+    local newItem = itemFactory:newItem(itemType)
+    newItem:setPos(x, y)
+    newItem.type = itemType
+    itemManager:addItem(newItem)
+    mapManager.map.items[indexx][indexy] = newItem
+
+end
+
+-- 删除物体
+function mapManager:removeItem(indexx, indexy)
+    local item = mapManager:getMapItem(indexx, indexy)
+    if item then
+        itemManager:removeItem(item.id)
+        mapManager.map.items[indexx][indexy]:destroy()
+        mapManager.map.items[indexx][indexy] = 0
+    end
+end
+
+-- 地块添加
+function mapManager:addGrid(type, indexx, indexy, isLoading)
+    local px, py = mapManager:toGridPos(indexx, indexy)
+    if not isLoading and mapManager:getMapItem(px, py) then
+        return
+    end
+    print("addGrid xy:", indexx, indexy, "地块类型：", type)
+    local image = gridFactory:newGrid(type)
+    image:setPos(px, py)
+    image:setSize(mapManager.map.gridSize, mapManager.map.gridSize)
+    image:setAnchor(0.5, 1)
+    image.type = type
+    gridManager:addGrid(image, indexx, indexy)
+    mapManager.map.grids[indexx][indexy] = image
+end
+
+-- 地块删除
+function mapManager:removeGrid(indexx, indexy)
+    mapManager.map.grids[indexx][indexy] = 0
+    gridManager:removeGrid(indexx, indexy)
 end
 
 function mapManager:creatMap(w, h)
-    local map = require "src.map.map"
+    local createMap = require "src.map.map"
+    local map = createMap()
     map.size.width = w
     map.size.height = h
     for x = 1, w do
         table.insert(map.grids, {})
         table.insert(map.items, {})
         for y = 1, h do
-            map.items[x][y] = nil
-            map.grids[x][y] = nil
+            map.items[x][y] = 0
+            map.grids[x][y] = 0
         end
     end
     print("创建新地图，大小：", w, h)
@@ -128,72 +163,67 @@ end
 function mapManager:loadMap(mapPath)
     self:closeMap()
     if love.filesystem.getInfo(mapPath) then
-        self.map = self.loadMapFile(mapPath)
-        -- 将地图中的 items 添加到 itemManager 中进行管理
-        for i, v in ipairs(self.map.items) do
-            for j, item in ipairs(v) do
-                if item then
-                    itemManager:addItem(item)
-                end
-            end
-        end
-        for i, v in ipairs(self.map.grids) do
-            for j, grid in ipairs(v) do
-                if grid then
-                    gridManager:addGrid(grid, i, j)
-                end
-            end
-        end
-        
+        print("地图文件存在，加载地图：", mapPath)
+        self:_loadMapFile(mapPath)
         cameraManager.cam:setPosition(self.map.startPoint.x, self.map.startPoint.y)
         return self.map
     else
         print("地图文件不存在，创建一个空地图")
-        self.map=self:creatMap(10, 10)
+        self.map = self:creatMap(10, 10)
         return self.map
     end
 end
 
 function mapManager:closeMap()
-    --self.map = nil
+    -- self.map = nil
     itemManager:removeAll()
 end
 
 function mapManager:saveMap(outFile)
     print("保存地图到:", outFile)
-    self.save(self.map, outFile)
+    self._save(self.map, outFile)
 end
 
 --- mapTable 包含items  startPoint
 --- 将地图对象保存为 JSON（编辑器使用）
 --- @param mapTable 必须包含 fields: background (string), items (list)
 --- @param outFile 输出路径，例如 "maps/map01.json"
-function mapManager.save(map, outFile)
-    --导出初始设置
-    local out = require "src.map.map"
-    out.gridSize=map.gridSize or 32
+function mapManager._save(map, outFile)
+    -- 导出初始设置
+    local createMap = require "src.map.map"
+    local out = createMap()
+    out.gridSize = map.gridSize or 32
     out.background = map.background or ""
-    out.size = {width=map.size.width, height=map.size.height}
-    out.startPoint = { x = map.startPoint.x, y = map.startPoint.y }
-    
+    out.size = {
+        width = map.size.width,
+        height = map.size.height
+    }
+    out.startPoint = {
+        x = map.startPoint.x,
+        y = map.startPoint.y
+    }
+    print("导出地图设置：", "背景图:", out.background, "网格大小:", out.gridSize, "地图大小:",
+        out.size.width, out.size.height, "起始点:", out.startPoint.x, out.startPoint.y)
+    nianTool.dump(out)
     for x = 1, out.size.width do
-        table.insert(out.items, {})
-        table.insert(out.grids, {})
-
+        out.items[x] = {}
+        out.grids[x] = {}
         for y = 1, out.size.height do
-            
+            print("导出坐标：", x, y, map.items[x][y])
             local item = map.items[x][y]
-            if item ~= nil then
+            if item ~= 0 then
+                print("save 物体：", item.type, "坐标：", x, y)
                 out.items[x][y] = item:serialize()
             else
-                out.items[x][y] = nil
+                out.items[x][y] = 0
             end
 
             local grid = map.grids[x][y]
-            if grid ~= nil then
+            if grid ~= 0 then
+                print("save 地块：", grid.type, "坐标：", x, y)
                 out.grids[x][y] = grid.type
             else
-                out.grids[x][y] = nil
+                out.grids[x][y] = 0
             end
         end
     end

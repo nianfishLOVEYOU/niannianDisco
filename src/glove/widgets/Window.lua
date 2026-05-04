@@ -1,3 +1,5 @@
+--拖窗
+
 -- /d:/lua/LOVEgame/niannianDisco/src/glove/widgets/window.lua
 -- GitHub Copilot
 -- A draggable window widget (like Windows), slidepanel-like API, supports child widgets,

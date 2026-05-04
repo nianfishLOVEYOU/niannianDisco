@@ -8,7 +8,9 @@ local gridFactory = require "src.map.gridFactory"
 local mapEditor = {
     brushOpen = false, -- 是否打开右键菜单
     brushSize = 1, -- 画笔大小，默认为1格
-    brush = 0 -- 0=物体 2=地板
+    brush = "", -- item or grid
+    selectItemBrushType = "",
+    selectGridBrushType = ""
 }
 
 local history = {}
@@ -67,96 +69,33 @@ local function floorToPixSize(x)
     return math.floor(x / pixSize) * pixSize
 end
 
-function mapEditor:mousepressed(x, y, button)
-    local worldX, worldY = cameraManager.cam:toWorld(x, y)
-    print("button", x, y, "world", worldX, worldY)
-    if button == 1 then -- 左键：选中
-        mapEditor.selected = nil
-        for _, item in pairs(itemManager.items) do
-            if item:isOver(worldX, worldY) then
-                if (not mapEditor.selected) or (item.layer > mapEditor.selected.layer) or
-                    (item.layer == mapEditor.selected.layer and item.z > mapEditor.selected.z) then
-                    mapEditor.selected = item
-                end
+
+
+-- 画笔触碰事件，参数是格子坐标和鼠标按钮
+function mapEditor:brushTouch(indexx, indexy, mouseButton)
+    if mapEditor.brush == "item" then
+
+        if mouseButton == 1 and self.selectItemBrushType ~= "" then -- 左键添加，右键删除\
+            local item = mapManager:getMapItem(indexx, indexy)
+            if item then
+                return
             end
+            mapManager:addItem(self.selectItemBrushType, indexx, indexy)
+        elseif mouseButton == 2 then
+            mapManager:removeItem(indexx, indexy)
         end
-        -- 记录偏移量，防止选中时瞬移到鼠标位置
-        if mapEditor.selected then
-            mapEditor.dragOffset.x = mapEditor.selected.x - worldX
-            mapEditor.dragOffset.y = mapEditor.selected.y - worldY
-            -- 开始拖拽时记录起始位置，用于撤销
-            mapEditor.dragging = true
-            mapEditor.dragStartPos.x = mapEditor.selected.x
-            mapEditor.dragStartPos.y = mapEditor.selected.y
-        else
-            mapEditor.dragging = false
+    elseif mapEditor.brush == "grid" then
+
+        if mouseButton == 1 and self.selectGridBrushType ~= "" then -- 左键添加，右键删除
+            local grid = mapManager:getMapGrid(indexx, indexy)
+            if grid then
+                return
+            end
+            mapManager:addGrid(self.selectGridBrushType, indexx, indexy)
+        elseif mouseButton == 2 then
+            mapManager:removeGrid(indexx, indexy)
         end
-    elseif button == 2 then
-        -- 逻辑层不再直接创建 UI，仅负责记录选中等，UI 层通过右键事件弹出菜单
     end
-end
-
--- 添加物体
-function mapEditor:addItem(type, x, y)
-    print("mapEditor:addItem", type, x, y)
-    local itemType = type
-    if not itemType or not itemFactory.news[itemType] then
-        return
-    end
-    local indexX, indexY = mapManager:toGridIndex(x, y)
-    local px, py = mapManager:toGridPos(indexX, indexY)
-    if (mapManager:getMapItem(x, y)) then
-        print("当前位置已有物体，无法创建")
-        return
-    end
-    local newItem = itemFactory:newItem(itemType)
-    newItem:setPos(px, py)
-    itemManager:addItem(newItem)
-    mapManager.map.items[indexX][indexY] = newItem
-
-    -- 新建物体时重置拖拽偏移
-    mapEditor.dragOffset.x = 0
-    mapEditor.dragOffset.y = 0
-end
-
--- 删除物体
-function mapEditor:removeItem(indexx, indexy)
-    -- local target = mapEditor.selected
-
-    local item = mapManager:getMapItem(indexx, indexy)
-    if item then
-        print("删除物体：", item.type, "坐标：", indexx, indexy)
-        itemManager.removeItem(item.id)
-        mapManager.map.items[indexx][indexy]:destroy()
-        mapManager.map.items[indexx][indexy] = nil
-    end
-    -- if mapEditor.selected == item then
-    --     mapEditor.selected = nil
-    -- end
-end
-
--- 地块添加
-function mapEditor:addGrid(type, indexx, indexy)
-    print("mapEditor:addGrid", type, indexx, indexy)
-    if not type or not gridFactory.news[type] then
-        return
-    end
-    local px, py = mapManager:toGridPos(indexx, indexy)
-    if (mapManager:getMapItem(px, py)) then
-        print("当前位置已有物体，无法创建")
-        return
-    end
-
-    local image = gridFactory:newGrid(type)
-    image:setPos(px, py)
-    gridManager:addGrid(image, indexx, indexy)
-    mapManager.map.grids[indexx][indexy] = image
-end
-
--- 地块删除
-function mapEditor:removeGrid(indexx, indexy)
-    mapManager.map.grids[indexx][indexy] = nil
-    gridManager:removeGrid(indexx, indexy)
 end
 
 function mapEditor:mousereleased(x, y, button)
@@ -176,12 +115,53 @@ function mapEditor:mousereleased(x, y, button)
     end
 end
 
+function mapEditor:mousepressed(x, y, button)
+    local worldX, worldY = cameraManager.cam:toWorld(x, y)
+    if button == 1 then -- 左键：选中
+        mapEditor.selected = nil
+        -- for _, item in pairs(itemManager.items) do
+        --     if item:isOver(worldX, worldY) then
+        --         if (not mapEditor.selected) or (item.layer > mapEditor.selected.layer) or
+        --             (item.layer == mapEditor.selected.layer and item.z > mapEditor.selected.z) then
+        --             mapEditor.selected = item
+        --         end
+        --     end
+        -- end
+
+        if mapEditor.brush ~= "" then
+            local indexx, indexy = mapManager:toGridIndex(worldX, worldY)
+            if indexx and indexy then
+                mapEditor:brushTouch(indexx, indexy, 1)
+            end
+        end
+    elseif button == 2 then
+        if mapEditor.brush ~= "" then
+            local indexx, indexy = mapManager:toGridIndex(worldX, worldY)
+            if indexx and indexy then
+                mapEditor:brushTouch(indexx, indexy, 2)
+            end
+        end
+    end
+
+end
+
 function mapEditor:mousemoved(x, y, dx, dy, istouch)
     local worldX, worldY = cameraManager.cam:toWorld(x, y)
-    if mapEditor.selected and love.mouse.isDown(1) then
-        local posx = floorToPixSize(worldX + mapEditor.dragOffset.x)
-        local posy = floorToPixSize(worldY + mapEditor.dragOffset.y)
-        mapEditor.selected:setPos(posx, posy)
+
+    if love.mouse.isDown(1) then -- 右键选中物体
+        if mapEditor.brush ~= "" then
+            local indexx, indexy = mapManager:toGridIndex(worldX, worldY)
+            if indexx and indexy then
+                mapEditor:brushTouch(indexx, indexy, 1)
+            end
+        end
+    elseif love.mouse.isDown(2) then -- 画笔拖拽
+        if mapEditor.brush ~= "" then
+            local indexx, indexy = mapManager:toGridIndex(worldX, worldY)
+            if indexx and indexy then
+                mapEditor:brushTouch(indexx, indexy, 2)
+            end
+        end
     elseif love.mouse.isDown(3) then
         cameraManager.cam:setPosition(cameraManager.cam.x - dx, cameraManager.cam.y - dy)
     end
@@ -213,8 +193,8 @@ function mapEditor:printItemCenter()
     for _, item in ipairs(itemManager.items) do
         if item.getPos then
             local x, y = item:getPos()
-            drawArrow(x, y, x + 50, y,1,0,0) -- 示例箭头，实际参数根据需求调整
-            drawArrow(x, y, x , y-50 ,1,0,0) -- 示例箭头，实际参数根据需求调整
+            drawArrow(x, y, x + 50, y, 1, 0, 0) -- 示例箭头，实际参数根据需求调整
+            drawArrow(x, y, x, y - 50, 1, 0, 0) -- 示例箭头，实际参数根据需求调整
             love.graphics.circle("fill", x, y, 3)
         end
     end

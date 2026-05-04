@@ -1,4 +1,4 @@
--- slider
+-- slider拖拽条
 
 local image = require "src.common.aUIImage"
 local widget = require "src.glove.widgets.widget"

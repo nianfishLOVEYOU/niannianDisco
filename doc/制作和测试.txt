@@ -169,6 +169,7 @@ tips
 			69 修改ui  添加item的方法改为用笔刷，选择item或者网格按钮，然后点击左键和右键
 			70 简化系统
 			71 像素化屏幕
+			72 把editor的add和remove都移动到mapmanager里面吧，不然manager的load没有效果
 
 
 

@@ -1,3 +1,4 @@
+--所有ui的父类
 local item = require "src.item.item"
 
 local widget = item:extend()
@@ -6,6 +7,7 @@ local widget = item:extend()
 function widget:init()
   Glove.widgets[self] = self
   self.visible = true
+  self.color = {1, 1, 1, 1}
 end
 
 function widget:setVisible(v)

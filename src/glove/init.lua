@@ -17,7 +17,7 @@ local widgets = {
   "HStack",
   "Image",
   "Input",
-  --"RadioButtons",
+  "RadioButtons",
   --"Select",
   "Spacer",
   --"Tabs",

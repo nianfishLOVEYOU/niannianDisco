@@ -7,7 +7,7 @@ function wall:init(imgPath, bodyInfo)
     self.type="wall"
     self.autoBody=true
     self:setImage("res/image/wall.png")
-    self:setBody(self.w/2,10)
+    self:setSize(mapManager.map.gridSize,mapManager.map.gridSize)
 end
 
 return wall

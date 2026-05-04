@@ -7,13 +7,10 @@ local gridFactory = require "src.map.gridFactory"
 local itemTypes = itemFactory.types
 local itemnews = itemFactory.news
 
-
-
 function MapEditorUI:init(editor)
     -- editor 是逻辑层的 mapEditor（src/map/mapEditor.lua）
     self.editor = editor
     self:refresh()
-
 end
 
 function MapEditorUI:refresh()
@@ -26,177 +23,153 @@ end
 function MapEditorUI:draw()
     self:drawStacks()
 
-    if not self.editor then return end
+    if not self.editor then
+        return
+    end
 
     local width, height = love.graphics.getDimensions()
 
     love.graphics.setColor(1, 0, 0, 0.9)
-    love.graphics.print("左键：选中  右键：创建/菜单  滚轮：切换  S：保存  Delete：删除选中块", 10, height - 30)
+    love.graphics.print(
+        "左键：选中  右键：创建/菜单  滚轮：切换  S：保存  Delete：删除选中块", 10,
+        height - 30)
     love.graphics.setColor(1, 1, 1, 1)
 end
 
 -- ---------- 右键菜单状态 ----------
+
+-- 搭建笔刷选择单选框
+function MapEditorUI:_buildBrushMenuStack()
+
+    -- 清理之前的笔刷选择界面
+    if self.BrushMenuStack then
+        self:removeStack(self.BrushMenuStack)
+        self.BrushMenuStack = nil
+    end
+
+    local burshRadioButtons = Glove.RadioButtons:new({{
+        label = "物体",
+        value = "item"
+    }, {
+        label = "地板",
+        value = "grid"
+    }}, function(value)
+        self:_setBrush(value)
+    end)
+    local stack = Glove.VStack:new({burshRadioButtons}, 10)
+    stack:setPos(100, 0, self.z)
+    self.BrushMenuStack = stack
+    self:addStack(stack)
+end
+
+-- 详细的笔刷选择界面，包含所有 item 类型的按钮
+function MapEditorUI:_setBrush(value)
+
+    self.editor.brush = value
+
+    -- 清理之前的笔刷选择界面
+    if self._brushSelectStack then
+        self:removeStack(self._brushSelectStack)
+        self._brushSelectStack = nil
+    end
+    print("选择笔刷类型：", value)
+    if value == "item" then
+        local burshTable = {}
+        for _, itemType in ipairs(itemFactory.types) do
+            table.insert(burshTable, {
+                label = itemType,
+                value = itemType
+            })
+        end
+        local burshRadioButtons = Glove.RadioButtons:new(burshTable, function(value)
+            self.editor.selectItemBrushType  = value
+            print("当前物体笔刷：", value)
+        end)
+        local stack = Glove.VStack:new({burshRadioButtons}, 10)
+        stack:setPos(200, 0, self.z)
+        self._brushSelectStack = stack
+        self:addStack(stack)
+        print("当前笔刷：物体")
+    elseif value == "grid" then
+        local burshTable = {}
+        for _, gridType in ipairs(gridFactory.types) do
+            table.insert(burshTable, {
+                label = gridType,
+                value = gridType
+            })
+        end
+        local burshRadioButtons = Glove.RadioButtons:new(burshTable, function(value)
+            self.editor.selectGridBrushType = value
+            print("当前地板笔刷：", value)
+        end)
+        local stack = Glove.VStack:new({burshRadioButtons}, 10)
+        stack:setPos(200, 0, self.z)
+        self._brushSelectStack = stack
+        self:addStack(stack)
+        print("当前笔刷：地板")
+    end
+end
+
 function MapEditorUI:_ensureEditorUIState()
     -- 记录最近一次右键时是否点在选中对象上
-    self._ctxMenu = self._ctxMenu or { open = false, x = 0, y = 0, onSelected = false }
+    self._ctxMenu = self._ctxMenu or {
+        open = false,
+        x = 0,
+        y = 0,
+        onSelected = false
+    }
 end
 
-function MapEditorUI:_closeContextMenu()
+function MapEditorUI:_openBrushMenu()
+    self._brushIsOpen = true
+    if not self.BrushMenuStack then
+        self:_buildBrushMenuStack()
+    end
+    self:_buildBrushMenuStack()
+end
+
+function MapEditorUI:_closeBrushMenu()
+    self._brushIsOpen = false
+    self.editor.brush = ""
+    if self._brushSelectStack then
+        self:removeStack(self._brushSelectStack)
+        self._brushSelectStack = nil
+    end
+    if self.BrushMenuStack then
+        self:removeStack(self.BrushMenuStack)
+        self.BrushMenuStack = nil
+    end
     self:_ensureEditorUIState()
-    if self._ctxMenuWindow then
-        self:removeStack(self._ctxMenuWindow)
-        self._ctxMenuWindow = nil
-    end
-    self._ctxMenu.open = false
-    self._ctxMenu.onSelected = false
-end
-
--- 根据 mapManager.itemnews 里的类型生成菜单按钮
-local function buildCreateButtons(self, win)
-
-    for _, t in ipairs(itemTypes) do
-        if itemnews[t] then
-            local btn = Glove.Button:new("创建: " .. tostring(t), function()
-                if self.editor and self.editor.addItem then
-                    -- 使用当前鼠标位置创建
-                    local mx, my = love.mouse.getPosition()
-                    local worldX, worldY = cameraManager.cam:toWorld(mx, my)
-                    self.editor:addItem(t, worldX, worldY)
-                end
-                self:_closeContextMenu()
-            end)
-            btn:setSize(0,0)
-            win:addChild(btn)
-        end
-    end
-
-end
-
--- ---------- 右键菜单事件 ----------
-local function isRightClickOnSelected(editor, screenX, screenY)
-    if not (editor and editor.selected and editor.selected.isOver) then
-        return false
-    end
-    local worldX, worldY = cameraManager.cam:toWorld(screenX, screenY)
-    return editor.selected:isOver(worldX, worldY)
-end
-
--- 打开右键菜单，参数是点击位置（屏幕坐标）
-function MapEditorUI:_openContextMenu(screenX, screenY)
-    if not self.editor then return end
-
-    self:_ensureEditorUIState()
-    -- 判断这次右键是否点在当前选中对象上
-    self._ctxMenu.onSelected = isRightClickOnSelected(self.editor, screenX, screenY)
-    self._ctxMenu.x, self._ctxMenu.y = screenX, screenY
-
-    -- rebuild window
-    self:_closeContextMenu()
-    self:_ensureEditorUIState()
-    self._ctxMenu.onSelected = isRightClickOnSelected(self.editor, screenX, screenY)
-    self._ctxMenu.x, self._ctxMenu.y = screenX, screenY
-
-    local title = self.editor.selected and "对象操作" or "地图操作"
-    local VS = Glove.VStack:new({},0)
-
-    local padX, padY = 10, 10
-    local curY = padY
-
-    if self._ctxMenu.onSelected then
-        -- 只有在右键点在已选中的对象上时，才显示“删除对象”
-        local delBtn = Glove.Button:new("删除对象", function()
-            if self.editor and self.editor.selected then
-                self.editor:removeItem(self.editor.selected)
-            end
-            self:_closeContextMenu()
-        end)
-        VS:addChild(delBtn)
-        delBtn:setSize(0,0)
-        VS:layout()
-    else
-        -- 地图操作：根据所有 itemTypes 生成“创建对象”按钮
-        buildCreateButtons(self, VS)
-
-        local saveBtn = Glove.Button:new("保存地图", function()
-            mapManager:saveMap("res/maps/edited.json")
-            self:_closeContextMenu()
-        end)
-        saveBtn:setSize(0,0)
-        VS:addChild(saveBtn)
-        VS:layout()
-    end
-
-    -- 创建一个可滚动容器包裹菜单
-    local screenW, screenH = love.graphics.getDimensions()
-    local maxHeight = screenH * 0.6
-
-    local contentHeight = curY + padY
-    local viewHeight = math.min(contentHeight, maxHeight)
-
-    local scrollContainer = Glove.ScrollArea and Glove.ScrollArea:new({ content = VS, width = 220, height = viewHeight }) or VS
-
-    if scrollContainer ~= VS then
-        -- 如果有 ScrollArea 组件，则使用它来包装 VS
-        scrollContainer:setPos(self._ctxMenu.x, self._ctxMenu.y, (self.z or 0) + 100)
-        scrollContainer:setContent(VS)
-        self._ctxMenuWindow = scrollContainer
-    else
-        -- 否则退回到原来的行为
-        VS:setPos(self._ctxMenu.x, self._ctxMenu.y, (self.z or 0) + 100)
-        self._ctxMenuWindow = VS
-    end
-
-    self:addStack(self._ctxMenuWindow)
-    self._ctxMenu.open = true
 end
 
 -- UI 接管鼠标事件（由 uiManager 分发）
 function MapEditorUI:mousePressed(x, y, button)
 
-    if button == 2 then
+    if button == 1 then
         local screenX, screenY = x, y
         local indexx, indexy = mapManager:toGridIndex(cameraManager.cam:toWorld(screenX, screenY))
-        if(indexx and indexy) then
-            print("右键点击地图网格：", indexx, indexy)
-            self:_openContextMenu(screenX, screenY)
+        if (indexx and indexy) then
+            if not self._brushIsOpen then
+                self:_openBrushMenu()
+            end
         else
-            print("右键点击地图外部，关闭菜单")
-            self:_closeContextMenu()
-        end
-    elseif button == 1 then
-        -- 左键：只有在点到菜单外面时才关闭菜单
-        if self._ctxMenuWindow and self._ctxMenu and self._ctxMenu.open then
-            if self._ctxMenuWindow.hitTest then
-                -- 如果 Glove 控件有 hitTest，优先使用
-                if not self._ctxMenuWindow:hitTest(x, y) then
-                    self:_closeContextMenu()
+            if self._brushIsOpen then
+                local w = Glove.getFirstWidget(x, y) -- 检测点击位置是否在菜单上
+                if w then
+                    return
                 end
-            else
-                -- 简单的矩形包围盒检测
-                local wx, wy = self._ctxMenu.x, self._ctxMenu.y
-                local ww = self._ctxMenuWindow.w or self._ctxMenuWindow.width or 220
-                local wh = self._ctxMenuWindow.h or self._ctxMenuWindow.height or 200
-                if x < wx or x > wx + ww or y < wy or y > wy + wh then
-                    self:_closeContextMenu()
-                end
+                print("右键点击地图外部，关闭菜单")
+                self:_closeBrushMenu()
             end
         end
+    elseif button == 2 then
+
     end
 end
 
 -- 当右键菜单打开时，用滚轮滚动菜单
 function MapEditorUI:wheelmoved(x, y)
-    if not (self._ctxMenu and self._ctxMenu.open and self._ctxMenuWindow) then return end
 
-    -- 如果使用的是 ScrollArea 组件，优先调用它的滚动接口
-    if self._ctxMenuWindow.scrollBy then
-        self._ctxMenuWindow:scrollBy(0, y * 20)
-        return
-    end
-
-    -- 简单回退：直接移动整个菜单窗口的位置
-    local wx, wy, wz = self._ctxMenuWindow:getPos()
-    self._ctxMenuWindow:setPos(wx, wy + y * 20, wz)
 end
 
 function MapEditorUI:mouseLeased(x, y, button)
