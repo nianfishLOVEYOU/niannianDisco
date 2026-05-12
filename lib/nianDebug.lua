@@ -94,7 +94,12 @@ function nianDebug.DebugPrint()
     local deepSize = 0.1
     love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * deepSize, 0,
         0, deepSize, deepSize)
-
+    --显示深度图边框
+    love.graphics.setColor(1, 0, 0)
+    love.graphics.setLineWidth(1)
+    love.graphics.rectangle("line", love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * deepSize, 0, nianDraw.depthCanvas:getWidth() * deepSize, nianDraw.depthCanvas:getHeight() * deepSize)
+    love.graphics.setColor(1, 1, 1)
+    
     debugLogExtend.draw()
 end
 

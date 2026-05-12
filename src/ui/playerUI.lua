@@ -12,7 +12,7 @@ end
 function PlayerUI:refresh()
     self:clearStacks()
     --背景
-    self:addStack(self:getBackStack())
+    --self:addStack(self:getBackStack())
     -- 创建本地列表
     self:addStack(self:getvstack())
 
@@ -104,6 +104,7 @@ function PlayerUI:getvstack()
     local volumeSlider = Glove.Slider:new(audio.volume, function(value)
         audio:setVolume(value)
     end)
+    print("当前音量:", audio.volume)
 
     --右边对其
     local musiVoiceHStack = Glove.HStack:new({infoText, progressText, volumeText, volumeSlider })

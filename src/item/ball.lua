@@ -49,25 +49,7 @@ end
 
 -- 点击按钮才触发
 function ball:onClick()
-    -- 找到本地玩家，用于决定踢球方向
-    local player = playerManager and playerManager.player or nil
 
-    -- 本地执行踢球
-    self:doKickFromPlayer(player)
-
-    -- 通过网络广播踢球动作（包含球的 id/位置和玩家信息等）
-    local bx, by = self:getPos()
-    local px, py = 0, 0
-    if player and player.getPos then
-        px, py = player:getPos()
-    end
-    broadcastAction("kick_ball", {
-        ballType = self.type,
-        ballX = bx,
-        ballY = by,
-        playerX = px,
-        playerY = py,
-    })
 
 end
 

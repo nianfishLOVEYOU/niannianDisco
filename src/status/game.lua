@@ -5,16 +5,22 @@ local Game = {}
 
 function Game:init()
     --ui
-    mapManager:loadMap("res/maps/edited.json")
-    local playerUI = require("src.ui.playerUI"):new()
-    uiManager:addUI("playerUI",playerUI)
-    local playerlistUI = require("src.ui.playerlistUI"):new()
-    uiManager:addUI("playerlistUI",playerlistUI)
+    --mapManager:loadMap("res/maps/edited.json")
+
     local floatUI = require("src.ui.floatUI"):new()
     uiManager:addUI("floatUI",floatUI)
-
-    playerManager:addPlayer(globleManager.map.startPoint.x, globleManager.map.startPoint.y)
+    --玩家聊天ui
+    --播放列表ui
+    --左右切换页面系统
+    local pageControlUI = require("src.ui.pageControlUI"):new()
+    uiManager:addUI("pageControlUI",pageControlUI)
+    --playerManager:addPlayer(globleManager.map.startPoint.x, globleManager.map.startPoint.y)
     --playerManager:addRemotePlayer(1,"name",map.startPoint.x, map.startPoint.y)
+    
+    -- 添加nian接待员
+    local nianPlayer = require "src.nianPlayer"
+    itemManager:addItem(nianPlayer:new())
+    
 end
 
 
@@ -43,10 +49,9 @@ end
 
 -- 结束生命周期等待下次初始化
 function Game:leave()
-    uiManager:removeUI("playlistUI")
-    uiManager:removeUI("playerUI")
-    uiManager:removeUI("playerlistUI")
+
     uiManager:removeUI("floatUI")
+    uiManager:removeUI("pageControlUI")
 end
 
 return Game

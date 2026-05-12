@@ -67,7 +67,7 @@ function MusicInputUI:refresh()
     -- 创建本地列表
     self.stack = self:getvstack()
     self.closehstack = Glove.HStack({}, {Glove.Button_img("","res/image/ui/x.png", {
-        onClick = closeUI,
+        mousePressed = closeUI,
         width=20,
         height=20
     })})

@@ -3,11 +3,11 @@ local AnchoredImage = class:extend()
 
 -- 锚点预设（可选，方便快速调用）
 AnchoredImage.ANCHOR = {
-    CENTER = { 0.5, 0.5 },
-    TOP_LEFT = { 0, 0 },
-    TOP_RIGHT = { 1, 0 },
-    BOTTOM_LEFT = { 0, 1 },
-    BOTTOM_RIGHT = { 1, 1 }
+    CENTER = {0.5, 0.5},
+    TOP_LEFT = {0, 0},
+    TOP_RIGHT = {1, 0},
+    BOTTOM_LEFT = {0, 1},
+    BOTTOM_RIGHT = {1, 1}
 }
 
 -- 构造函数
@@ -18,6 +18,17 @@ function AnchoredImage:init(path, x, y, anchorX, anchorY)
     self.img = resourceManager.loadImage(path)
     if not self.img then
         print("!ERROR non path ! : " .. path)
+
+        self.color = {1, 0, 0, 1}
+        self.w, self.h = 32, 32
+        self.originalW, self.originalH = self.w, self.h
+        self.anchorX = anchorX or 0.5
+        self.anchorY = anchorY or 0.5
+        self.x = x or 0
+        self.y = y or 0
+        self.z = 0
+        self.layer = 0
+        self.rotation = 0
         return
     end
     self.quad = nil
@@ -37,7 +48,7 @@ function AnchoredImage:init(path, x, y, anchorX, anchorY)
     self.layer = 0
     -- 额外属性：旋转、颜色
     self.rotation = 0
-    self.color = { 1, 1, 1, 1 }
+    self.color = {1, 1, 1, 1}
 
     -- **翻转标记**（默认不翻转）
     self.flipX = false -- true → 水平镜像
@@ -68,7 +79,7 @@ function AnchoredImage:setSize(w, h)
 end
 
 function AnchoredImage:getSize()
-   -- print(self.quad)
+    -- print(self.quad)
     if self.quad then
         local x, y, qw, qh = self.quad:getViewport()
         return qw, qh
@@ -139,7 +150,7 @@ function AnchoredImage:draw()
     }
 
     if (self.quad) then
-        --这里因为元尺寸过大，所以需要根据裁剪算新的尺寸
+        -- 这里因为元尺寸过大，所以需要根据裁剪算新的尺寸
         local qx, qy, qw, qh = self.quad:getViewport()
         scaleX = self.w / qw
         scaleY = self.h / qh
@@ -153,14 +164,14 @@ function AnchoredImage:draw()
         -- 锚点偏移量 = 锚点比例 * 当前尺寸
         local offsetX = self.anchorX * qw
         local offsetY = self.anchorY * qh
-        drawInfo.parameters = { self.img, self.quad, self.x, self.y, self.rotation, scaleX, scaleY, offsetX, offsetY }
+        drawInfo.parameters = {self.img, self.quad, self.x, self.y, self.rotation, scaleX, scaleY, offsetX, offsetY}
         nianDraw:drawReg(drawInfo)
     else
         -- 锚点偏移量 = 锚点比例 * 当前尺寸
         local offsetX = self.anchorX * self.originalW
         local offsetY = self.anchorY * self.originalH
 
-        drawInfo.parameters = { self.img, self.x, self.y, self.rotation, scaleX, scaleY, offsetX, offsetY }
+        drawInfo.parameters = {self.img, self.x, self.y, self.rotation, scaleX, scaleY, offsetX, offsetY}
         nianDraw:drawReg(drawInfo)
     end
     love.graphics.setColor(1, 1, 1, 1)

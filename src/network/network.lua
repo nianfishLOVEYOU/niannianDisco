@@ -197,7 +197,7 @@ function Network:handleMessage(message, address)
         local userid = self:getPeersId(address)
         audio:fileRequestAllow(userid, message.index)
     elseif message.type == "playermove" then
-        -- 收到远程玩家移动信息
+        -- 收到远程玩家移动信息 
         local remotePlayer = playerManager.remotePlayers[message.userid]
         if remotePlayer then
             remotePlayer:gotoPos(message.x, message.y)
@@ -211,37 +211,10 @@ function Network:handleMessage(message, address)
     elseif message.type == "playerConnectInfo" then
         -- 收到玩家生成信息
         playerManager:addRemotePlayer(message.userid, message.name, message.x, message.y)
-    elseif message.type == "cake_clicked" then
-        -- 收到有人点击蛋糕的广播，在本地播放一次生日快乐歌，实现同步
-        if soundManager and soundManager.play then
-            soundManager:play("res/soundeffects/happybirthday.mp3", 1, false)
-        end
-        --找到item中的cake
-        for _, item in pairs(itemManager.items) do
-            if item.type == "cake" then
-                item:handleCakeClickSequence()
-                break
-            end
-        end
-    elseif message.type == "kick_ball" then
-        -- 收到踢球动作广播，找到场景中的球，按发送过来的数据做一次本地踢球
-        for _, item in pairs(itemManager.items) do
-            if item.type == "ball" and item.doKickFromPlayer then
-                -- 这里简单根据广播时记录的球位置来校准一下，避免误踢其他球
-                if not message.ballX or not message.ballY then
-                    item:doKickFromPlayer(nil)
-                else
-                    local bx, by = item:getPos()
-                    local dx = bx - message.ballX
-                    local dy = by - message.ballY
-                    -- 距离太远就认为不是同一个球
-                    if dx * dx + dy * dy < 32 * 32 then
-                        item:doKickFromPlayer(nil)
-                        break
-                    end
-                end
-            end
-        end
+
+    elseif message.type == "chatMessage" then
+        uiManager:getUI("dialog"):addMessage( message.content,message.userid)
+
     else
         print("## no handle by: " .. message.type)
     end

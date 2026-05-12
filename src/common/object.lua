@@ -30,7 +30,7 @@ end
 -- 确保没有被引用了
 function object:destroy()
     if self.__destroyed then
-        print("! duble destory !")
+        print("! duble destory !",self.type, self.id)
         return
     end
     self.__destroyed = true

@@ -55,8 +55,8 @@ function PlaylistUI:refresh()
     
     -- 创建本地列表
     self:clearStacks()
-    self:addStack(self:getvstack())
-    self:addStack(self:getlocalPlayListStack())
+    self:_buildPlayListStack()
+    self:_buildLocalPlayListStack()
     
 end
 
@@ -65,7 +65,7 @@ function PlaylistUI:update(dt)
 
 end
 
-function PlaylistUI:getlocalPlayListStack()
+function PlaylistUI:_buildLocalPlayListStack()
     local title = Glove.HStack:new({ Glove.Text:new("tmp本地列表:") })
     title:setName("title tmp")
 
@@ -92,11 +92,11 @@ function PlaylistUI:getlocalPlayListStack()
     slidePanel:setPos(self.posx - 250, self.posy, self.z)
     slidePanel:setSize(200, 300)
     vstack:setPos(0, 0) --大概是拖拽条的限制归为问题
-    return slidePanel
+    self:addStack(slidePanel)
 end
 
 -- 获得播放列表ui
-function PlaylistUI:getvstack()
+function PlaylistUI:_buildPlayListStack()
     local title = Glove.HStack:new({ Glove.Text:new("播放列表:") })
     title:setName("title")
     local title2 = Glove.Text:new(">拖拽音乐.mp3文件加入歌单<")
@@ -129,7 +129,8 @@ function PlaylistUI:getvstack()
     slidePanel:setPos(self.posx, self.posy, self.z)
     slidePanel:setSize(200, 300)
     vstack:setPos(0, 0) --大概是拖拽条的限制归为问题
-    return slidePanel
+    
+    self:addStack(slidePanel)
 end
 
 function PlaylistUI:draw()

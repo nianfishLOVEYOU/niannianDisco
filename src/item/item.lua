@@ -193,6 +193,23 @@ function item:onClick(x, y, button)
 
 end
 
+function item:mouseLeased(x, y, button)
+
+end
+
+function item:mousePressed(x, y, button)
+
+end
+
+function item:mouseMoved(x, y, dx, dy)
+
+end
+
+function item:wheelmoved(x, y)
+
+end
+
+
 -- 被拖拽
 function item:onDrag(x, y, dx, dy)
 

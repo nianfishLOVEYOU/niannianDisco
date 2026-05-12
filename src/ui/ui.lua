@@ -1,11 +1,10 @@
-local object = require "src.common.object"
-local UI = object:extend()
+local item = require "src.item.item"
+local UI = item:extend()
 
 function UI:init()
     self.scalex = 1 -- 缩放倍数
     self.scaley = 1 -- 缩放倍数
     self.stacks = {}
-    self.z = 0
 end
 
 function UI:refresh()
@@ -16,6 +15,7 @@ end
 function UI:addStack(stack)
    
     table.insert(self.stacks, stack)
+    self:addChild(stack)
 end
 
 function UI:removeStack(stack)
@@ -26,6 +26,7 @@ function UI:removeStack(stack)
             break
         end
     end
+    self:removeChild(stack)
 end
 
 --清理widget
@@ -34,6 +35,7 @@ function UI:clearStacks()
     for i = #self.stacks, 1, -1 do
         self.stacks[i]:destroy()
         table.remove(self.stacks, i)
+        self:removeChild(self.stacks[i])
     end
 end
 
@@ -43,6 +45,10 @@ end
 
 function UI:draw()
     self:drawStacks()
+end
+
+function UI:mouse()
+    
 end
 
 function UI:drawStacks()
@@ -57,21 +63,6 @@ function UI:drawStacks()
     love.graphics.pop()
 end
 
-function UI:mouseLeased(x, y, button)
-
-end
-
-function UI:mousePressed(x, y, button)
-
-end
-
-function UI:mouseMoved(x, y, dx, dy)
-
-end
-
-function UI:wheelmoved(x, y)
-
-end
 
 function UI:destroy()
     UI.super.destroy(self)
