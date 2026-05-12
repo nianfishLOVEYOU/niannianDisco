@@ -13,8 +13,8 @@ function page1UI:init()
     -- 音乐播放
     local playerUI = require("src.ui.playerUI"):new()
     uiManager:addUI("playerUI", playerUI)
-    local playerlistUI = require("src.ui.playerlistUI"):new()
-    uiManager:addUI("playerlistUI", playerlistUI)
+    -- local playerlistUI = require("src.ui.playerlistUI"):new()
+    -- uiManager:addUI("playerlistUI", playerlistUI)
     -- 立绘ui
 
     self:refresh()

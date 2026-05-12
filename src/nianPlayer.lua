@@ -13,13 +13,13 @@ function nianPlayer:init()
 end
 
 function nianPlayer:update(dt)
-    local screenx, screeny = love.graphics.getWidth()-200, love.graphics.getHeight()-400
+    local screenx, screeny = love.graphics.getWidth()-200, love.graphics.getHeight()-300
     local targetx, targety = cameraManager.cam:toWorld(screenx, screeny)
     self:setPos(targetx, targety)
 end
 
 function nianPlayer:draw()
-    love.graphics.draw(self.nianImage, self.x, self.y)
+    love.graphics.draw(self.nianImage, self.x, self.y, 0, 1, 1, self.nianImage:getWidth()/2, self.nianImage:getHeight()/2)
 
     
 end

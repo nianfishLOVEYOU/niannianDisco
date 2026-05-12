@@ -78,11 +78,19 @@ end
 --输入框被点击
 function Input:onClick(clickX, clickY, button)
   Glove.setFocus(self)
-  -- Enable keyboard.
-  -- TODO: Is this needed? Maybe only on mobile devices.
+  -- 传入输入框的屏幕坐标，让 Windows 输入法候选框跟随显示在正确位置
+  love.keyboard.setTextInput(true, self.x, self.y, self.w, self.h)
 
   local value = self.text or ""
   inputCursor = value:utf8len()
+end
+
+-- 失去焦点时关闭虚拟键盘（仅手机端需要关闭，桌面端保持开启避免影响输入法）
+function Input:removeFocus()
+  local os = love.system.getOS()
+  if os == "Android" or os == "iOS" then
+    love.keyboard.setTextInput(false)
+  end
 end
 
 --这个应该是新家的用love settext
@@ -127,5 +135,8 @@ function Input:textinput(t)
   inputCursor = c + t:utf8len()
   if self.onInput then self.onInput(self.text) end
 end
+
+-- 显示打字备选字ui在input打字的时候
+
 
 return Input

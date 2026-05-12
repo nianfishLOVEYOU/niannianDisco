@@ -101,6 +101,8 @@ function love.textinput(t)
     eventManager:emit("event_textinput", t)
 end
 
-
+function systemManager:removeFunc(event, func)
+    eventManager:off(event, func)
+end
 
 return systemManager

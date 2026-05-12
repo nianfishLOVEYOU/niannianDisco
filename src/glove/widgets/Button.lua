@@ -14,7 +14,7 @@ function Button:init(label, func)
   self.label = label
   self.labelColor = colors.black
   self.clickFunc = func
-  self.padding = 10
+  self.padding = 5
   self:setSize(40, 20)
 
 end
@@ -59,6 +59,9 @@ function Button:getFontSize()
 end
 
 function Button:setSize(w, h)
+  w= w - self.padding * 2
+  h= h - self.padding * 2
+  
   local labelWidth, labelHeight = self:getFontSize()
   self.w = labelWidth > w and labelWidth or w
   self.h = labelHeight > h and labelHeight or h

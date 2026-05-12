@@ -2,10 +2,30 @@ local ui = require "src.ui.ui"
 
 local dialog = ui:extend()
 
+function dialog.keyboard(key)
+    if key == "enter" then
+        if dialog.message ~= "" then
+            dialog:_sendMessage(dialog.message)
+            dialog.message = ""
+            dialog.inputMessageBox:setText("")
+        end
+    end
+end
+
 function dialog:init()
     self.message = ""
     self:refresh()
+    self.keyboardEvent= systemManager:keypressed_regester(function(key)
+        --print("dialog got key", key)
 
+            if key == "return" and Glove.isFocused(self.inputMessageBox) then
+        if self.message ~= "" then
+            self:_sendMessage(self.message)
+            self.message = ""
+            self.inputMessageBox:setText("")
+        end
+    end
+    end)
 end
 
 -- 更新播放列表显示
@@ -15,19 +35,16 @@ function dialog:refresh()
     self:_buildInputBox()
 end
 
+
+
 -- 聊天历史记录
 function dialog:_buildChatRoom()
-    local title = Glove.HStack:new({ Glove.Text:new("tmp本地列表:") })
-    title:setName("title tmp")
-
-    local vstack = Glove.VStack:new({ title, listVstack }, 10)
     --滑动条
     local slidePanel = Glove.SlidePanel:new()
-    slidePanel:setPos(50, 100, self.z)
+    self:addStack(slidePanel)
+    slidePanel:setLocalPos(50, 20, self.z)
     slidePanel:setSize( love.graphics.getWidth() - 100, 200)
     slidePanel:setName("dialog chatroom slidePanel")
-    vstack:setPos(0, 0) --大概是拖拽条的限制归为问题
-    self:addStack(slidePanel)
 
     self.ChatRoomSlidePanel = slidePanel
 end
@@ -46,9 +63,10 @@ function dialog:_buildInputBox()
             self.inputMessageBox:setText("")
         end
     end)
+    sendButton:setSize(50, 20)
     local hstack = Glove.HStack:new({self.inputMessageBox, sendButton}, 5)
     hstack:setName("dialog input hstack")
-    hstack:setPos(love.graphics.getWidth() - 200, 320)
+    hstack:setPos(love.graphics.getWidth() - 200, 240)
     self:addStack(hstack)
 end
 
@@ -82,9 +100,9 @@ end
 
 function dialog:draw()
     -- 画一个底色方块
-    love.graphics.setColor(1, 1, 1, 0.5)
-    love.graphics.rectangle("fill", 50, 100, love.graphics.getWidth() - 100, 200)
-    love.graphics.setColor(1, 1, 1)
+    -- love.graphics.setColor(1, 1, 1, 0.5)
+    -- love.graphics.rectangle("fill", 50, 20, love.graphics.getWidth() - 100, 200)
+    -- love.graphics.setColor(1, 1, 1)
 
     dialog.super.draw(self)
 end
@@ -94,6 +112,7 @@ function dialog:update(dt)
 end
 
 function dialog:destroy()
+    systemManager:removeFunc(self.keyboardEvent)
     dialog.super.destroy(self)
 end
 
