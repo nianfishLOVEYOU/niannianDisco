@@ -42,6 +42,20 @@ function item:init()
     self.interaction = false
 end
 
+function item:setVisiable(visiable)
+    self.visiable = visiable
+end
+
+function item:getRealVisiable()
+    if not self.visiable then
+        return false
+    end
+    if self.parent then
+        return self.parent:getRealVisiable()
+    end
+    return true
+end
+
 function item:setName(name)
     self.name = name
 end
@@ -188,14 +202,7 @@ function item:removeComponent(name)
     comp.owner = nil
 end
 
--- 点击事件
-function item:onClick(x, y, button)
 
-end
-
-function item:mouseLeased(x, y, button)
-
-end
 
 function item:mousePressed(x, y, button)
 
@@ -218,8 +225,12 @@ end
 function item:onDragOver(x, y)
 
 end
+-- 点击事件
+function item:onClick(x, y, button)
 
-function item:onClickOver(x, y)
+end
+
+function item:onClickOver(x, y,button)
 
 end
 
@@ -306,6 +317,7 @@ function item:update(dt)
 end
 
 function item:draw()
+    if not self.visiable then return end
     local x, y = self:getPos()
     love.graphics.setColor(self.color)
     love.graphics.rectangle('fill', x - self.w / 2, y - self.h / 2, self.w,

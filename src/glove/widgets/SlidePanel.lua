@@ -12,7 +12,7 @@ function SlidePanel:init(content)
     self.progressX = 0
     self.progressY = 0
 
-    self.color = {0, 0, 0, 0.5}
+    self.color = {1, 1, 1, 0.2}
 
     self.w = 60
     self.h = 100
@@ -29,6 +29,13 @@ function SlidePanel:init(content)
     self.t = 0
     self.dt = 0
     self.viscous = 0.2
+
+  self.padding = 10
+    -- 滚动条配置
+    self.scrollBarWidth = 10
+    self.isDraggingScrollBar = false
+    self.scrollBarColor = {1, 1, 1, 1}  -- 白色背景
+    self.scrollThumbColor = {0, 0, 0, 1}  -- 黑色滚动块
     -- if not self.shadePanel then
     --     self.shadePanel = Glove.ShadePanel:new()
     --     self.shadePanel:setPos(self.x, self.y)
@@ -112,8 +119,10 @@ function SlidePanel:draw()
     -- 进度条
 
     g.setColor(self.color)
-    g.rectangle("fill", self.x, self.y, self.w, self.h)
-
+    g.rectangle("fill", self.x, self.y, self.w, self.h,self.padding,self.padding)
+    g.setColor(0,0,0,0.5)
+    g.rectangle("line", self.x, self.y, self.w, self.h,self.padding,self.padding)
+    g.rectangle("line", self.x + self.padding, self.y + self.padding, self.w - 2 * self.padding, self.h - 2 * self.padding)
     local content = self:getContent()
     if not content then
         return
@@ -127,8 +136,9 @@ function SlidePanel:draw()
     if not self.visible then
         return
     end
+    --减去padding的裁剪，避免内容被完全遮挡无法拖动
     local sx, sy, sw, sh = g.getScissor()
-    g.setScissor(self.x, self.y, self.w, self.h)
+    g.setScissor(self.x + self.padding, self.y + self.padding, self.w - 2 * self.padding - self.scrollBarWidth, self.h - 2 * self.padding)
     for _, entry in ipairs(self.children) do
         if entry.draw then
             entry:draw()
@@ -136,13 +146,38 @@ function SlidePanel:draw()
     end
     g.setScissor(sx, sy, sw, sh)
 
-    g.setColor(1, 1, 0)
-    g.rectangle("line", self.x, self.y, self.w, self.h)
+    -- 绘制滚动条
+    self:drawScrollBar()
+
+    -- g.setColor(1, 1, 0)
+    -- g.rectangle("line", self.x, self.y, self.w, self.h)
 
     -- self.shadePanel:draw()
 end
 
+-- 处理点击事件（包括滚动条点击） 暂时没有点击，都会穿透到内容上
+function SlidePanel:onClick(x, y)
+    -- 检测是否点击了滚动条
+    if self:isOverScrollBar(x, y) then
+        if self:isOverScrollThumb(x, y) then
+            -- 点击了滚动块，开始拖拽
+            self.isDraggingScrollBar = true
+        else
+            -- 点击了滚动条其他位置，直接导航
+            self:dragScrollBar(y)
+            self.isDraggingScrollBar = true
+        end
+    end
+        print ("Clicked on scroll bar, dragging:", self.isDraggingScrollBar)
+end
+
 function SlidePanel:onDrag(x, y, dx, dy)
+    -- 如果正在拖拽滚动条，更新进度
+    if self.isDraggingScrollBar then
+        self:dragScrollBar(y)
+        return
+    end
+    
     -- 仍需保证拖拽点在可视区域内
     if not self:isOver(x, y) then
         return
@@ -155,7 +190,34 @@ function SlidePanel:onDrag(x, y, dx, dy)
     self:onDragInternal(dx, dy)
 end
 
--- internal helper to reuse existing onDrag code
+-- 拖拽滚动条时更新进度
+function SlidePanel:dragScrollBar(y)
+    local scrollBarY = self.y + self.padding
+    local scrollBarHeight = self.h - 2 * self.padding
+    
+    local info = self:getScrollBarInfo()
+    if not info or not info.canScroll then
+        return
+    end
+    
+    -- 计算滚动块在滚动条中的相对位置
+    local relY = y - scrollBarY
+    relY = math.max(0, math.min(relY, scrollBarHeight - info.thumbHeight))
+    
+    -- 更新 progressY
+    local maxThumbY = scrollBarHeight - info.thumbHeight
+    self.progressY = maxThumbY > 0 and (relY / maxThumbY) or 0
+    self.progressY = math.max(0, math.min(1, self.progressY))
+    
+    -- 更新内容位置
+    local content = self:getContent()
+    if content then
+        local xspace, yspace = self:getSlideSpace()
+        local newY = -self.progressY * yspace
+        local cx, cy = content:getLocalPos()
+        content:setLocalPos(cx, newY)
+    end
+end
 function SlidePanel:onDragInternal(dx, dy)
     local content = self:getContent()
     if not content then
@@ -202,6 +264,12 @@ function SlidePanel:onDragInternal(dx, dy)
 end
 
 function SlidePanel:onDragOver(x, y)
+    -- 结束滚动条拖拽
+    if self.isDraggingScrollBar then
+        self.isDraggingScrollBar = false
+        return
+    end
+    
     self:dragProgress(x)
     self.t = 0
     self.dt = 0
@@ -236,7 +304,84 @@ function SlidePanel:onHold(x, y)
     end
 end
 
--- 可滑动空间
+-- 计算滚动条的尺寸和位置
+function SlidePanel:getScrollBarInfo()
+    local content = self:getContent()
+    if not content then
+        return nil
+    end
+    
+    local contentHeight = content.h
+    local panelHeight = self.h - 2 * self.padding
+    
+    -- 如果内容小于等于面板高度，不需要滚动条
+    if contentHeight <= panelHeight then
+        return {
+            thumbHeight = panelHeight,
+            thumbY = 0,
+            canScroll = false
+        }
+    end
+    
+    -- 计算滚动块的高度（比例）
+    local thumbHeight = panelHeight * (panelHeight / contentHeight)
+    thumbHeight = math.max(thumbHeight, 20)  -- 最小高度为20像素
+    
+    -- 根据 progressY 计算滚动块的位置
+    local maxThumbY = panelHeight - thumbHeight
+    local thumbY = self.progressY * maxThumbY
+    
+    return {
+        thumbHeight = thumbHeight,
+        thumbY = thumbY,
+        canScroll = true
+    }
+end
+
+-- 绘制滚动条
+function SlidePanel:drawScrollBar()
+    local scrollBarX = self.x + self.w - self.scrollBarWidth
+    local scrollBarY = self.y + self.padding
+    local scrollBarHeight = self.h - 2 * self.padding
+    
+    -- 绘制滚动条背景（白色+黑色描边）
+    g.setColor(self.scrollBarColor)
+    g.rectangle("fill", scrollBarX, scrollBarY, self.scrollBarWidth, scrollBarHeight)
+    g.setColor(0, 0, 0, 0.5)  -- 黑色描边
+    g.setLineWidth(1)
+    g.rectangle("line", scrollBarX, scrollBarY, self.scrollBarWidth, scrollBarHeight)
+    
+    -- 绘制滚动块（黑色长块）
+    local info = self:getScrollBarInfo()
+    if info and info.canScroll then
+        g.setColor(self.scrollThumbColor)
+        g.rectangle("fill", scrollBarX + 1, scrollBarY + info.thumbY, self.scrollBarWidth - 2, info.thumbHeight)
+    end
+end
+
+-- 判断点击是否在滚动条上
+function SlidePanel:isOverScrollBar(x, y)
+    local scrollBarX = self.x + self.w - self.scrollBarWidth
+    local scrollBarY = self.y + self.padding
+    local scrollBarHeight = self.h - 2 * self.padding
+    
+    return x >= scrollBarX and x < scrollBarX + self.scrollBarWidth and
+           y >= scrollBarY and y < scrollBarY + scrollBarHeight
+end
+
+-- 判断点击是否在滚动块上
+function SlidePanel:isOverScrollThumb(x, y)
+    local scrollBarX = self.x + self.w - self.scrollBarWidth
+    local scrollBarY = self.y + self.padding
+    local info = self:getScrollBarInfo()
+    
+    if not info or not info.canScroll then
+        return false
+    end
+    
+    return x >= scrollBarX and x < scrollBarX + self.scrollBarWidth and
+           y >= scrollBarY + info.thumbY and y < scrollBarY + info.thumbY + info.thumbHeight
+end
 function SlidePanel:getSlideSpace()
     local content = self:getContent()
     if content then

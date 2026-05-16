@@ -12,13 +12,13 @@ systemManager:draw_regester(function ()
 end)
 
 systemManager:mouseLeased_regester(function (x,y,button)
-    uiManager:mouseLeased(x,y,button)
+    uiManager:onClickOver(x,y,button)
 end)
 systemManager:mouseMoved_regester(function (x,y,dx,dy)
     uiManager:mouseMoved(x,y,dx,dy)
 end)
 systemManager:mousepressed_regester(function (x,y,button)
-    uiManager:mousePressed(x,y,button)
+    uiManager:onClick(x,y,button)
 end)
 systemManager:wheelMoved_regester(function (x,y)
     uiManager:wheelmoved(x,y)
@@ -31,11 +31,9 @@ function uiManager:visiable(name,visiable)
     end
 end
 
-function uiManager:addUI(name,ui,options)
+function uiManager:addUI(name,ui)
     if(not self:getUI(name)) then
-        local options=options or {}
-        options.visiable= true
-        local instance={name =name ,ui= ui,options=options }
+        local instance={name =name ,ui= ui }
         table.insert(self.uiTable,instance)
         ui.z=#self.uiTable
         print("[add ui] ",name)
@@ -76,7 +74,7 @@ end
 
 function uiManager:refresh(name)
     for i, v in ipairs(self.uiTable) do
-        if v.name == name and v.options.visiable then
+        if v.name == name and v.ui:getRealVisiable() then
             v.ui:refresh()
         end
     end
@@ -84,7 +82,7 @@ end
 
 function uiManager:update(dt)
     for k, v in pairs(self.uiTable) do
-        if v.ui.update and v.options.visiable then
+        if v.ui.update and v.ui:getRealVisiable() then
             v.ui:update(dt)
         end
     end
@@ -92,31 +90,31 @@ end
 
 function uiManager:draw()
     for i, v in ipairs(self.uiTable) do
-        if v.options.visiable then
+        if v.ui:getRealVisiable() then
             v.ui:draw()
         end
     end
 end
 
-function uiManager:mouseLeased(x,y,button)
+function uiManager:onClickOver(x,y,button)
     for i, v in ipairs(self.uiTable) do
-        if v.options.visiable then
-            v.ui:mouseLeased(x,y,button)
+        if v.ui:getRealVisiable() then
+            v.ui:onClickOver(x,y,button)
         end
     end
 end
 
-function uiManager:mousePressed(x,y,button)
+function uiManager:onClick(x,y,button)
     for i, v in ipairs(self.uiTable) do
-        if v.options.visiable then
-            v.ui:mousePressed(x,y,button)
+        if v.ui:getRealVisiable() then
+            v.ui:onClick(x,y,button)
         end
     end
 end
 
 function uiManager:mouseMoved(x,y,dx,dy)
     for i, v in ipairs(self.uiTable) do
-        if v.options.visiable then
+        if v.ui:getRealVisiable() then
             v.ui:mouseMoved(x,y,dx,dy)
         end
     end
@@ -124,7 +122,7 @@ end
 
 function uiManager:wheelmoved(x,y)
     for i, v in ipairs(self.uiTable) do
-        if v.options.visiable then
+        if v.ui:getRealVisiable() then
             v.ui:wheelmoved(x,y)
         end
     end

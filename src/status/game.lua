@@ -14,12 +14,7 @@ function Game:init()
     --左右切换页面系统
     local pageControlUI = require("src.ui.pageControlUI"):new()
     uiManager:addUI("pageControlUI",pageControlUI)
-    --playerManager:addPlayer(globleManager.map.startPoint.x, globleManager.map.startPoint.y)
-    --playerManager:addRemotePlayer(1,"name",map.startPoint.x, map.startPoint.y)
     
-    -- 添加nian接待员
-    local nianPlayer = require "src.nianPlayer"
-    itemManager:addItem(nianPlayer:new())
     
 end
 

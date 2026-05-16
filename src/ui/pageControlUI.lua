@@ -25,7 +25,6 @@ end
 
 -- 获得播放列表ui
 function pageControlUI:buildPage()
-
     -- 加载第一页
 
     local page1UI = require("src.ui.page1UI"):new()
@@ -36,6 +35,9 @@ function pageControlUI:buildPage()
     uiManager:addUI("page2UI", page2UI)
     self.pages[2] = page2UI
 
+    page2UI:setVisiable(false)
+    print("build page",page2UI.visiable)
+    
     -- 加载切换页面的按钮
     -- local leftButton = Glove.Button_img:new("", "res/image/ui/left.png", {
     --     mousePressed = function()

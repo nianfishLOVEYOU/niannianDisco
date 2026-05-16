@@ -143,7 +143,7 @@ function MapEditorUI:_closeBrushMenu()
 end
 
 -- UI 接管鼠标事件（由 uiManager 分发）
-function MapEditorUI:mousePressed(x, y, button)
+function MapEditorUI:onClick(x, y, button)
 
     if button == 1 then
         local screenX, screenY = x, y
@@ -172,8 +172,5 @@ function MapEditorUI:wheelmoved(x, y)
 
 end
 
-function MapEditorUI:mouseLeased(x, y, button)
-    -- 预留
-end
 
 return MapEditorUI

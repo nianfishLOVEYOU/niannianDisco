@@ -62,12 +62,12 @@ local per = function()
 end
 
 local list = function()
-    if not uiManager:getUI("playlistUI") then
-        local playlistUI = require("src.ui.playlistUI"):new()
-        uiManager:addUI("playlistUI", playlistUI)
-    else
-        uiManager:removeUI("playlistUI")
-    end
+    -- if not uiManager:getUI("playlistUI") then
+    --     local playlistUI = require("src.ui.playlistUI"):new()
+    --     uiManager:addUI("playlistUI", playlistUI)
+    -- else
+    --     uiManager:removeUI("playlistUI")
+    -- end
 end
 
 function PlayerUI:getvstack()
@@ -184,7 +184,7 @@ end
 
 function PlayerUI:destroy()
     PlayerUI.super.destroy(self)
-    uiManager:removeUI("playlistUI")
+    -- uiManager:removeUI("playlistUI")
 end
 
 return PlayerUI

@@ -57,7 +57,7 @@ Glove = {
     local clickWidget = nil
     for _, widget in pairs(Glove.widgets) do
       
-      if widget.visible then
+      if widget:getRealVisiable() then
         local _, _, z = widget:getPos()
         if widget:isOver(mouseX, mouseY) and not (nottype and widget.type == nottype) then
           -- 如果控件提供 isOver 方法，则让控件决定该点是否可被点击（用于裁剪区域内外判定）
@@ -106,7 +106,6 @@ Glove = {
     local clickSlidePanel = Glove.getFirstWidget(mouseX, mouseY, "SlidePanel")
     if clickSlidePanel then
       Glove.clickSlidePanel = clickSlidePanel
-      
     else
       --移除焦点
       Glove.clickSlidePanel = nil

@@ -70,8 +70,8 @@ function nianDebug.DebugPrint()
             love.graphics.circle("fill", x, y, 3)
             love.graphics.setColor(1, 1, 1)
 
-            love.graphics.print("mouse screen: " .. x .. "," .. y, x + 10, y - 10)
-            love.graphics.print("mouse world: " .. wx .. "," .. wy, x + 10, y)
+            drawOutlinedText("mouse screen: " .. x .. "," .. y, x + 10, y - 10)
+            drawOutlinedText("mouse world: " .. wx .. "," .. wy, x + 10, y)
         end
     end
 

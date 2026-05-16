@@ -1,12 +1,12 @@
 local fun = require "src.glove.fun"
 local widget = require "src.glove.widgets.widget"
 
---排序方式，靠左，居中，靠右
+-- 排序方式，靠左，居中，靠右
 local aligtype = {"left", "center", "right"}
 local VStack = widget:extend()
 
 function VStack:init(childrenTB, spacing, align)
-    self.type = "HStack"
+    self.type = "VStack"
 
     self.align = align or "left"
     self.w = 0 -- computed in layout method
@@ -16,11 +16,14 @@ function VStack:init(childrenTB, spacing, align)
     for i, child in ipairs(childrenTB) do
         self:addChild(child)
     end
+    self.color = {0, 0, 0, 0}
     self:layout()
 end
 
 function VStack:draw()
     self:localPosRefresh()
+    love.graphics.setColor(self.color)
+    love.graphics.rectangle("fill", self.x, self.y, self.w, self.h, self.padding, self.padding)
     for _, child in ipairs(self.children) do
         child:draw()
     end
@@ -90,9 +93,9 @@ function VStack:layout()
         if child.type == "Spacer" then
             y = y + (child.size or spacerWidth)
         else
-            
+
             if i ~= 1 then
-                y = y + spacing --除了首位全都加上间隔
+                y = y + spacing -- 除了首位全都加上间隔
             end
 
             local cw, ch = child:getSize()
@@ -129,7 +132,5 @@ function VStack:setPos(x, y, z)
     VStack.super.setPos(self, x, y, z)
     self:layout()
 end
-
-
 
 return VStack

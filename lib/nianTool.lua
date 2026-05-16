@@ -7,7 +7,6 @@ require "lib.nianMath"
 require "lib.nianDebug"
 require "lib.nianDraw"
 
-
 if love.filesystem.isFused() then
     print("打包模式")
 else
@@ -76,8 +75,6 @@ function setBody(x, y, w, h, anchorX, anchorY, bodyInfo)
     -- fixture:setFriction(0.3)
     -- fixture:setRestitution(0.2) -- 弹性
 end
-
-
 
 -- 核心工具函数：判断鼠标是否点击到指定Body（兼容任意旋转角度）
 function isBodyClicked(body, mx, my)
@@ -260,8 +257,6 @@ initStringExtensions()
 -- local dir = love.filesystem.getSaveDirectory():gsub("/", "\\")
 -- local f = io.open(dir .. "\\" .. cmd.path, "rb")
 
-
-
 --- 画箭头
 -- 画箭头函数：起点(x1,y1)，终点(x2,y2)，可选颜色、线宽、箭头大小
 function drawArrow(x1, y1, x2, y2, r, g, b, a, lineWidth, arrowSize)
@@ -296,4 +291,24 @@ function drawArrow(x1, y1, x2, y2, r, g, b, a, lineWidth, arrowSize)
     -- 恢复默认
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.setLineWidth(1)
+end
+
+local outlineSize = 1 -- 描边粗细（像素）
+local outlineColor = {0, 0, 0, 1} -- 描边：黑色
+local fillColor = {1, 1, 1, 1} -- 文字：白色
+-- 辅助：绘制带描边文字
+function drawOutlinedText(t, x, y)
+
+    -- 1. 画8个方向描边
+    love.graphics.setColor(outlineColor)
+    for dx = -outlineSize, outlineSize do
+        for dy = -outlineSize, outlineSize do
+            if dx ~= 0 or dy ~= 0 then -- 跳过原位
+                love.graphics.print(t, x + dx, y + dy)
+            end
+        end
+    end
+    -- 2. 画主体文字
+    love.graphics.setColor(fillColor)
+    love.graphics.print(t, x, y)
 end

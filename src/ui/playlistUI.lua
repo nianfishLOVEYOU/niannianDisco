@@ -4,6 +4,8 @@ local ui = require "src.ui.ui"
 
 local PlaylistUI = ui:extend() -- 子类继承父类
 
+local slideW = love.graphics.getWidth() - 200
+local slideH = 160
 
 local musicInput = function(file, name, fullname, extend)
     -- 判断文件格式
@@ -30,12 +32,11 @@ local musicInput = function(file, name, fullname, extend)
     end
 
     local music = love.audio.newSource(tmpPath, "stream")
-    playlistManager:addMusic(name,tmpPath,"tmp",  music:getDuration(),"self")
+    playlistManager:addMusic(name, tmpPath, "tmp", music:getDuration(), "self")
     audio:addPlayMusic(tmpPath, music:getDuration(), name)
     uiManager:refresh("playlistUI")
     music = nil
 end
-
 
 function PlaylistUI:init()
     local width = love.graphics.getWidth()
@@ -52,12 +53,23 @@ function PlaylistUI:init()
 end
 
 function PlaylistUI:refresh()
-    
+
     -- 创建本地列表
     self:clearStacks()
     self:_buildPlayListStack()
     self:_buildLocalPlayListStack()
-    
+
+    if self.LLimage == nil then
+        self.LLimage = image:new("res/image/ui/lineTail.png", self.playList.x + self.playList.w + 8,
+            self.playList.y + self.playList.h + 8)
+        self.LLimage:setScale(0.7, 0.7)
+        self.LLimage.rotation = 0.8
+
+        self.LLimage2 = image:new("res/image/ui/lineTail.png", self.LocalPlayList.x + self.LocalPlayList.w + 8,
+            self.LocalPlayList.y + self.LocalPlayList.h + 8)
+        self.LLimage2:setScale(0.7, 0.7)
+        self.LLimage2.rotation = 0.8
+    end
 end
 
 ---------------播放列表------------
@@ -65,79 +77,121 @@ function PlaylistUI:update(dt)
 
 end
 
-function PlaylistUI:_buildLocalPlayListStack()
-    local title = Glove.HStack:new({ Glove.Text:new("tmp本地列表:") })
-    title:setName("title tmp")
+-- 刷新按钮状态和音乐提示,或者记录之前的拖动数据
+function PlaylistUI:updateListInfo()
 
-    local listVstack = Glove.VStack:new({}, 10)
-    for i, v in ipairs(playlistManager.localPlaylist["tmp"].list) do
-        local nameText = Glove.Text:new(v.name)
-        nameText:setSize(120, 20)
-        local button = Glove.Button:new("添加", function()
-            audio:addPlayMusic(v.path, v.duration, v.name)
-        end)
-        button.padding = 5
-        button:setSize(0, 0)
+end
 
-        local hstack = Glove.HStack:new({ nameText, button })
-        hstack:setName(v.name)
-        listVstack:addChild(hstack)
+function PlaylistUI:addPlayListItem(name)
+    local iswaitstr = audio.stuck and "[ ↓ing " .. audio.downloadProgress .. "%]" or "[√]"
+    local musicInfo = i == audio.currentIndex and "[播放]" .. iswaitstr or ""
+    local nameText = Glove.Text:new(musicInfo .. name)
+    nameText:setSize(120, 30)
+    nameText:setOmit(true)
+    nameText.color = {0, 0, 0}
+    -- 删除按钮
+    local button = Glove.Button:new("删除", function()
+        audio:removePlayMusic(name)
+        self:removePlayListItem(name)
+    end)
+    button.padding = 5
+    button:setSize(0, 0)
+    button.color = {0, 0, 0, 0}
+
+    local hstack = Glove.HStack:new({nameText, button})
+    hstack.color = {0, 0, 0, 0.3}
+    hstack:setName(name)
+    self.playList:add(hstack)
+end
+
+function PlaylistUI:removePlayListItem(name)
+    for i, v in ipairs(self.playList.children) do
+        if v.name == name then
+            table.remove(self.playList.children, i)
+            break
+        end
     end
-    listVstack:layout()
-
-    local vstack = Glove.VStack:new({ title, listVstack }, 10)
-    vstack:setName("playerlistui vstack")
-    --滑动条
-    local slidePanel = Glove.SlidePanel:new(vstack)
-    slidePanel:setPos(self.posx - 250, self.posy, self.z)
-    slidePanel:setSize(200, 300)
-    vstack:setPos(0, 0) --大概是拖拽条的限制归为问题
-    self:addStack(slidePanel)
 end
 
 -- 获得播放列表ui
 function PlaylistUI:_buildPlayListStack()
-    local title = Glove.HStack:new({ Glove.Text:new("播放列表:") })
+    local tT = Glove.Text:new("播放列表:")
+    tT.color = {1, 1, 1}
+    local tT2 = Glove.Text:new(">拖拽音乐.mp3文件加入歌单<")
+    tT2.color = {1, 0, 0}
+    tT2:setSize(200, 20)
+    local title = Glove.HStack:new({tT, tT2})
     title:setName("title")
-    local title2 = Glove.Text:new(">拖拽音乐.mp3文件加入歌单<")
-    title2.color = { 1, 0, 0 }
-    title2:setSize(0, 20)
+    self:addStack(title)
+    title:setLocalPos(0, 20, self.z)
 
-    local listVstack = Glove.VStack:new({}, 10)
-    for i, v in ipairs(audio.playlist) do
-        local iswaitstr = audio.stuck and "[ ↓ing " .. audio.downloadProgress .. "%]" or "[√]"
-        local musicInfo = i == audio.currentIndex and "[播放]" .. iswaitstr or ""
-        local nameText = Glove.Text:new(musicInfo .. v.name)
-        nameText:setSize(140, 20)
-        --删除按钮
-        local button = Glove.Button:new("删除", function()
-            audio:removePlayMusic(v.name)
-        end)
-        button.padding = 5
-        button:setSize(0, 0)
-
-        local hstack = Glove.HStack:new({ nameText ,button })
-        hstack:setName(v.name)
-        listVstack:addChild(hstack)
-    end
-    listVstack:layout()
-
-    local vstack = Glove.VStack:new({ title, title2, listVstack }, 10)
+    local vstack = Glove.VStack:new({}, 10)
     vstack:setName("playerlistui vstack")
-    --滑动条
+    -- 滑动条
     local slidePanel = Glove.SlidePanel:new(vstack)
-    slidePanel:setPos(self.posx, self.posy, self.z)
-    slidePanel:setSize(200, 300)
-    vstack:setPos(0, 0) --大概是拖拽条的限制归为问题
-    
+    self.playList = slidePanel
     self:addStack(slidePanel)
+    slidePanel:setLocalPos(0, 50, self.z)
+    slidePanel:setSize(slideW, slideH)
+    slidePanel.color = {1, 1, 1, 1} -- 设置滑动面板的颜色为白色
+    for i, v in ipairs(audio.playlist) do
+        self:addPlayListItem(v.name)
+    end
+end
+
+-- 获得本地播放列表ui
+function PlaylistUI:addLocalPlayListItem(path, name, duration)
+    local nameText = Glove.Text:new(name)
+    nameText:setSize(120, 30)
+    nameText:setOmit(true)
+    nameText.color = {0, 0, 0}
+    local button = Glove.Button:new("添加", function()
+        audio:addPlayMusic(path, duration, name)
+    end)
+    button.padding = 5
+    button:setSize(0, 0)
+    button.color = {0, 0, 0, 0}
+
+    local hstack = Glove.HStack:new({nameText, button})
+    hstack.color = {0, 0, 0, 0.3}
+    hstack:setName(name)
+    self.LocalPlayList:add(hstack)
+end
+
+function PlaylistUI:_buildLocalPlayListStack()
+    local tT = Glove.Text:new("tmp本地列表:")
+    tT.color = {1, 1, 1}
+    tT:setSize(200, 20)
+    local title = Glove.HStack:new({tT})
+    self:addStack(title)
+    title:setLocalPos(0, 230, self.z)
+
+    -- 本地音乐列表
+    local vstack = Glove.VStack:new({}, 10)
+    vstack:setName("playerlistui vstack")
+
+    local slidePanel = Glove.SlidePanel:new(vstack)
+    self.LocalPlayList = slidePanel
+    slidePanel:setSize(slideW, slideH)
+    slidePanel.color = {1, 1, 1, 1} -- 设置滑动面板的颜色为白色
+    self:addStack(slidePanel)
+    slidePanel:setLocalPos(0, 250, self.z)
+    for i, v in ipairs(playlistManager.localPlaylist["tmp"].list) do
+        self:addLocalPlayListItem(v.path, v.name, v.duration)
+    end
+
+    -- vstack:setPos(0, 0) --大概是拖拽条的限制归为问题
 end
 
 function PlaylistUI:draw()
-    self:drawStacks()
 
+    -- if self.LLimage then
+    --     self.LLimage:draw()
+    --     self.LLimage2:draw()
+    -- end
+    self:drawStacks()
     -- 拖拽区域图片
-    --self.inputImage:draw()
+    -- self.inputImage:draw()
 end
 
 function PlaylistUI:wheelmoved(x, y)

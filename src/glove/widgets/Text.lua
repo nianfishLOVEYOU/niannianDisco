@@ -11,9 +11,10 @@ function Text:init(text, w, h)
     self.font = font
     self.autoW = false
     self.autoH = false
+    self.omit = false
     self:setText(text)
     self:setSize(w or 60, h or 20)
-
+    
 end
 
 -- 设置字符
@@ -26,6 +27,48 @@ function Text:getFontSize()
     local labelWidth = self.font:getWidth(self:getText())
     local labelHeight = self.font:getHeight()
     return labelWidth, labelHeight
+end
+
+function Text:setOmit(omit)
+    self.omit = omit and true or false
+end
+
+function Text:_getOmittedText(value)
+    if not self.omit or self.autoW or self.autoH then
+        return value
+    end
+    if not self.w or not self.h or self.w <= 0 or self.h <= 0 then
+        return value
+    end
+
+    local lineHeight = self.font:getHeight()
+    local maxLines = math.floor(self.h / lineHeight)
+    if maxLines <= 0 then
+        return ""
+    end
+
+    local _, wrappedLines = self.font:getWrap(value, self.w)
+    if #wrappedLines <= maxLines then
+        return value
+    end
+
+    local lines = {}
+    for i = 1, maxLines do
+        lines[i] = wrappedLines[i] or ""
+    end
+
+    local ellipsis = "..."
+    local last = lines[maxLines] or ""
+    while last:utf8len() > 0 and self.font:getWidth(last .. ellipsis) > self.w do
+        last = last:utf8sub(1, last:utf8len() - 1)
+    end
+    if self.font:getWidth(ellipsis) <= self.w then
+        lines[maxLines] = last .. ellipsis
+    else
+        lines[maxLines] = ""
+    end
+
+    return table.concat(lines, "\n")
 end
 
 function Text:_updateLayout()
@@ -74,10 +117,11 @@ function Text:draw()
     self:_updateLayout()
 
     local value = self:getText() or ""
+    local displayValue = self:_getOmittedText(value)
     if self.w and self.w > 0 then
-        g.printf(value, self.x, self.y, self.w, "left")
+        g.printf(displayValue, self.x, self.y, self.w, "left")
     else
-        g.print(value, self.x, self.y)
+        g.print(displayValue, self.x, self.y)
     end
 end
 

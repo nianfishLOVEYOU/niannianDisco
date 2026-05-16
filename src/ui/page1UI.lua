@@ -7,15 +7,19 @@ local ui = require "src.ui.ui"
 local page1UI = ui:extend()
 
 function page1UI:init()
-    -- 聊天界面
-    local dialog = require("src.ui.dialog"):new()
-    uiManager:addUI("dialog", dialog)
-    -- 音乐播放
     local playerUI = require("src.ui.playerUI"):new()
     uiManager:addUI("playerUI", playerUI)
-    -- local playerlistUI = require("src.ui.playerlistUI"):new()
-    -- uiManager:addUI("playerlistUI", playerlistUI)
+    self:addChild(playerUI)
+    local playlistUI = require("src.ui.playlistUI"):new()
+    uiManager:addUI("playlistUI", playlistUI)
+    self:addChild(playlistUI)
     -- 立绘ui
+    local nianocUI = require("src.ui.nianocUI"):new()
+    uiManager:addUI("nianocUI",nianocUI)
+    self:addChild(nianocUI)
+
+    
+
 
     self:refresh()
 end
@@ -43,10 +47,11 @@ end
 
 function page1UI:destroy()
     page1UI.super.destroy(self)
-    uiManager:removeUI("dialog")
-    uiManager:removeUI("playlistUI") --播放列表，是在ui内展开的，这里直接remove就行了
+    uiManager:removeUI("playlistUI") -- 播放列表，是在ui内展开的，这里直接remove就行了
     uiManager:removeUI("playerUI")
-    uiManager:removeUI("playerlistUI")
+    uiManager:removeUI("nianocUI")
+
+    -- uiManager:removeUI("playerlistUI")
 end
 
 return page1UI

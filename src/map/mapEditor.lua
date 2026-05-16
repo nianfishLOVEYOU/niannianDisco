@@ -16,19 +16,19 @@ local mapEditor = {
 local history = {}
 
 systemManager:mousepressed_regester(function(x, y, button)
-    mapEditor:mousepressed(x, y, button)
+    mapEditor:onClick(x, y, button)
 end)
 systemManager:mouseMoved_regester(function(x, y, dx, dy)
-    mapEditor:mousemoved(x, y, dx, dy)
+    mapEditor:mouseMoved(x, y, dx, dy)
 end)
 systemManager:mouseLeased_regester(function(x, y, button)
-    mapEditor:mousereleased(x, y, button)
+    mapEditor:onClickOver(x, y, button)
 end)
 systemManager:wheelMoved_regester(function(x, y)
-    mapEditor:wheelmoved(x, y)
+    mapEditor:wheelMoved(x, y)
 end)
 systemManager:keypressed_regester(function(key)
-    mapEditor:keypressed(key)
+    mapEditor:keyPressed(key)
 end)
 
 function mapEditor:init()
@@ -98,7 +98,7 @@ function mapEditor:brushTouch(indexx, indexy, mouseButton)
     end
 end
 
-function mapEditor:mousereleased(x, y, button)
+function mapEditor:onClickOver(x, y, button)
     if button == 1 then
         if (mapEditor.selected) then
             print("item xywh2", mapEditor.selected.x, mapEditor.selected.y, mapEditor.selected.w, mapEditor.selected.h)
@@ -115,7 +115,7 @@ function mapEditor:mousereleased(x, y, button)
     end
 end
 
-function mapEditor:mousepressed(x, y, button)
+function mapEditor:onClick(x, y, button)
     local worldX, worldY = cameraManager.cam:toWorld(x, y)
     if button == 1 then -- 左键：选中
         mapEditor.selected = nil
@@ -145,7 +145,7 @@ function mapEditor:mousepressed(x, y, button)
 
 end
 
-function mapEditor:mousemoved(x, y, dx, dy, istouch)
+function mapEditor:mouseMoved(x, y, dx, dy, istouch)
     local worldX, worldY = cameraManager.cam:toWorld(x, y)
 
     if love.mouse.isDown(1) then -- 右键选中物体
@@ -167,11 +167,11 @@ function mapEditor:mousemoved(x, y, dx, dy, istouch)
     end
 end
 
-function mapEditor:wheelmoved(dx, dy)
+function mapEditor:wheelMoved(dx, dy)
 
 end
 
-function mapEditor:keypressed(key)
+function mapEditor:keyPressed(key)
 
     if key == "s" then
         mapManager:saveMap("res/maps/edited.json")

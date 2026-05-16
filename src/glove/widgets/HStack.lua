@@ -1,8 +1,8 @@
 local fun = require "src.glove.fun"
 local widget = require "src.glove.widgets.widget"
 
---排序方式，顶格，居中，垫底
-local aligtype = {"top", "center","buttom"}
+-- 排序方式，顶格，居中，垫底
+local aligtype = {"top", "center", "buttom"}
 local HStack = widget:extend()
 
 function HStack:init(childrenTB, spacing, align)
@@ -17,11 +17,14 @@ function HStack:init(childrenTB, spacing, align)
     for i, child in ipairs(childrenTB) do
         self:addChild(child)
     end
+    self.color = {0, 0, 0, 0}
     self:layout()
 end
 
 function HStack:draw()
     self:localPosRefresh()
+    love.graphics.setColor(self.color)
+    love.graphics.rectangle("fill", self.x, self.y, self.w, self.h, self.padding, self.padding)
     for _, child in ipairs(self.children) do
         child:draw()
     end
@@ -49,7 +52,7 @@ function HStack:layout()
     local children = self.children
     local spacerWidth = 0
     local spacing = self.spacing or 0
-    local x =  0
+    local x = 0
 
     for i, child in ipairs(children) do
         if child.type == "VStack" or child.type == "HStack" then
@@ -96,7 +99,7 @@ function HStack:layout()
             x = x + (child.size or spacerWidth)
         else
             if i ~= 1 then
-                x = x + spacing--除了首位全都加上间隔
+                x = x + spacing -- 除了首位全都加上间隔
             end
             local cw, ch = child:getSize()
             if self.align == "center" then
@@ -133,6 +136,5 @@ function HStack:setPos(x, y, z)
     HStack.super.setPos(self, x, y, z)
     self:layout()
 end
-
 
 return HStack

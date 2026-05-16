@@ -2,6 +2,9 @@ local ui = require "src.ui.ui"
 
 local dialog = ui:extend()
 
+local dialogW=love.graphics.getWidth() - 100
+local dialogH=200
+
 function dialog.keyboard(key)
     if key == "enter" then
         if dialog.message ~= "" then
@@ -43,7 +46,7 @@ function dialog:_buildChatRoom()
     local slidePanel = Glove.SlidePanel:new()
     self:addStack(slidePanel)
     slidePanel:setLocalPos(50, 20, self.z)
-    slidePanel:setSize( love.graphics.getWidth() - 100, 200)
+    slidePanel:setSize( dialogW, dialogH)
     slidePanel:setName("dialog chatroom slidePanel")
 
     self.ChatRoomSlidePanel = slidePanel
