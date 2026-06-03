@@ -126,7 +126,7 @@ function PlaylistUI:_buildPlayListStack()
     title:setLocalPos(0, 20, self.z)
 
     local vstack = Glove.VStack:new({}, 10)
-    vstack:setName("playerlistui vstack")
+    vstack:setName("playerlistui vstack _buildPlayListStack")
     -- 滑动条
     local slidePanel = Glove.SlidePanel:new(vstack)
     self.playList = slidePanel
@@ -168,7 +168,7 @@ function PlaylistUI:_buildLocalPlayListStack()
 
     -- 本地音乐列表
     local vstack = Glove.VStack:new({}, 10)
-    vstack:setName("playerlistui vstack")
+    vstack:setName("playerlistui vstack _buildLocalPlayListStack")
 
     local slidePanel = Glove.SlidePanel:new(vstack)
     self.LocalPlayList = slidePanel

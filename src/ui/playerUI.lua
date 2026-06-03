@@ -113,7 +113,7 @@ function PlayerUI:getvstack()
     local stack = Glove.VStack:new({ musiVoiceHStack, sliderHStack, buttonHStack },10,"center")
 
     local sw, sh = stack:getSize()
-    stack:setPos(width / 2 - sw / 2, height - sh)
+    stack:setPos(width / 2 - sw / 2, height - sh -50)
     return stack
 end
 

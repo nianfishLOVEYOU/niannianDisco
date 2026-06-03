@@ -13,6 +13,9 @@ function Slider:init( progress,onSet)
     self.color =  { 0.2, 0.6, 1 }
     self.backColor = { 0.5, 0.5, 0.5 }
     self.onSet=onSet
+    self.isDrawIcon = false
+    self.backGroundimage = nil --用love的图片，不用glove图片
+    self.iconImage = nil --用love的图片，不用glove图片
 
     self.w = 60 
     self.h = 10 
@@ -25,20 +28,34 @@ function Slider:draw()
     local height = self.h
 
     self.progress=math.max(0, math.min(1, self.progress))
-
+    
     -- 进度条
-    if self:isOver(love.mouse.getPosition()) then
+    if self:isOver(love.mouse.getPosition()) then --鼠标点击时
         g.setColor(self.backColor)
         g.rectangle("fill", self.x, self.y, self.w, self.h)
 
         g.setColor(self.color)
         g.rectangle("fill", self.x, self.y, self.w * self.progress, self.h)
-    else
+    else --鼠标没点击的时候
         g.setColor(self.backColor)
         g.rectangle("fill", self.x, self.y, self.w, self.h)
 
         g.setColor(self.color)
         g.rectangle("fill", self.x, self.y, self.w * self.progress, self.h)
+    end
+
+    -- 画当前进度的小图标
+    if self.isDrawIcon then 
+        if self.iconImage then
+            g.draw(self.iconImage, self.x + self.w * self.progress, self.y + self.h / 2)
+        else
+             local iconX = self.x + self.w * self.progress
+            local iconY = self.y + self.h / 2
+            local iconRadius = self.h *0.6
+            g.setColor(1,0,0)
+            g.circle("fill", iconX, iconY, iconRadius)
+        end
+       
     end
 end
 

@@ -17,7 +17,9 @@ function page1UI:init()
     local nianocUI = require("src.ui.nianocUI"):new()
     uiManager:addUI("nianocUI",nianocUI)
     self:addChild(nianocUI)
-
+    local roomUI = require("src.ui.roomUI"):new()
+    uiManager:addUI("roomUI", roomUI)
+    self:addChild(roomUI)
     
 
 
@@ -50,6 +52,7 @@ function page1UI:destroy()
     uiManager:removeUI("playlistUI") -- 播放列表，是在ui内展开的，这里直接remove就行了
     uiManager:removeUI("playerUI")
     uiManager:removeUI("nianocUI")
+    uiManager:removeUI("roomUI")
 
     -- uiManager:removeUI("playerlistUI")
 end

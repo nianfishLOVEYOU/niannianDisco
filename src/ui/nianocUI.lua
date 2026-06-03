@@ -7,8 +7,13 @@ function nianocUI:init()
     self:refresh()
 
     self.nianImage = love.graphics.newImage("res/image/nianPlayer.png")
-    
+    --自己的位置跟着父亲走
     self:setLocalPos(love.graphics.getWidth()-180, love.graphics.getHeight()-320)
+
+        -- 1. 创建Mesh（ID: test_mesh，位置(100,100)，尺寸200x200）
+    local nianMeshId= meshAnimator:createMesh("res/image/nianPlayer.png", 200, 200, self.nianImage:getWidth()/2, self.nianImage:getHeight()/2,"res/image/nianPlayer.png")
+    self.nianMesh = meshAnimator:getMeshData(nianMeshId).mesh
+    --pendulumSystem:bindMesh(meshAnimator:getMeshData(nianMeshId),200,200)
 end
 
 -- 更新播放列表显示
@@ -56,8 +61,13 @@ end
 
 function nianocUI:draw()
     self:drawStacks()
+    -- love.graphics.setColor(1, 1, 1)
+    -- love.graphics.draw(self.nianImage, self.x, self.y, 0, 0.5, 0.5)
+
+        
     love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(self.nianImage, self.x, self.y, 0, 0.5, 0.5)
+    love.graphics.draw(self.nianMesh)
+    --drawMeshGrid(self.nianMesh, true, true, {1,1,1})
 end
 
 function nianocUI:destroy()

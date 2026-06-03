@@ -1,7 +1,7 @@
 -- ==============================================
 -- 1. 全局Mesh管理器（核心模块）
 -- ==============================================
-MeshAnimator = {
+local MeshAnimator = {
     meshes = {},          -- 存储所有Mesh实例 {id: {mesh, vertices, animData}}
     currentTime = 0,      -- 全局动画时间（秒）
     isPlaying = true      -- 是否播放动画
@@ -23,9 +23,22 @@ MeshAnimator = {
 -- @param id: Mesh唯一标识
 -- @param x,y: 初始位置
 -- @param width,height: 尺寸
-function MeshAnimator:createMesh(id, x, y, width, height)
+function MeshAnimator:createMesh(path, x, y, width, height)
     -- 1. 加载图片（皮肤）
-    texture = love.graphics.newImage("your_image.png")
+    local texture = love.graphics.newImage(path)
+    local id =globleManager:guid()
+
+    local meshSize =2
+
+    -- local vertices={}
+    -- for i=1,meshSize do
+    --     for j=1,meshSize do
+    --          local x = (j-1)*width/(meshSize-1)
+    --          local y = (i-1)*height/(meshSize-1)
+    --          table.insert(vertices,{x,y,(j-1)/(meshSize-1),(i-1)/(meshSize-1)})
+    --     end
+    -- end
+
     -- 四边形顶点（顺序：左下、右下、右上、左上）
     local vertices = {
         {x, y, 0, 0},          -- 顶点1：坐标(x,y)，UV(0,0)
@@ -42,7 +55,10 @@ function MeshAnimator:createMesh(id, x, y, width, height)
 
     -- 存储Mesh实例
     self.meshes[id] = {
+        id = id,
         mesh = mesh,
+        w= width,
+        h= height,
         originalVertices = deepcopy(vertices), -- 原始顶点（用于复位）
         currentVertices = deepcopy(vertices),  -- 当前顶点
         animData = {                          -- 动画数据
@@ -55,8 +71,15 @@ function MeshAnimator:createMesh(id, x, y, width, height)
     mesh:setTexture(texture)
 
     love.graphics.draw(mesh, 200, 200)
-    return mesh
+    return id
 end
+
+function MeshAnimator:getMeshData(id)
+    return self.meshes[id]
+end
+
+
+
 
 --- 修改单个顶点的坐标
 -- @param id: Mesh唯一标识
@@ -96,6 +119,7 @@ function MeshAnimator:quadDeform(id, leftBottom, rightBottom, rightTop, leftTop)
         print("错误：Mesh ID="..id.." 不存在")
         return
     end
+    --print(string.format("开始四角形变：Mesh ID=%s", id))
 
     -- 按顺序更新四个顶点（保持UV不变）
     self:modifyVertex(id, 1, leftBottom.x, leftBottom.y)
@@ -103,7 +127,7 @@ function MeshAnimator:quadDeform(id, leftBottom, rightBottom, rightTop, leftTop)
     self:modifyVertex(id, 3, rightTop.x, rightTop.y)
     self:modifyVertex(id, 4, leftTop.x, leftTop.y)
 
-    print("Mesh "..id.." 四角形变完成")
+    --print("Mesh "..id.." 四角形变完成")
 end
 
 --- 复位Mesh到原始状态
@@ -146,6 +170,11 @@ function MeshAnimator:addKeyframe(id, time, keyframeData)
     -- 更新动画总时长
     meshData.animData.duration = math.max(meshData.animData.duration, time)
     print("关键帧添加成功：Mesh="..id.." 时间="..time.."秒")
+end
+
+--- 绑定定点摆动动画（示例：让Mesh某个顶点像钟摆一样来回摆动）以及权重
+function  MeshAnimator:bindPointPendulum(id, time, keyframeData)
+    
 end
 
 --- 保存动画数据到文件（JSON格式）
@@ -280,83 +309,84 @@ function deepcopy(orig)
     return copy
 end
 
--- ==============================================
--- Love2D 生命周期函数（测试示例）
--- ==============================================
-function love.load()
-    -- 初始化JSON库（Love2D 11.x+ 内置）
-    json = require("dkjson")
+return MeshAnimator
+-- -- ==============================================
+-- -- Love2D 生命周期函数（测试示例）
+-- -- ==============================================
+-- function love.load()
+--     -- 初始化JSON库（Love2D 11.x+ 内置）
+--     json = require("dkjson")
 
-    -- 1. 创建Mesh（ID: test_mesh，位置(100,100)，尺寸200x200）
-    MeshAnimator:createMesh("test_mesh", 100, 100, 200, 200)
+--     -- 1. 创建Mesh（ID: test_mesh，位置(100,100)，尺寸200x200）
+--     MeshAnimator:createMesh("test_mesh", 100, 100, 200, 200)
 
-    -- 2. 添加关键帧（动画：四角形变+自定义属性）
-    -- 0秒：初始状态
-    MeshAnimator:addKeyframe("test_mesh", 0, {
-        vertices = {
-            [1] = {x=100, y=100},  -- 左下
-            [2] = {x=300, y=100},  -- 右下
-            [3] = {x=300, y=300},  -- 右上
-            [4] = {x=100, y=300}   -- 左上
-        },
-        customProps = {scale = 1.0}  -- 自定义属性：缩放
-    })
+--     -- 2. 添加关键帧（动画：四角形变+自定义属性）
+--     -- 0秒：初始状态
+--     MeshAnimator:addKeyframe("test_mesh", 0, {
+--         vertices = {
+--             [1] = {x=100, y=100},  -- 左下
+--             [2] = {x=300, y=100},  -- 右下
+--             [3] = {x=300, y=300},  -- 右上
+--             [4] = {x=100, y=300}   -- 左上
+--         },
+--         customProps = {scale = 1.0}  -- 自定义属性：缩放
+--     })
 
-    -- 2秒：形变（右下右移，左上上移）
-    MeshAnimator:addKeyframe("test_mesh", 2, {
-        vertices = {
-            [1] = {x=100, y=100},
-            [2] = {x=400, y=150},
-            [3] = {x=300, y=300},
-            [4] = {x=100, y=250}
-        },
-        customProps = {scale = 1.2}
-    })
+--     -- 2秒：形变（右下右移，左上上移）
+--     MeshAnimator:addKeyframe("test_mesh", 2, {
+--         vertices = {
+--             [1] = {x=100, y=100},
+--             [2] = {x=400, y=150},
+--             [3] = {x=300, y=300},
+--             [4] = {x=100, y=250}
+--         },
+--         customProps = {scale = 1.2}
+--     })
 
-    -- 4秒：恢复初始状态
-    MeshAnimator:addKeyframe("test_mesh", 4, {
-        vertices = {
-            [1] = {x=100, y=100},
-            [2] = {x=300, y=100},
-            [3] = {x=300, y=300},
-            [4] = {x=100, y=300}
-        },
-        customProps = {scale = 1.0}
-    })
+--     -- 4秒：恢复初始状态
+--     MeshAnimator:addKeyframe("test_mesh", 4, {
+--         vertices = {
+--             [1] = {x=100, y=100},
+--             [2] = {x=300, y=100},
+--             [3] = {x=300, y=300},
+--             [4] = {x=100, y=300}
+--         },
+--         customProps = {scale = 1.0}
+--     })
 
-    -- 3. 保存动画（可选）
-    -- MeshAnimator:saveAnimation("test_mesh", "anim/test_mesh_anim.json")
+--     -- 3. 保存动画（可选）
+--     -- MeshAnimator:saveAnimation("test_mesh", "anim/test_mesh_anim.json")
 
-    -- 4. 加载动画（可选，注释上面保存，取消下面注释测试）
-    -- MeshAnimator:loadAnimation("test_mesh", "anim/test_mesh_anim.json")
-end
+--     -- 4. 加载动画（可选，注释上面保存，取消下面注释测试）
+--     -- MeshAnimator:loadAnimation("test_mesh", "anim/test_mesh_anim.json")
+-- end
 
-function love.update(dt)
-    -- 驱动动画更新
-    MeshAnimator:update(dt)
-end
+-- function love.update(dt)
+--     -- 驱动动画更新
+--     MeshAnimator:update(dt)
+-- end
 
-function love.draw()
-    -- 绘制Mesh（填充白色，方便看形变）
-    local mesh = MeshAnimator.meshes["test_mesh"].mesh
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.draw(mesh)
+-- function love.draw()
+--     -- 绘制Mesh（填充白色，方便看形变）
+--     local mesh = MeshAnimator.meshes["test_mesh"].mesh
+--     love.graphics.setColor(1, 1, 1)
+--     love.graphics.draw(mesh)
 
-    -- 绘制调试信息
-    love.graphics.setColor(1, 0, 0)
-    love.graphics.print("动画时间："..string.format("%.2f", MeshAnimator.currentTime).."秒", 10, 10)
-    love.graphics.print("按空格暂停/播放", 10, 30)
-    love.graphics.print("按R复位Mesh", 10, 50)
-end
+--     -- 绘制调试信息
+--     love.graphics.setColor(1, 0, 0)
+--     love.graphics.print("动画时间："..string.format("%.2f", MeshAnimator.currentTime).."秒", 10, 10)
+--     love.graphics.print("按空格暂停/播放", 10, 30)
+--     love.graphics.print("按R复位Mesh", 10, 50)
+-- end
 
-function love.keypressed(key)
-    if key == "space" then
-        -- 暂停/播放动画
-        MeshAnimator.isPlaying = not MeshAnimator.isPlaying
-    elseif key == "r" then
-        -- 复位Mesh
-        MeshAnimator:resetMesh("test_mesh")
-    elseif key == "escape" then
-        love.event.quit()
-    end
-end
+-- function love.keypressed(key)
+--     if key == "space" then
+--         -- 暂停/播放动画
+--         MeshAnimator.isPlaying = not MeshAnimator.isPlaying
+--     elseif key == "r" then
+--         -- 复位Mesh
+--         MeshAnimator:resetMesh("test_mesh")
+--     elseif key == "escape" then
+--         love.event.quit()
+--     end
+-- end

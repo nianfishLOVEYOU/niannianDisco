@@ -6,7 +6,6 @@ GlobleManager = {
     allData = {},
 }
 
-config=require "src.manager.extend.config"
 
 systemManager:init_regester(function()
     GlobleManager:init()

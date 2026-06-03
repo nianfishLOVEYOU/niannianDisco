@@ -30,7 +30,8 @@ function SlidePanel:init(content)
     self.dt = 0
     self.viscous = 0.2
 
-  self.padding = 10
+    self.padding = 10
+    self.shade =true
     -- 滚动条配置
     self.scrollBarWidth = 10
     self.isDraggingScrollBar = false
