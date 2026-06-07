@@ -4,9 +4,11 @@ local MenuUI = ui:extend()
 
 local connectFail = function()
     uiManager:removeUI("waitingUI")
+    print("连接失败")
 end
 
 local connectSeccess = function()
+    print("连接成功")
     statusManager:statusChange("game")
 end
 

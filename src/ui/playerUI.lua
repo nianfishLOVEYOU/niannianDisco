@@ -5,17 +5,17 @@ local PlayerUI = ui:extend()
 
 function PlayerUI:init()
     audio.playlist = globleManager:getGameData("playlist") or {}
+    self.playerStack=nil
     self:refresh()
 end
 
 -- 更新播放列表显示
 function PlayerUI:refresh()
     self:clearStacks()
+    self:buildStack()
     --背景
     --self:addStack(self:getBackStack())
     -- 创建本地列表
-    self:addStack(self:getvstack())
-
     -- self:addStack(Glove.Window:new("hello",function (widget)
     --     self:removeStack(widget)
     -- end))
@@ -70,7 +70,7 @@ local list = function()
     -- end
 end
 
-function PlayerUI:getvstack()
+function PlayerUI:buildStack()
     
 
     local width, height = love.graphics.getDimensions()
@@ -78,14 +78,18 @@ function PlayerUI:getvstack()
     local playimg = audio.isPlaying and "res/image/ui/resume.png" or "res/image/ui/pase.png"
     local playButton = Glove.Button_img:new("", playimg, click)
     playButton:setScale(2, 2)
+    playButton.color={0.4,0.4,0.4}
     local nextButton = Glove.Button_img:new("", "res/image/ui/next.png", next)
     nextButton:setScale(2, 2)
+    nextButton.color={0.4,0.4,0.4}
     local perButton = Glove.Button_img:new("", "res/image/ui/per.png", per)
     perButton:setScale(2, 2)
-    local listButton = Glove.Button_img:new("", "res/image/ui/listbutton.png", list)
-    listButton:setScale(2, 2)
-    local openMusicDirButton = Glove.Button:new("打开音乐文件夹", fileManager.openMusicDirectory)
-    openMusicDirButton.color ={0.5,0.8,0.5}
+    perButton.color={0.4,0.4,0.4}
+    -- local listButton = Glove.Button_img:new("", "res/image/ui/listbutton.png", list)
+    -- listButton:setScale(2, 2)
+    -- local openMusicDirButton = Glove.Button:new("打开音乐文件夹", fileManager.openMusicDirectory)
+
+    -- openMusicDirButton.color ={0.5,0.8,0.5}
 
     ------ slider-------
     local playSlider = Glove.Slider:new(0, function(value)
@@ -96,25 +100,32 @@ function PlayerUI:getvstack()
     ------ musicvoice slider------
 
     local infoText = Glove.Text:new("正在播放: ")
+    infoText:setSize(120,0)
+    infoText.color={0,0,0}
     self.infoText =infoText 
     local progressText = Glove.Text:new("进度:")
+    progressText.color={0,0,0}
     self.progressText =progressText
     self.progressText:setSize(120,20)
     local volumeText = Glove.Text:new("音量:")
+    volumeText.color={0,0,0}
+    volumeText:setSize(0,0)
+
     local volumeSlider = Glove.Slider:new(audio.volume, function(value)
         audio:setVolume(value)
     end)
-    print("当前音量:", audio.volume)
 
     --右边对其
     local musiVoiceHStack = Glove.HStack:new({infoText, progressText, volumeText, volumeSlider })
     local sliderHStack = Glove.HStack:new({ playSlider })
-    local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton, listButton,openMusicDirButton} )
-    local stack = Glove.VStack:new({ musiVoiceHStack, sliderHStack, buttonHStack },10,"center")
+    local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton} )
+    local stack = Glove.VStack:new({ musiVoiceHStack, buttonHStack, sliderHStack },10,"center")
 
     local sw, sh = stack:getSize()
     stack:setPos(width / 2 - sw / 2, height - sh -50)
-    return stack
+    
+    self:addStack(stack)
+    self.playerStack=stack
 end
 
 function PlayerUI:getBackStack()
@@ -165,6 +176,11 @@ function PlayerUI:update(dt)
 end
 
 function PlayerUI:draw()
+    --画一个白色背景
+    love.graphics.setColor(1, 1, 1)
+    if self.playerStack then
+        love.graphics.rectangle("fill", self.playerStack.x,self.playerStack.y,self.playerStack.w,self.playerStack.h,10)
+    end
     self:drawStacks()
     local width, height = love.graphics.getDimensions()
     -- if network.musicTransfering > 0 then

@@ -22,16 +22,8 @@ function UiAnchoredImage:draw()
         self.depth = self.depth < 0 and 0 or self.depth
     end
 
-    local drawInfo = {
-        type = "draw",
-        parameters = {},
-        depth = self.depth,
-        color = self.color,
-        z = self.z,
-        layer = self.layer
-    }
 
-    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.setColor(self.color)
     if (self.quad) then
         local qx, qy, qw, qh = self.quad:getViewport()
         -- 锚点偏移量 = 锚点比例 * 当前尺寸

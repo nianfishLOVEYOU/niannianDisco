@@ -81,7 +81,7 @@ end
 
 -- 后期需要加入新的元素时
 function SlidePanel:add(child)
-    print("SlidePanel add child", child.type)
+    --print("SlidePanel add child", child.type)
     self:getContent():addChild(child)
     self:getContent():layout()
 end

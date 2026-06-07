@@ -108,6 +108,7 @@ function Network:unicast_mp3(id, path, name)
     self.musicTransfering = self.musicTransfering + 1
 end
 
+-- 网络线程回调
 function Network:info()
     --必须要0.01没有数据就跳过，不然是阻塞的
     --窗口焦点切换会降低 Love2D 主线程的调度优先级，系统不再「宽容」这个阻塞请求，而是强制等待 pop() 返回

@@ -26,6 +26,7 @@ function Button_img:draw()
 
     --先显示图片
     love.graphics.setColor(self.color)
+    self.image.color=self.color
     if self:isOver(love.mouse.getPosition()) and not love.mouse.isDown(1) then
         local offsetx = padding / 2
         local offsety = padding / 2

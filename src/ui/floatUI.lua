@@ -3,6 +3,7 @@ local ui = require "src.ui.ui"
 local FloatUI = ui:extend()
 
 function FloatUI:init()
+    floatUI= self
     self.timers = {}
     self.widgets = {
     } -- floating items (tables with update/draw)

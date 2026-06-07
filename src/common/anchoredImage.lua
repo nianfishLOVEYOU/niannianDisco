@@ -148,7 +148,7 @@ function AnchoredImage:draw()
         z = self.z,
         layer = self.layer
     }
-
+    love.graphics.setColor(self.color)
     if (self.quad) then
         -- 这里因为元尺寸过大，所以需要根据裁剪算新的尺寸
         local qx, qy, qw, qh = self.quad:getViewport()

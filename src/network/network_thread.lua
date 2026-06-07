@@ -44,7 +44,7 @@ local function getPublicAddr()
     end
     return nil
 end
-
+print("111111111111111111111111111111111111111111")
 local myAddr
 local peers = {} -- {id={ip,port,address,enetPeer}}
 local sigPeer --令信服务器peer

@@ -32,6 +32,7 @@ end
 
 -- 0=没遮罩或者在遮罩里面 1=有遮罩在外面,不显示
 function widget:isShade(mouseX, mouseY)
+  --nianDebug.printStackTrace("widget:isShade")
     if self.parent then -- 是否对下面进行遮罩
         if self.parent.shade == true and self.parent.isShade then
             return not self.parent:isOver(mouseX, mouseY) -- 递归返回含有遮罩的父辈遮罩情况

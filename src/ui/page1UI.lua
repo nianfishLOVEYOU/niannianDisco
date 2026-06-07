@@ -17,9 +17,10 @@ function page1UI:init()
     local nianocUI = require("src.ui.nianocUI"):new()
     uiManager:addUI("nianocUI",nianocUI)
     self:addChild(nianocUI)
-    local roomUI = require("src.ui.roomUI"):new()
-    uiManager:addUI("roomUI", roomUI)
-    self:addChild(roomUI)
+    --切换频道
+    -- local roomUI = require("src.ui.roomUI"):new()
+    -- uiManager:addUI("roomUI", roomUI)
+    -- self:addChild(roomUI)
     
 
 
