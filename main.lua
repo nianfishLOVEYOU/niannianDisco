@@ -39,6 +39,7 @@ function love.update(dt)
     systemManager:update(dt)
     statusManager:update(dt)
     animation:update(dt)
+    animator:update(dt)
     timer:update(dt)
     --debug检测
     nianDebug.DebugUpdate(dt)

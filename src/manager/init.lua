@@ -25,5 +25,5 @@ soundManager = require "src.manager.soundManager"
 
 
 config=require "src.manager.extend.config"
-meshAnimator = require "src.manager.extend.meshAnimator"
+--meshAnimator = require "src.manager.extend.meshAnimator"
 pendulumSystem = require "src.manager.extend.PendulumSystem"

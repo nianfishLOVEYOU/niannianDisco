@@ -1,6 +1,7 @@
 nianTool = {}
 timer = require "src.common.timer"
 animation = require "src.animation"
+animator = require "src.animator"
 commonData = require "src.common.commonData"
 
 require "lib.nianMath"

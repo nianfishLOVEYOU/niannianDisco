@@ -65,7 +65,7 @@ function MenuUI:getvstack()
             uiManager:addUI("waitingUI", waitingUI)
         end
     end)
-
+    linkButton:setSize(100,50)
     local inputCode = Glove.Input:new(self.code, function(input)
         self.code = input
     end)

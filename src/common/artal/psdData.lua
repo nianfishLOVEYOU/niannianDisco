@@ -5,52 +5,50 @@ local item = require "src.item.item"
 local PsdData = item:extend()
 
 function PsdData:init(path)
-    self.img = artal.newPSD(path)
-    for i = 1, #self.img do
-        self.img[i].visiable = true
-        print("加载pad图片" .. self.img[i].name)
+    self.sortimgs = artal.newPSD(path)
+    self.imgs={}
+    for i = 1, #self.sortimgs do
+        local name = self.sortimgs[i].name
+        self.imgs[name] = self.sortimgs[i]
+        self.imgs[name].visiable = true
+        self.imgs[name].x=self.imgs[name].ox --ox为位置备份
+        self.imgs[name].y=self.imgs[name].oy
+        
+        print("加载pad图片" .. name)
     end
     -- self.w = self.img[2].image:getWidth()
     -- self.h = self.img[2].image:getHeight()
 end
 
 function PsdData:getLayer(layerName)
-    for k, layer in pairs(self.img) do
-        if layer.name == layerName then
-            return layer
-        end
-    end
-    return nil
+    return self.imgs[layerName]
 end
 
 
 function PsdData:setLayerVisiable(layerName, visiable)
-    for k, layer in pairs(self.img) do
-        if layer.name == layerName then
-            layer.visiable = visiable
-            break
-        end
+    local layer = self:getLayer(layerName)
+    if layer then
+        layer.visiable = visiable
     end
-    self.visiable = visiable
 end
 
 function PsdData:allVisiable(boo)
-    for i = 1, #self.img do
-        self.img[i].visiable = boo
+    for _, layer in ipairs(self.sortimgs) do
+        layer.visiable = boo
     end
 end
 
 function PsdData:draw()
     love.graphics.setColor(1, 1, 1)
-    for i = 1, #self.img do
-        if self.img[i].visiable then
-            love.graphics.draw(self.img[i].image, self.x, -- Position X
+    for _, layer in ipairs(self.sortimgs) do
+        if layer.visiable then
+            love.graphics.draw(layer.image, self.x, -- Position X
             self.y, -- Position Y
             nil, -- Rotation
             nil, -- Scale X
             nil, -- Scale Y
-            self.img[i].ox, -- Offset X
-            self.img[i].oy) -- Offset Y
+            layer.x, -- Offset X
+            layer.y) -- Offset Y
         end
     end
 end
