@@ -91,6 +91,12 @@ function Animator:clearKeyframes(trackName)
     tr.keyframes = {}
 end
 
+function Animator:clearAllKeyframes()
+    for _, tr in pairs(self.tracks) do
+        tr.keyframes = {}
+    end
+end
+
 function Animator:addKeyframe(trackName, time, value)
     local tr = self.tracks[trackName]
     if not tr then return end

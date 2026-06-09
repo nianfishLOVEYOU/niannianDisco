@@ -857,6 +857,39 @@ function artalFunction.newPSD(fileNameOrData, structureFlagOrNumber)
 	end
 end
 
+---建立图层的文件夹树
+function buildLayerTree(psdLayers)
+    local tree = {}
+    local folderStack = {}  -- 文件夹栈：记录当前在哪个文件夹内
+    local currentParent = tree
+
+    for i, layer in ipairs(psdLayers) do
+        if layer.type == "open" then
+            -- 新文件夹开始
+            local folder = {
+                name = layer.name,
+                type = "folder",
+                layers = {},
+                x = 0,  -- 文件夹整体偏移 X
+                y = 0   -- 文件夹整体偏移 Y
+            }
+            table.insert(currentParent, folder)
+            table.insert(folderStack, folder)
+            currentParent = folder.layers
+        elseif layer.type == "close" then
+            -- 文件夹结束
+            table.remove(folderStack)
+            currentParent = #folderStack > 0 and folderStack[#folderStack].layers or tree
+        else
+            -- 图片图层，放入当前父级
+            table.insert(currentParent, layer)
+        end
+    end
+
+    return tree
+end
+
+
 return artalFunction
 
 --[[

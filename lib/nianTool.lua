@@ -295,25 +295,32 @@ function drawArrow(x1, y1, x2, y2, r, g, b, a, lineWidth, arrowSize)
 end
 
 local outlineSize = 1 -- 描边粗细（像素）
-local outlineColor = {0, 0, 0, 1} -- 描边：黑色
-local fillColor = {1, 1, 1, 1} -- 文字：白色
 -- 辅助：绘制带描边文字
-function drawOutlinedText(t, x, y)
-
+function drawOutlinedText(t, x, y, w, color, outlineColor)
+    
+    local fillColor = color or {1, 1, 1, 1} -- 文字：白色
+    local outlineColor = outlineColor or {0, 0, 0, 1} -- 描边：黑色
     -- 1. 画8个方向描边
     love.graphics.setColor(outlineColor)
     for dx = -outlineSize, outlineSize do
         for dy = -outlineSize, outlineSize do
             if dx ~= 0 or dy ~= 0 then -- 跳过原位
-                love.graphics.print(t, x + dx, y + dy)
+                if w and w > 0 then
+                    love.graphics.printf(t, x + dx, y + dy, w, "left")
+                else
+                    love.graphics.print(t, x + dx, y + dy)
+                end
             end
         end
     end
     -- 2. 画主体文字
     love.graphics.setColor(fillColor)
-    love.graphics.print(t, x, y)
+
+    if w and w > 0 then
+        love.graphics.printf(t, x, y, w, "left")
+    else
+        love.graphics.print(t, x, y)
+    end
+    --love.graphics.print(t, x, y)
 end
-
-
-
 

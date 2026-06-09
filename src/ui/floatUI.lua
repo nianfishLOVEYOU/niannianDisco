@@ -21,8 +21,17 @@ function FloatUI:addFloatText(text, x, y)
     local gtext = Glove.Text:new(text)
     gtext:setPos(x, y, 0)
     gtext.color = color
+    gtext.outline=true
 
-    table.insert(self.floatTexts, { text = gtext, duration = duration, vy = vy })
+    table.insert(self.floatTexts, {
+        text = gtext,
+        x = x,
+        y = y,
+        elapsed = 0,
+        duration = duration,
+        vy = vy,
+        baseColor = { color[1], color[2], color[3], color[4] }
+    })
 end
 
 function FloatUI:addDialogeBox(text, player)
@@ -80,6 +89,26 @@ function FloatUI:update(dt)
             table.remove(self.timers, i)
         end
     end
+
+    -- update float texts: move up and fade out, then remove
+    for i = #self.floatTexts, 1, -1 do
+        local ft = self.floatTexts[i]
+        ft.elapsed = ft.elapsed + dt
+        local p = ft.elapsed / ft.duration
+        if p > 1 then p = 1 end
+
+        local ny = ft.y + ft.vy * p
+        ft.text:setPos(ft.x, ny, 0)
+
+        local c = ft.baseColor
+        ft.text.color = { c[1], c[2], c[3], c[4] * (1 - p) }
+
+        if ft.elapsed >= ft.duration then
+            self.floatTexts[i].text:destroy()
+            table.remove(self.floatTexts, i)
+
+        end
+    end
 end
 
 function FloatUI:draw()
@@ -97,6 +126,7 @@ function FloatUI:draw()
     for i, t in ipairs(self.floatTexts) do
         t.text:draw()
     end
+    --print(#self.floatTexts)
 end
 
 return FloatUI

@@ -38,46 +38,32 @@ function DialogueBox:new(text, x, y, targetX, targetY, config)
     return self
 end
 
--- 绘制圆角矩形
-local function drawRoundedRect(x, y, w, h, r)
-    love.graphics.beginPath()
-    -- 左上角
-    love.graphics.arc("open", x+r, y+r, r, math.pi, 3*math.pi/2)
-    love.graphics.line(x+r, y, x+w-r, y)
-    -- 右上角
-    love.graphics.arc("open", x+w-r, y+r, r, 3*math.pi/2, 0)
-    love.graphics.line(x+w, y+r, x+w, y+h-r)
-    -- 右下角
-    love.graphics.arc("open", x+w-r, y+h-r, r, 0, math.pi/2)
-    love.graphics.line(x+w-r, y+h, x+r, y+h)
-    -- 左下角
-    love.graphics.arc("open", x+r, y+h-r, r, math.pi/2, math.pi)
-    love.graphics.line(x, y+h-r, x, y+r)
-    love.graphics.closePath()
+-- LÖVE 没有 beginPath/closePath 这类路径 API，直接用原生圆角矩形接口绘制。
+local function drawRoundedRect(mode, x, y, w, h, r)
+    love.graphics.rectangle(mode, x, y, w, h, r, r)
 end
 
 -- 绘制对话框尾巴
 local function drawTail(boxX, boxY, boxW, boxH, targetX, targetY, size, borderWidth)
     local baseX = math.max(boxX + 20, math.min(targetX, boxX + boxW - 20))
     local baseY = boxY + boxH
+    local points = {
+        baseX, baseY,
+        baseX - size, baseY + size,
+        baseX + size, baseY + size
+    }
     
     -- 绘制尾巴填充
-    love.graphics.beginPath()
-    love.graphics.moveTo(baseX, baseY)
-    love.graphics.lineTo(baseX - size, baseY + size)
-    love.graphics.lineTo(baseX + size, baseY + size)
-    love.graphics.closePath()
-    love.graphics.fill()
+    love.graphics.polygon("fill", points)
     
     -- 绘制尾巴边框
     love.graphics.setLineWidth(borderWidth)
-    love.graphics.stroke()
+    love.graphics.polygon("line", points)
 end
 
 -- 绘制对话框
 function DialogueBox:draw()
     -- 设置字体
-    love.graphics.setFont(self.font)
     
     -- 计算文本尺寸
     local textObj = love.graphics.newText(self.font, self.text)
@@ -93,14 +79,12 @@ function DialogueBox:draw()
     
     -- 1. 绘制背景
     love.graphics.setColor(self.config.bgColor)
-    drawRoundedRect(self.x, self.y, boxW, boxH, self.config.borderRadius)
-    love.graphics.fill()
+    drawRoundedRect("fill", self.x, self.y, boxW, boxH, self.config.borderRadius)
     
     -- 2. 绘制边框
     love.graphics.setColor(self.config.borderColor)
     love.graphics.setLineWidth(self.config.borderWidth)
-    drawRoundedRect(self.x, self.y, boxW, boxH, self.config.borderRadius)
-    love.graphics.stroke()
+    drawRoundedRect("line", self.x, self.y, boxW, boxH, self.config.borderRadius)
     
     -- 3. 绘制尾巴
     drawTail(self.x, self.y, boxW, boxH, self.targetX, self.targetY, 

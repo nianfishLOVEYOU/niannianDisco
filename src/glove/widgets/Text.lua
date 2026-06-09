@@ -1,4 +1,4 @@
---输入框
+-- 输入框
 local widget = require "src.glove.widgets.widget"
 
 local g = love.graphics
@@ -9,12 +9,15 @@ function Text:init(text, w, h)
     self.type = "Text"
     local font = g.getFont()
     self.font = font
-    self.autoW = false
-    self.autoH = false
-    self.omit = false
+    self.autoW = false -- 是否根据文本自动调整宽度，默认为false，设置为true后w参数将被忽略
+    self.autoH = false -- 是否根据文本自动调整宽高，默认为false，设置为true后w或h参数将被忽略
+    self.omit = false -- 是否启用省略号（...）功能，当文本过长时显示省略号
+    self.outline = false -- 是否启用描边功能
+    self.outlineColor = {0, 0, 0, 1}
+
     self:setText(text)
     self:setSize(w or 60, h or 20)
-    
+
 end
 
 -- 设置字符
@@ -118,11 +121,16 @@ function Text:draw()
 
     local value = self:getText() or ""
     local displayValue = self:_getOmittedText(value)
-    if self.w and self.w > 0 then
-        g.printf(displayValue, self.x, self.y, self.w, "left")
+    if self.outline then
+        drawOutlinedText(displayValue, self.x, self.y,self.w,self.color, self.outlineColor)
     else
-        g.print(displayValue, self.x, self.y)
+        if self.w and self.w > 0 then
+            g.printf(displayValue, self.x, self.y, self.w, "left")
+        else
+            g.print(displayValue, self.x, self.y)
+        end
     end
+
 end
 
 function Text:getText()

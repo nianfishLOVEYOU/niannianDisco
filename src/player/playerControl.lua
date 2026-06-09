@@ -50,16 +50,6 @@ function playerControl:mousePressed(x, y, button)
     end
 end
 
-local pn = 0
-function playerControl:keydown(key)
-
-        if key == 'q' then
-            print("dialogebox create")
-            uiManager:getUI("floatUI"):addDialogeBox("hello world ",playerManager.player)
-            --创建一个对话
-        end
-
-end
 
 function playerControl:draw()
     local player =playerManager.player

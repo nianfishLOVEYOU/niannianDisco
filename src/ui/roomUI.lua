@@ -6,7 +6,7 @@ local connectFail = function()
     uiManager:removeUI("waitingUI")
     -- 显示连接失败
     local width, height = love.graphics.getDimensions()
-    floatUI:addFloatText("连接失败", width / 2, height / 2)
+    --floatUI:addFloatText("连接失败", width / 2, height / 2)
     print("连接失败")
 end
 
@@ -14,7 +14,7 @@ local connectSeccess = function()
     uiManager:removeUI("waitingUI")
     -- 显示连接成功
     local width, height = love.graphics.getDimensions()
-    floatUI:addFloatText("连接成功", width / 2, height / 2)
+    --floatUI:addFloatText("连接成功", width / 2, height / 2)
     print("连接成功")
 end
 

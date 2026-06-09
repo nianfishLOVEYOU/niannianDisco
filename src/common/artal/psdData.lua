@@ -6,14 +6,27 @@ local PsdData = item:extend()
 
 function PsdData:init(path)
     self.sortimgs = artal.newPSD(path)
-    self.imgs={}
+    self.imgs = {}
     for i = 1, #self.sortimgs do
         local name = self.sortimgs[i].name
         self.imgs[name] = self.sortimgs[i]
         self.imgs[name].visiable = true
-        self.imgs[name].x=self.imgs[name].ox --ox为位置备份
-        self.imgs[name].y=self.imgs[name].oy
-        
+        self.imgs[name].x = self.imgs[name].ox -- ox为位置备份
+        self.imgs[name].y = self.imgs[name].oy
+
+        print("加载pad图片" .. name)
+    end
+
+    --树化
+    self.sortTree=buildLayerTree(self.sortimgs)
+    self.imgsTree ={} 
+    for i = 1, #self.sortTree do
+        local name = self.sortTree[i].name
+        self.imgsTree[name] = self.sortTree[i]
+        self.imgsTree[name].visiable = true
+        self.imgsTree[name].x = self.sortTree[i].ox -- ox为位置备份
+        self.imgsTree[name].y = self.sortTree[i].oy
+
         print("加载pad图片" .. name)
     end
     -- self.w = self.img[2].image:getWidth()
@@ -23,7 +36,6 @@ end
 function PsdData:getLayer(layerName)
     return self.imgs[layerName]
 end
-
 
 function PsdData:setLayerVisiable(layerName, visiable)
     local layer = self:getLayer(layerName)

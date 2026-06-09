@@ -2,6 +2,8 @@ local ui = require "src.ui.ui"
 
 local MenuUI = ui:extend()
 
+
+
 local connectFail = function()
     uiManager:removeUI("waitingUI")
     print("连接失败")
@@ -65,6 +67,12 @@ function MenuUI:getvstack()
             uiManager:addUI("waitingUI", waitingUI)
         end
     end)
+
+    local showFileButton = Glove.Button:new("文件夹", function()
+        local saveDir=love.filesystem.getSaveDirectory()
+        love.system.openURL("file://" .. saveDir)
+    end)
+
     linkButton:setSize(100,50)
     local inputCode = Glove.Input:new(self.code, function(input)
         self.code = input
@@ -86,7 +94,7 @@ function MenuUI:getvstack()
     -- local slider = Glove.Slider:new(0, 0, 200, 20, 0, function(input)
     --     self.code = input
     -- end)
-    local bt = Glove.HStack:new({ linkButton })
+    local bt = Glove.HStack:new({ linkButton ,showFileButton})
 
     local stack = Glove.VStack:new({first,second,bt,Toggle},10)
     stack.spacing = 10

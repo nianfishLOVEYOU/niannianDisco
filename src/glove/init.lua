@@ -94,10 +94,10 @@ Glove = {
     if clickWidget then
       clickWidget:onClick(mouseX, mouseY)
       Glove.setFocus(clickWidget)
-      print("'o'mouseInThe:", clickWidget.type, clickWidget.name, clickWidget:isOver(mouseX, mouseY),clickWidget.parent:isOver(mouseX, mouseY))
-      if clickWidget.parent.isShade then
-        print("parent isShade:", clickWidget:isShade(mouseX, mouseY))
-      end
+      print("'o'mouseInThe:", clickWidget.type, clickWidget.name)
+      -- if  clickWidget.parent.isShade then
+      --   print("parent isShade:", clickWidget:isShade(mouseX, mouseY))
+      -- end
     else
       print(" mousePressed setFocus nil")
       --移除焦点

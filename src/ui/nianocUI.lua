@@ -22,7 +22,11 @@ end
 function nianocUI:_newNian()
     self.psdData = psdData:new("res/image/nian/nian.psd")
     self.psdData:setPos(self.x, self.y)
-    self:changeState("idle")
+    self:changeState("music")
+
+
+    --添加播放按钮
+
 end
 
 function nianocUI:changeState(state)
@@ -120,10 +124,10 @@ function nianocUI:_createStates()
             self.psdData:getLayer("love").x = -55
 
             self:_eyeAction("left")
-            self:_mouseAction("happy")
+            self:_mouseAction("open")
             -- 动画
-            self:_defaultAni()
-
+            self:_musicAni()
+            self.ani.globalSpeed=3
         end,
         update = function(self, dt)
 
@@ -135,6 +139,7 @@ function nianocUI:_createStates()
         end,
         leave = function(self)
 
+            self.ani.globalSpeed=1
         end
     }
 
@@ -210,14 +215,14 @@ function nianocUI:_mouseAction(action)
     end
 end
 
+function nianocUI:_clearAni()
+    self.ani:clearAllKeyframes()
+end
+
+
 function nianocUI:_defaultAni()
 
-    self.ani:clearKeyframes("psdy")
-    self.ani:clearKeyframes("clothes")
-    self.ani:clearKeyframes("head")
-    self.ani:clearKeyframes("mic")
-    self.ani:clearKeyframes("love")
-    self.ani:clearKeyframes("hand_Left")
+    self:_clearAni()
 
     -- defaultEnable 默认启用 loop 循环 pinpon 来回
     self.ani:addTrack("psdy", self.psdData, "y", true, true, false, "easeInOut")
@@ -230,10 +235,10 @@ function nianocUI:_defaultAni()
     self.ani:addKeyframe("clothes", 2, self.psdData.imgs.clothes.y + 1)
     self.ani:addKeyframe("clothes", 4, self.psdData.imgs.clothes.y - 1)
 
-    self.ani:addTrack("head", self.psdData, "imgs.head.y", true, true, true, "easeInOut")
-    self.ani:addKeyframe("head", 0, self.psdData.imgs.head.y - 1)
-    self.ani:addKeyframe("head", 2, self.psdData.imgs.head.y + 1)
-    self.ani:addKeyframe("head", 4, self.psdData.imgs.head.y - 1)
+    self.ani:addTrack("hear_Down", self.psdData, "imgs.hear_Down.y", true, true, true, "easeInOut")
+    self.ani:addKeyframe("hear_Down", 0, self.psdData.imgs.hear_Down.y - 2)
+    self.ani:addKeyframe("hear_Down", 2, self.psdData.imgs.hear_Down.y + 2)
+    self.ani:addKeyframe("hear_Down", 4, self.psdData.imgs.hear_Down.y - 2)
 
     self.ani:addTrack("mic", self.psdData, "imgs.mic.y", true, true, true, "easeInOut")
     self.ani:addKeyframe("mic", 0, self.psdData.imgs.mic.y + 3)
@@ -252,6 +257,90 @@ function nianocUI:_defaultAni()
 
 
 end
+
+function nianocUI:_musicAni()
+        self:_clearAni()
+
+    -- defaultEnable 默认启用 loop 循环 pinpon 来回
+    self.ani:addTrack("psdy", self.psdData, "y", true, true, false, "easeInOut")
+    self.ani:addKeyframe("psdy", 0, self.psdData.y + 4)
+    self.ani:addKeyframe("psdy", 1, self.psdData.y - 4)
+    self.ani:addKeyframe("psdy", 2, self.psdData.y + 4)
+    self.ani:addTrack("psdx", self.psdData, "x", true, true, false, "easeInOut")
+    self.ani:addKeyframe("psdx", 0, self.psdData.x - 5)
+    self.ani:addKeyframe("psdx", 2, self.psdData.x + 5)
+    self.ani:addKeyframe("psdx", 4, self.psdData.x - 5)
+
+    self.ani:addTrack("clothes", self.psdData, "imgs.clothes.y", true, true, true, "easeInOut")
+    self.ani:addKeyframe("clothes", 0, self.psdData.imgs.clothes.y - 1)
+    self.ani:addKeyframe("clothes", 1, self.psdData.imgs.clothes.y + 1)
+    self.ani:addKeyframe("clothes", 2, self.psdData.imgs.clothes.y - 1)
+
+    self.ani:addTrack("hear_Down", self.psdData, "imgs.hear_Down.y", true, true, true, "easeInOut")
+    self.ani:addKeyframe("hear_Down", 0, self.psdData.imgs.hear_Down.y - 2)
+    self.ani:addKeyframe("hear_Down", 1, self.psdData.imgs.hear_Down.y + 2)
+    self.ani:addKeyframe("hear_Down", 2, self.psdData.imgs.hear_Down.y - 2)
+    
+
+    self.ani:addTrack("mic", self.psdData, "imgs.mic.y", true, true, true, "easeInOut")
+    self.ani:addKeyframe("mic", 0, self.psdData.imgs.mic.y + 3)
+    self.ani:addKeyframe("mic", 1, self.psdData.imgs.mic.y - 3)
+    self.ani:addKeyframe("mic", 2, self.psdData.imgs.mic.y + 3)
+
+    self.ani:addTrack("love", self.psdData, "imgs.love.y", true, true, true, "easeInOut")
+    self.ani:addKeyframe("love", 0, self.psdData.imgs.love.y - 4)
+    self.ani:addKeyframe("love", 1, self.psdData.imgs.love.x + 4)
+    self.ani:addKeyframe("love", 2, self.psdData.imgs.love.y - 4)
+
+    self.ani:addTrack("hand_Left", self.psdData, "imgs.hand_Left.y", true, true, true, "easeInOut")
+    self.ani:addKeyframe("hand_Left", 0, self.psdData.imgs.hand_Left.y + 1)
+    self.ani:addKeyframe("hand_Left", 1, self.psdData.imgs.hand_Left.y - 1)
+    self.ani:addKeyframe("hand_Left", 2, self.psdData.imgs.hand_Left.y + 1)
+end
+
+function nianocUI:_clickAni()
+
+    self:_clearAni()
+
+    -- defaultEnable 默认启用 loop 循环 pinpon 来回
+    self.ani:addTrack("psdy", self.psdData, "y", true, false, false, "easeInOut")
+    self.ani:addKeyframe("psdy", 0, self.psdData.y - 5)
+    self.ani:addKeyframe("psdy", 0.1, self.psdData.y + 7)
+    self.ani:addKeyframe("psdy", 0.2, self.psdData.y - 5)
+
+    self.ani:addTrack("clothes", self.psdData, "imgs.clothes.y", true, false, false, "easeInOut")
+    self.ani:addKeyframe("clothes", 0, self.psdData.imgs.clothes.y - 1)
+    self.ani:addKeyframe("clothes", 0.1, self.psdData.imgs.clothes.y + 4)
+    self.ani:addKeyframe("clothes", 0.2, self.psdData.imgs.clothes.y - 1)
+
+
+    
+    self.ani:addTrack("hear_Down", self.psdData, "imgs.hear_Down.y", true, false, false, "easeInOut")
+    self.ani:addKeyframe("hear_Down", 0, self.psdData.imgs.hear_Down.y + 1)
+    self.ani:addKeyframe("hear_Down", 0.2, self.psdData.imgs.hear_Down.y - 1)
+    self.ani:addKeyframe("hear_Down", 0.4, self.psdData.imgs.hear_Down.y + 1)
+
+    self.ani:addTrack("mic", self.psdData, "imgs.mic.y", true, false, false, "easeInOut")
+    self.ani:addKeyframe("mic", 0, self.psdData.imgs.mic.y + 6)
+    self.ani:addKeyframe("mic", 0.2, self.psdData.imgs.mic.y - 3)
+    self.ani:addKeyframe("mic", 0.4, self.psdData.imgs.mic.y + 6)
+
+    self.ani:addTrack("love", self.psdData, "imgs.love.y", true, false, false, "easeInOut")
+    self.ani:addKeyframe("love", 0, self.psdData.imgs.love.y - 4)
+    self.ani:addKeyframe("love", 0.2, self.psdData.imgs.love.y + 8)
+    self.ani:addKeyframe("love", 0.4, self.psdData.imgs.love.y - 4)
+
+    self.ani:addTrack("hand_Left", self.psdData, "imgs.hand_Left.y", true, false, false, "easeInOut")
+    self.ani:addKeyframe("hand_Left", 0, self.psdData.imgs.hand_Left.y + 4)
+    self.ani:addKeyframe("hand_Left", 0.2, self.psdData.imgs.hand_Left.y - 1)
+    self.ani:addKeyframe("hand_Left", 0.4, self.psdData.imgs.hand_Left.y + 4)
+
+    timer:after(0.5, function()
+        self:_defaultAni()
+    end)
+end
+
+
 
 -- 更新播放列表显示
 function nianocUI:refresh()
