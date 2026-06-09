@@ -17,9 +17,9 @@ function PsdData:init(path)
         print("加载pad图片" .. name)
     end
 
-    --树化
-    self.sortTree=buildLayerTree(self.sortimgs)
-    self.imgsTree ={} 
+    -- 树化
+    self.sortTree = buildLayerTree(self.sortimgs)
+    self.imgsTree = {}
     for i = 1, #self.sortTree do
         local name = self.sortTree[i].name
         self.imgsTree[name] = self.sortTree[i]
@@ -34,7 +34,12 @@ function PsdData:init(path)
 end
 
 function PsdData:getLayer(layerName)
-    return self.imgs[layerName]
+    if self.imgs[layerName] then
+        return self.imgs[layerName]
+    elseif self.imgsTree[layerName] then
+        return self.imgsTree[layerName]
+    end
+
 end
 
 function PsdData:setLayerVisiable(layerName, visiable)
@@ -50,19 +55,41 @@ function PsdData:allVisiable(boo)
     end
 end
 
-function PsdData:draw()
-    love.graphics.setColor(1, 1, 1)
-    for _, layer in ipairs(self.sortimgs) do
+local function drawImgTree(x, y, sortTree)
+    for _, layer in ipairs(sortTree) do
         if layer.visiable then
-            love.graphics.draw(layer.image, self.x, -- Position X
-            self.y, -- Position Y
-            nil, -- Rotation
-            nil, -- Scale X
-            nil, -- Scale Y
-            layer.x, -- Offset X
-            layer.y) -- Offset Y
+            if layer.type == "folder" then
+                local newx, newy = x + layer.x, y + layer.y
+                drawImgTree(newx, newy, layer.layers)
+            elseif layer.type == "image" then
+                love.graphics.draw(layer.image, x, -- Position X
+                y, -- Position Y
+                nil, -- Rotation
+                nil, -- Scale X
+                nil, -- Scale Y
+                layer.x, -- Offset X
+                layer.y) -- Offset Y
+            end
+
         end
     end
+end
+
+function PsdData:draw()
+    love.graphics.setColor(1, 1, 1)
+    -- for _, layer in ipairs(self.sortimgs) do
+    --     if layer.visiable then
+
+    --         love.graphics.draw(layer.image, self.x, -- Position X
+    --         self.y, -- Position Y
+    --         nil, -- Rotation
+    --         nil, -- Scale X
+    --         nil, -- Scale Y
+    --         layer.x, -- Offset X
+    --         layer.y) -- Offset Y
+    --     end
+    -- end
+    drawImgTree(self.x, self.y, self.sortTree)
 end
 
 return PsdData

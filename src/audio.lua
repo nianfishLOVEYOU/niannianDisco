@@ -86,6 +86,8 @@ function Audio:play(position)
     self.currentSource:setLooping(false)
     self.currentSource:play()
     uiManager:refresh("playerUI")
+    
+    eventManager:emit("audio_state_changed","play")
     return true
 end
 
@@ -93,6 +95,7 @@ end
 function Audio:pause()
     if self.currentSource then
         self.currentSource:pause()
+        eventManager:emit("audio_state_changed","pause")
     end
 end
 
@@ -100,12 +103,14 @@ end
 function Audio:resume()
     if self.currentSource and not self:isPlaying() then
         self.currentSource:play()
+        eventManager:emit("audio_state_changed","resume")
     end
 end
 
 function Audio:stop()
     if self.currentSource then
         self.currentSource:stop()
+        eventManager:emit("audio_state_changed","stop")
     end
 end
 
@@ -201,13 +206,20 @@ function Audio:automusicNext()
     -- 还没开始播放的时候播放
     if self.currentIndex == 0 then
         nextId = 1
+        self:tryNext(nextId)
+        self:pause()
     end
     -- 从播放结束之后开始播放
     if self:isOvered() then
         nextId = ((audio.currentIndex) % #audio.playlist) + 1
+        self:tryNext(nextId)
     end
 
-    -- 如果当前正在播放的音乐没有结束，就不自动下一首
+
+end
+
+function Audio:tryNext(nextId)
+        -- 如果当前正在播放的音乐没有结束，就不自动下一首
     if self.playlist[nextId] then
         if nextId ~= 0 and network.userid == self.playlist[nextId].userid then
             self:next(nextId)
@@ -217,15 +229,12 @@ function Audio:automusicNext()
     end
 end
 
-
 local waittime = os.time()
 function Audio:update(dt)
 
     -- 如果没有音乐资源就等待，直到下载好
     if os.time() - waittime > 0.5 then
         waittime = os.time()
-
-
     else
         -- 不是定时的逻辑
     end

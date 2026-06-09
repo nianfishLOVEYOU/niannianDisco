@@ -22,8 +22,7 @@ playlistManager =require "src.manager.playlistManager"
 mapManager = require "src.manager.mapManager"
 
 soundManager = require "src.manager.soundManager"
-nianAI = require "src.manager.nianAI"
 
 config=require "src.manager.extend.config"
 --meshAnimator = require "src.manager.extend.meshAnimator"
-pendulumSystem = require "src.manager.extend.PendulumSystem"
+--pendulumSystem = require "src.manager.extend.PendulumSystem"

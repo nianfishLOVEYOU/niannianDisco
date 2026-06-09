@@ -1,12 +1,14 @@
 local ui = require "src.ui.ui"
 local psdData = require "src.common.artal.psdData"
 local animator = require("src.animator")
-local nianocUI = ui:extend()
+local NianocUI = ui:extend()
+nianAI = require "src.ui.uiHelpSrc.nianAI"
 
-function nianocUI:init()
+function NianocUI:init()
+    nianocUI=self
     self:refresh()
     self.ani = animator.new()
-    print("nianocUI:init()", self.ani, animator)
+    print("NianocUI:init()", self.ani, animator)
     self.stateType = ""
     self.state = {}
     self.states = self:_createStates()
@@ -19,17 +21,14 @@ function nianocUI:init()
     self:_newNian()
 end
 
-function nianocUI:_newNian()
+function NianocUI:_newNian()
     self.psdData = psdData:new("res/image/nian/nian.psd")
     self.psdData:setPos(self.x, self.y)
-    self:changeState("music")
-
-
+    self:changeState("idle")
     --添加播放按钮
-
 end
 
-function nianocUI:changeState(state)
+function NianocUI:changeState(state)
     if self.state ~= state then
         if self.states[self.state] and self.states[self.state].leave then
             self.states[self.state].leave(self)
@@ -44,7 +43,7 @@ end
 local wait = 0
 local random = 0
 
-function nianocUI:_createStates()
+function NianocUI:_createStates()
     local states = {}
     states["idle"] = {}
     states["happy"] = {}
@@ -60,7 +59,7 @@ function nianocUI:_createStates()
             -- 图层开关
             self:_defaultPsd()
             self:_eyeAction("right")
-            self:_mouseAction("close")
+            self:_mouseAction("happy")
 
             -- 动画
             self:_defaultAni()
@@ -70,15 +69,6 @@ function nianocUI:_createStates()
             wait = wait + dt
             if wait > 3 then
                 self:_eyeAction("blink")
-                random = math.random(0, 1)
-                print(random) -- 随机嘴型
-                if random < 0.2 then
-                    self:_mouseAction("happy")
-                elseif random < 0.3 then
-                    self:_mouseAction("open")
-                else
-                    self:_mouseAction("close")
-                end
                 wait = 0
             end
 
@@ -157,7 +147,7 @@ function nianocUI:_createStates()
     return states
 end
 
-function nianocUI:_bodyAction(action)
+function NianocUI:_bodyAction(action)
     if action == "idle" then
 
     elseif action == "leftHand" then
@@ -170,7 +160,7 @@ end
 
 local eye = ""
 -- 眼睛动作
-function nianocUI:_eyeAction(action)
+function NianocUI:_eyeAction(action)
     self.psdData.imgs.eye_OpenRight.visiable = false
     self.psdData.imgs.eye_OpenLeft.visiable = false
     self.psdData.imgs.eyeClose.visiable = false
@@ -202,7 +192,7 @@ function nianocUI:_eyeAction(action)
 end
 
 -- 嘴巴动作
-function nianocUI:_mouseAction(action)
+function NianocUI:_mouseAction(action)
     self.psdData.imgs.mouseClose.visiable = false
     self.psdData.imgs.mouthOpen.visiable = false
     self.psdData.imgs.mouseHappy.visiable = false
@@ -215,12 +205,12 @@ function nianocUI:_mouseAction(action)
     end
 end
 
-function nianocUI:_clearAni()
+function NianocUI:_clearAni()
     self.ani:clearAllKeyframes()
 end
 
 
-function nianocUI:_defaultAni()
+function NianocUI:_defaultAni()
 
     self:_clearAni()
 
@@ -236,9 +226,14 @@ function nianocUI:_defaultAni()
     self.ani:addKeyframe("clothes", 4, self.psdData.imgs.clothes.y - 1)
 
     self.ani:addTrack("hear_Down", self.psdData, "imgs.hear_Down.y", true, true, true, "easeInOut")
-    self.ani:addKeyframe("hear_Down", 0, self.psdData.imgs.hear_Down.y - 2)
-    self.ani:addKeyframe("hear_Down", 2, self.psdData.imgs.hear_Down.y + 2)
-    self.ani:addKeyframe("hear_Down", 4, self.psdData.imgs.hear_Down.y - 2)
+    self.ani:addKeyframe("hear_Down", 0, self.psdData.imgs.hear_Down.y - 1)
+    self.ani:addKeyframe("hear_Down", 2, self.psdData.imgs.hear_Down.y + 1)
+    self.ani:addKeyframe("hear_Down", 4, self.psdData.imgs.hear_Down.y - 1)
+
+    self.ani:addTrack("head_fold", self.psdData, "imgsTree.head_fold.y", true, true, true, "easeInOut")
+    self.ani:addKeyframe("head_fold", 0, self.psdData.imgsTree.head_fold.y + 1)
+    self.ani:addKeyframe("head_fold", 2, self.psdData.imgsTree.head_fold.y - 1)
+    self.ani:addKeyframe("head_fold", 4, self.psdData.imgsTree.head_fold.y + 1)
 
     self.ani:addTrack("mic", self.psdData, "imgs.mic.y", true, true, true, "easeInOut")
     self.ani:addKeyframe("mic", 0, self.psdData.imgs.mic.y + 3)
@@ -258,7 +253,7 @@ function nianocUI:_defaultAni()
 
 end
 
-function nianocUI:_musicAni()
+function NianocUI:_musicAni()
         self:_clearAni()
 
     -- defaultEnable 默认启用 loop 循环 pinpon 来回
@@ -278,9 +273,13 @@ function nianocUI:_musicAni()
 
     self.ani:addTrack("hear_Down", self.psdData, "imgs.hear_Down.y", true, true, true, "easeInOut")
     self.ani:addKeyframe("hear_Down", 0, self.psdData.imgs.hear_Down.y - 2)
-    self.ani:addKeyframe("hear_Down", 1, self.psdData.imgs.hear_Down.y + 2)
+    self.ani:addKeyframe("hear_Down", 1, self.psdData.imgs.hear_Down.y + 0)
     self.ani:addKeyframe("hear_Down", 2, self.psdData.imgs.hear_Down.y - 2)
     
+    self.ani:addTrack("head_fold", self.psdData, "imgsTree.head_fold.y", true, true, true, "easeInOut")
+    self.ani:addKeyframe("head_fold", 0, self.psdData.imgsTree.head_fold.y + 1)
+    self.ani:addKeyframe("head_fold", 1, self.psdData.imgsTree.head_fold.y - 1)
+    self.ani:addKeyframe("head_fold", 2, self.psdData.imgsTree.head_fold.y + 1)
 
     self.ani:addTrack("mic", self.psdData, "imgs.mic.y", true, true, true, "easeInOut")
     self.ani:addKeyframe("mic", 0, self.psdData.imgs.mic.y + 3)
@@ -294,11 +293,11 @@ function nianocUI:_musicAni()
 
     self.ani:addTrack("hand_Left", self.psdData, "imgs.hand_Left.y", true, true, true, "easeInOut")
     self.ani:addKeyframe("hand_Left", 0, self.psdData.imgs.hand_Left.y + 1)
-    self.ani:addKeyframe("hand_Left", 1, self.psdData.imgs.hand_Left.y - 1)
+    self.ani:addKeyframe("hand_Left", 1, self.psdData.imgs.hand_Left.y - 2)
     self.ani:addKeyframe("hand_Left", 2, self.psdData.imgs.hand_Left.y + 1)
 end
 
-function nianocUI:_clickAni()
+function NianocUI:_clickAni()
 
     self:_clearAni()
 
@@ -343,29 +342,29 @@ end
 
 
 -- 更新播放列表显示
-function nianocUI:refresh()
+function NianocUI:refresh()
     self:clearStacks()
 end
 
-function nianocUI:update(dt)
+function NianocUI:update(dt)
     if self.states[self.state] and self.states[self.state].update then
         self.states[self.state].update(self, dt)
     end
     self.ani:update(dt)
 end
 
-function nianocUI:onClick(x, y, button)
+function NianocUI:onClick(x, y, button)
     -- 点击图片位置
     if x >= self.x and x <= self.x + 400 * 0.5 and y >= self.y and y <= self.y + 500 * 0.5 then
         print("点击了nian接待员")
     end
 end
 
-function nianocUI:_nianClickAnimation()
+function NianocUI:_nianClickAnimation()
 
 end
 
-function nianocUI:_defaultPsd() -- 无脸基础体
+function NianocUI:_defaultPsd() -- 无脸基础体
     self.psdData:allVisiable(false)
     self.psdData:getLayer("body1").visiable = true
     self.psdData:getLayer("hand_Left2").visiable = true
@@ -376,7 +375,7 @@ function nianocUI:_defaultPsd() -- 无脸基础体
     self.psdData:getLayer("eyebrow").visiable = true
 end
 
-function nianocUI:draw()
+function NianocUI:draw()
     -- 画一个自己的正方体
     -- love.graphics.setColor(1,0,0)
     -- love.graphics.rectangle("fill",self.x,self.y,200,300)
@@ -386,8 +385,8 @@ function nianocUI:draw()
     idle = 1
 end
 
-function nianocUI:destroy()
-    nianocUI.super.destroy(self)
+function NianocUI:destroy()
+    NianocUI.super.destroy(self)
 end
 
-return nianocUI
+return NianocUI

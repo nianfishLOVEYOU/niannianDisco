@@ -11,6 +11,13 @@ systemManager:init_regester(function()
     GlobleManager:init()
 end)
 
+local function InitGameData()
+    GlobleManager:saveGameData("好感度",10)
+    GlobleManager:saveGameData("听歌时长",10)
+    GlobleManager:saveGameData("上次下线时间",10)
+    GlobleManager:saveGameData("听歌次数",10)
+end 
+
 function GlobleManager:init()
     --初始化设定，音量什么的，保存到文件
     GlobleManager.allData = fileManager:readTable("allData")

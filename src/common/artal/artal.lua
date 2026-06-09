@@ -858,6 +858,7 @@ function artalFunction.newPSD(fileNameOrData, structureFlagOrNumber)
 end
 
 ---建立图层的文件夹树
+--文件夹的类型为folder 如果不是文件夹的是 image 和 empty
 function buildLayerTree(psdLayers)
     local tree = {}
     local folderStack = {}  -- 文件夹栈：记录当前在哪个文件夹内
@@ -871,7 +872,9 @@ function buildLayerTree(psdLayers)
                 type = "folder",
                 layers = {},
                 x = 0,  -- 文件夹整体偏移 X
-                y = 0   -- 文件夹整体偏移 Y
+                y = 0,   -- 文件夹整体偏移 Y
+				ox=0,
+				oy=0,
             }
             table.insert(currentParent, folder)
             table.insert(folderStack, folder)
