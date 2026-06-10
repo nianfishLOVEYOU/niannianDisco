@@ -176,7 +176,7 @@ end
 
 -- 保存 / 加载
 function Animator:saveToFile(path)
-    local json = require("dkjson")
+    local json = require "lib.json"
     local data = {
         globalSpeed=self.globalSpeed,
         globalPlaying=self.globalPlaying,

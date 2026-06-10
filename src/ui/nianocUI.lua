@@ -2,8 +2,8 @@ local ui = require "src.ui.ui"
 local psdData = require "src.common.artal.psdData"
 local animator = require("src.animator")
 local NianocUI = ui:extend()
-nianAI = require "src.ui.uiHelpSrc.nianAI"
-
+nianAI = require "src.common.nianAI.nianAI"
+nianAI:init()
 function NianocUI:init()
     nianocUI=self
     self:refresh()

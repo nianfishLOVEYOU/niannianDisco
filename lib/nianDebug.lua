@@ -31,7 +31,6 @@ local function printCol()
     end
 end
 
-
 local function debugPrintUi()
     love.graphics.setLineWidth(2)
 
@@ -90,16 +89,19 @@ function nianDebug.DebugPrint()
     end
 
     -- 显示深度图
-    love.graphics.setColor(1, 1, 1)
-    local deepSize = 0.1
-    love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * deepSize, 0,
-        0, deepSize, deepSize)
-    --显示深度图边框
-    love.graphics.setColor(1, 0, 0)
-    love.graphics.setLineWidth(1)
-    love.graphics.rectangle("line", love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * deepSize, 0, nianDraw.depthCanvas:getWidth() * deepSize, nianDraw.depthCanvas:getHeight() * deepSize)
-    love.graphics.setColor(1, 1, 1)
-    
+    if globleManager.getConfig("debug", "showDeepMap") then
+        love.graphics.setColor(1, 1, 1)
+        local deepSize = 0.1
+        love.graphics.draw(nianDraw.depthCanvas, love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * deepSize,
+            0, 0, deepSize, deepSize)
+        -- 显示深度图边框
+        love.graphics.setColor(1, 0, 0)
+        love.graphics.setLineWidth(1)
+        love.graphics.rectangle("line", love.graphics.getWidth() - nianDraw.depthCanvas:getWidth() * deepSize, 0,
+            nianDraw.depthCanvas:getWidth() * deepSize, nianDraw.depthCanvas:getHeight() * deepSize)
+        love.graphics.setColor(1, 1, 1)
+    end
+
     debugLogExtend.draw()
 end
 

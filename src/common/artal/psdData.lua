@@ -14,7 +14,7 @@ function PsdData:init(path)
         self.imgs[name].x = self.imgs[name].ox -- ox为位置备份
         self.imgs[name].y = self.imgs[name].oy
 
-        print("加载pad图片" .. name)
+        --print("加载pad图片" .. name)
     end
 
     -- 树化
@@ -27,7 +27,7 @@ function PsdData:init(path)
         self.imgsTree[name].x = self.sortTree[i].ox -- ox为位置备份
         self.imgsTree[name].y = self.sortTree[i].oy
 
-        print("加载pad图片" .. name)
+        --print("加载pad图片" .. name)
     end
     -- self.w = self.img[2].image:getWidth()
     -- self.h = self.img[2].image:getHeight()
