@@ -59,6 +59,10 @@ systemManager:wheelMoved_regester(function(x, y)
     uiManager:wheelmoved(x, y)
 end)
 
+systemManager:quit_regester(function()
+    uiManager:destroy()
+end)
+
 function uiManager:visiable(name, visiable)
     local ui = self:getUI(name)
     if (ui) then
@@ -110,6 +114,14 @@ function uiManager:removeUI(name)
     else
         print("uimanager no : ", name)
     end
+end
+
+function uiManager:removeAll()
+    for i, v in ipairs(self.uiTable) do
+        v.ui:destroy()
+    end
+    self.uiTable = {}
+    
 end
 
 function uiManager:refresh(name)
@@ -167,6 +179,10 @@ function uiManager:wheelmoved(x, y)
             v.ui:wheelmoved(x, y)
         end
     end
+end
+
+function uiManager:destroy()
+    self:removeAll()
 end
 
 return uiManager

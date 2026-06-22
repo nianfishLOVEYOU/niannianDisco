@@ -9,11 +9,11 @@ local function getTabHeight(font)
   return font:getHeight() + tabPadding * 2
 end
 
-local function setVisible(widget, visible)
-  widget.visible = visible
+local function setvisiable(widget, visiable)
+  widget.visiable = visiable
   if widget.children then
     for _, child in ipairs(widget.children) do
-      setVisible(child, visible)
+      setvisiable(child, visiable)
     end
   end
 end
@@ -103,8 +103,8 @@ local mt = {
           self.onChange(index, newTab)
         end
 
-        setVisible(currentTab.widget, false)
-        setVisible(newTab.widget, true)
+        setvisiable(currentTab.widget, false)
+        setvisiable(newTab.widget, true)
       end
 
       return clicked
@@ -162,7 +162,7 @@ local function Tabs(tabs, options)
     local widget = tab.widget
     widget.x = 0
     widget.y = 0
-    widget.visible = index == 1
+    widget.visiable = index == 1
   end
 
   local instance = options
@@ -171,7 +171,7 @@ local function Tabs(tabs, options)
   instance.font = options.font or g.getFont()
   instance.selectedTabIndex = 1
   instance.tabs = tabs
-  instance.visible = true
+  instance.visiable = true
   instance.x = 0
   instance.y = 0
 

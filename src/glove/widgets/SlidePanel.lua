@@ -31,12 +31,12 @@ function SlidePanel:init(content)
     self.viscous = 0.2
 
     self.padding = 10
-    self.shade =true
+    self.shade = true
     -- 滚动条配置
     self.scrollBarWidth = 10
     self.isDraggingScrollBar = false
-    self.scrollBarColor = {1, 1, 1, 1}  -- 白色背景
-    self.scrollThumbColor = {0, 0, 0, 1}  -- 黑色滚动块
+    self.scrollBarColor = {1, 1, 1, 1} -- 白色背景
+    self.scrollThumbColor = {0, 0, 0, 1} -- 黑色滚动块
     -- if not self.shadePanel then
     --     self.shadePanel = Glove.ShadePanel:new()
     --     self.shadePanel:setPos(self.x, self.y)
@@ -81,7 +81,7 @@ end
 
 -- 后期需要加入新的元素时
 function SlidePanel:add(child)
-    --print("SlidePanel add child", child.type)
+    -- print("SlidePanel add child", child.type)
     self:getContent():addChild(child)
     self:getContent():layout()
 end
@@ -97,6 +97,12 @@ function SlidePanel:remove(child)
         end
         content:layout()
     end
+end
+
+function SlidePanel:setTitle(str)
+    self.title = Glove.Text:new(str)
+    self.title:setSize(200, 0)
+    self.title:setLocalPos(self.spacingX+self.x, self.spacingY+self.y)
 end
 
 -- 设置滑页内的内容
@@ -119,27 +125,30 @@ end
 function SlidePanel:draw()
     -- 进度条
 
-    g.setColor(self.color)
-    g.rectangle("fill", self.x, self.y, self.w, self.h,self.padding,self.padding)
-    g.setColor(0,0,0,0.5)
-    g.rectangle("line", self.x, self.y, self.w, self.h,self.padding,self.padding)
-    g.rectangle("line", self.x + self.padding, self.y + self.padding, self.w - 2 * self.padding, self.h - 2 * self.padding)
-    local content = self:getContent()
-    if not content then
-        return
-    end
-
     if not self.isDrag then
         -- self:backToCenter()
     end
 
     --  裁剪
-    if not self.visible then
+    if not self:getRealVisiable() then
         return
     end
-    --减去padding的裁剪，避免内容被完全遮挡无法拖动
+
+    g.setColor(self.color)
+    g.rectangle("fill", self.x, self.y, self.w, self.h, self.padding, self.padding)
+    g.setColor(0, 0, 0, 0.5)
+    g.rectangle("line", self.x, self.y, self.w, self.h, self.padding, self.padding)
+    g.rectangle("line", self.x + self.padding, self.y + self.padding, self.w - 2 * self.padding,
+        self.h - 2 * self.padding)
+    local content = self:getContent()
+    if not content then
+        return
+    end
+
+    -- 减去padding的裁剪，避免内容被完全遮挡无法拖动
     local sx, sy, sw, sh = g.getScissor()
-    g.setScissor(self.x + self.padding, self.y + self.padding, self.w - 2 * self.padding - self.scrollBarWidth, self.h - 2 * self.padding)
+    g.setScissor(self.x + self.padding, self.y + self.padding, self.w - 2 * self.padding - self.scrollBarWidth,
+        self.h - 2 * self.padding)
     for _, entry in ipairs(self.children) do
         if entry.draw then
             entry:draw()
@@ -150,6 +159,9 @@ function SlidePanel:draw()
     -- 绘制滚动条
     self:drawScrollBar()
 
+    if self.title then
+        self.title:draw()
+    end
     -- g.setColor(1, 1, 0)
     -- g.rectangle("line", self.x, self.y, self.w, self.h)
 
@@ -169,7 +181,7 @@ function SlidePanel:onClick(x, y)
             self.isDraggingScrollBar = true
         end
     end
-        print ("Clicked on scroll bar, dragging:", self.isDraggingScrollBar)
+    print("Clicked on scroll bar, dragging:", self.isDraggingScrollBar)
 end
 
 function SlidePanel:onDrag(x, y, dx, dy)
@@ -178,7 +190,7 @@ function SlidePanel:onDrag(x, y, dx, dy)
         self:dragScrollBar(y)
         return
     end
-    
+
     -- 仍需保证拖拽点在可视区域内
     if not self:isOver(x, y) then
         return
@@ -195,21 +207,21 @@ end
 function SlidePanel:dragScrollBar(y)
     local scrollBarY = self.y + self.padding
     local scrollBarHeight = self.h - 2 * self.padding
-    
+
     local info = self:getScrollBarInfo()
     if not info or not info.canScroll then
         return
     end
-    
+
     -- 计算滚动块在滚动条中的相对位置
     local relY = y - scrollBarY
     relY = math.max(0, math.min(relY, scrollBarHeight - info.thumbHeight))
-    
+
     -- 更新 progressY
     local maxThumbY = scrollBarHeight - info.thumbHeight
     self.progressY = maxThumbY > 0 and (relY / maxThumbY) or 0
     self.progressY = math.max(0, math.min(1, self.progressY))
-    
+
     -- 更新内容位置
     local content = self:getContent()
     if content then
@@ -270,7 +282,7 @@ function SlidePanel:onDragOver(x, y)
         self.isDraggingScrollBar = false
         return
     end
-    
+
     self:dragProgress(x)
     self.t = 0
     self.dt = 0
@@ -311,10 +323,10 @@ function SlidePanel:getScrollBarInfo()
     if not content then
         return nil
     end
-    
+
     local contentHeight = content.h
     local panelHeight = self.h - 2 * self.padding
-    
+
     -- 如果内容小于等于面板高度，不需要滚动条
     if contentHeight <= panelHeight then
         return {
@@ -323,15 +335,15 @@ function SlidePanel:getScrollBarInfo()
             canScroll = false
         }
     end
-    
+
     -- 计算滚动块的高度（比例）
     local thumbHeight = panelHeight * (panelHeight / contentHeight)
-    thumbHeight = math.max(thumbHeight, 20)  -- 最小高度为20像素
-    
+    thumbHeight = math.max(thumbHeight, 20) -- 最小高度为20像素
+
     -- 根据 progressY 计算滚动块的位置
     local maxThumbY = panelHeight - thumbHeight
     local thumbY = self.progressY * maxThumbY
-    
+
     return {
         thumbHeight = thumbHeight,
         thumbY = thumbY,
@@ -344,14 +356,14 @@ function SlidePanel:drawScrollBar()
     local scrollBarX = self.x + self.w - self.scrollBarWidth
     local scrollBarY = self.y + self.padding
     local scrollBarHeight = self.h - 2 * self.padding
-    
+
     -- 绘制滚动条背景（白色+黑色描边）
     g.setColor(self.scrollBarColor)
     g.rectangle("fill", scrollBarX, scrollBarY, self.scrollBarWidth, scrollBarHeight)
-    g.setColor(0, 0, 0, 0.5)  -- 黑色描边
+    g.setColor(0, 0, 0, 0.5) -- 黑色描边
     g.setLineWidth(1)
     g.rectangle("line", scrollBarX, scrollBarY, self.scrollBarWidth, scrollBarHeight)
-    
+
     -- 绘制滚动块（黑色长块）
     local info = self:getScrollBarInfo()
     if info and info.canScroll then
@@ -365,9 +377,9 @@ function SlidePanel:isOverScrollBar(x, y)
     local scrollBarX = self.x + self.w - self.scrollBarWidth
     local scrollBarY = self.y + self.padding
     local scrollBarHeight = self.h - 2 * self.padding
-    
-    return x >= scrollBarX and x < scrollBarX + self.scrollBarWidth and
-           y >= scrollBarY and y < scrollBarY + scrollBarHeight
+
+    return x >= scrollBarX and x < scrollBarX + self.scrollBarWidth and y >= scrollBarY and y < scrollBarY +
+               scrollBarHeight
 end
 
 -- 判断点击是否在滚动块上
@@ -375,13 +387,14 @@ function SlidePanel:isOverScrollThumb(x, y)
     local scrollBarX = self.x + self.w - self.scrollBarWidth
     local scrollBarY = self.y + self.padding
     local info = self:getScrollBarInfo()
-    
+
     if not info or not info.canScroll then
         return false
     end
-    
-    return x >= scrollBarX and x < scrollBarX + self.scrollBarWidth and
-           y >= scrollBarY + info.thumbY and y < scrollBarY + info.thumbY + info.thumbHeight
+
+    return
+        x >= scrollBarX and x < scrollBarX + self.scrollBarWidth and y >= scrollBarY + info.thumbY and y < scrollBarY +
+            info.thumbY + info.thumbHeight
 end
 function SlidePanel:getSlideSpace()
     local content = self:getContent()
@@ -466,6 +479,9 @@ end
 
 function SlidePanel:destroy()
     widget.destroy(self)
+    if self.title then
+        self.title:destroy()
+    end
     -- self.shadePanel:destroy()
 end
 

@@ -1,35 +1,39 @@
 import pandas as pd
 import json
-import ast
-
-def safe_eval_json(val):
-    """将Excel中的字符串转为Python对象（list/dict）"""
-    if pd.isna(val) or val == "":
-        return None
-    try:
-        return ast.literal_eval(val)
-    except:
-        return val
 
 def convert_excel_to_json(excel_path, json_path):
-    df = pd.read_excel(excel_path, dtype=str).fillna("")
+    df = pd.read_excel(excel_path, dtype=str, keep_default_na=False)
+    df = df.fillna("")
+
+    if 'id' not in df.columns:
+        raise ValueError("Excel中缺少'id'列")
+
     nodes = {}
-    start_node = None
-    for _, row in df.iterrows():
+ # 从第二行开始遍历
+    for _, row in df.iloc[1:].iterrows():
         node_id = row['id']
-        if node_id == "start_node":
-            start_node = row.get('value')  # 特殊行记录开始节点
+        if not node_id:
             continue
+
         node = {}
-        if row.get('speaker'): node['speaker'] = row['speaker']
-        if row.get('text'): node['text'] = row['text']
-        if row.get('text_variants'): node['text_variants'] = safe_eval_json(row['text_variants'])
-        if row.get('options'): node['options'] = safe_eval_json(row['options'])
-        if row.get('random_next'): node['random_next'] = safe_eval_json(row['random_next'])
-        if row.get('next'): node['next'] = row['next']
-        if row.get('effects'): node['effects'] = safe_eval_json(row['effects'])
+        for col in df.columns:
+            cell_val = row[col]
+            # 核心：尝试解析 JSON 格式字符串（数组/对象）
+            if cell_val.startswith(("[", "{")) and cell_val.endswith(("]", "}")):
+                try:
+                    # 字符串转成真实数组/字典
+                    parsed_val = json.loads(cell_val)
+                    node[col] = parsed_val
+                except json.JSONDecodeError:
+                    # 解析失败，保留原字符串
+                    node[col] = cell_val
+            else:
+                # 普通文本直接赋值
+                node[col] = cell_val
+
         nodes[node_id] = node
-    dialogue_data = {"start_node": start_node, "nodes": nodes}
+
+    dialogue_data = nodes
     with open(json_path, 'w', encoding='utf-8') as f:
         json.dump(dialogue_data, f, ensure_ascii=False, indent=2)
 

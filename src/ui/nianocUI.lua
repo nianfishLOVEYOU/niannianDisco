@@ -3,9 +3,10 @@ local psdData = require "src.common.artal.psdData"
 local animator = require("src.animator")
 local NianocUI = ui:extend()
 nianAI = require "src.common.nianAI.nianAI"
-nianAI:init()
+
 function NianocUI:init()
     nianocUI=self
+    nianAI:init()
     self:refresh()
     self.ani = animator.new()
     print("NianocUI:init()", self.ani, animator)
@@ -387,6 +388,7 @@ end
 
 function NianocUI:destroy()
     NianocUI.super.destroy(self)
+    nianAI:destroy()
 end
 
 return NianocUI

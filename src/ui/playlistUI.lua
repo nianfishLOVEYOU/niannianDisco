@@ -7,6 +7,27 @@ local PlaylistUI = ui:extend() -- 子类继承父类
 local slideW = love.graphics.getWidth() - 200
 local slideH = 160
 
+local state = {
+    playlist = "playlist",
+    localplaylist = "localplaylist",
+    playlistPos = {
+        x = 20,
+        y = 30
+    },
+    playlistSize = {
+        w = 200,
+        h = 280
+    },
+    localplaylistPos = {
+        x = 20,
+        y = 30
+    },
+    localplaylistSize = {
+        w = 200,
+        h = 280
+    }
+}
+
 local musicInput = function(file, name, fullname, extend)
     -- 判断文件格式
     if not (extend == "mp3" or extend == "MP3") then
@@ -70,6 +91,8 @@ function PlaylistUI:refresh()
         self.LLimage2:setScale(0.7, 0.7)
         self.LLimage2.rotation = 0.8
     end
+
+    self:open("playlist")
 end
 
 ---------------播放列表------------
@@ -80,6 +103,12 @@ end
 -- 刷新按钮状态和音乐提示,或者记录之前的拖动数据
 function PlaylistUI:updateListInfo()
 
+end
+
+function PlaylistUI:open(mode)
+    self.playList.visiable = mode == "playlist"
+    self.LocalPlayList.visiable = mode == "localplaylist"
+    self.mode = mode
 end
 
 function PlaylistUI:addPlayListItem(name)
@@ -115,24 +144,25 @@ end
 
 -- 获得播放列表ui
 function PlaylistUI:_buildPlayListStack()
-    local tT = Glove.Text:new("播放列表:")
-    tT.color = {1, 1, 1}
-    local tT2 = Glove.Text:new(">拖拽音乐.mp3文件加入歌单<")
-    tT2.color = {1, 0, 0}
-    tT2:setSize(200, 20)
-    local title = Glove.HStack:new({tT, tT2})
-    title:setName("title")
-    self:addStack(title)
-    title:setLocalPos(0, 20, self.z)
+    -- local tT = Glove.Text:new("播放列表:")
+    -- tT.color = {1, 1, 1}
+    -- local tT2 = Glove.Text:new(">拖拽音乐.mp3文件加入歌单<")
+    -- tT2.color = {1, 0, 0}
+    -- tT2:setSize(200, 20)
+    -- local title = Glove.HStack:new({tT, tT2})
+    -- title:setName("title")
+    -- self:addStack(title)
+    -- title:setLocalPos(0, 20, self.z)
 
     local vstack = Glove.VStack:new({}, 10)
     vstack:setName("playerlistui vstack _buildPlayListStack")
     -- 滑动条
     local slidePanel = Glove.SlidePanel:new(vstack)
+    slidePanel:setTitle("播放列表:>拖入音乐.mp3")
     self.playList = slidePanel
     self:addStack(slidePanel)
-    slidePanel:setLocalPos(0, 50, self.z)
-    slidePanel:setSize(slideW, slideH)
+    slidePanel:setLocalPos(state.playlistPos.x, state.playlistPos.y, self.z)
+    slidePanel:setSize(state.playlistSize.w, state.playlistSize.h)
     slidePanel.color = {1, 1, 1, 1} -- 设置滑动面板的颜色为白色
     for i, v in ipairs(audio.playlist) do
         self:addPlayListItem(v.name)
@@ -159,22 +189,23 @@ function PlaylistUI:addLocalPlayListItem(path, name, duration)
 end
 
 function PlaylistUI:_buildLocalPlayListStack()
-    local tT = Glove.Text:new("tmp本地列表:")
-    tT.color = {1, 1, 1}
-    tT:setSize(200, 20)
-    local title = Glove.HStack:new({tT})
-    self:addStack(title)
-    title:setLocalPos(0, 230, self.z)
+    -- local tT = Glove.Text:new("tmp本地列表:")
+    -- tT.color = {1, 1, 1}
+    -- tT:setSize(200, 20)
+    -- local title = Glove.HStack:new({tT})
+    -- self:addStack(title)
+    -- title:setLocalPos(0, 230, self.z)
 
     -- 本地音乐列表
     local vstack = Glove.VStack:new({}, 10)
     vstack:setName("playerlistui vstack _buildLocalPlayListStack")
 
     local slidePanel = Glove.SlidePanel:new(vstack)
+    slidePanel:setTitle("tmp本地列表:")
     self.LocalPlayList = slidePanel
-    slidePanel:setSize(slideW, slideH)
     slidePanel.color = {1, 1, 1, 1} -- 设置滑动面板的颜色为白色
     self:addStack(slidePanel)
+    slidePanel:setSize(state.localplaylistSize.w, state.localplaylistSize.h)
     slidePanel:setLocalPos(0, 250, self.z)
     for i, v in ipairs(playlistManager.localPlaylist["tmp"].list) do
         self:addLocalPlayListItem(v.path, v.name, v.duration)
@@ -185,13 +216,19 @@ end
 
 function PlaylistUI:draw()
 
-    -- if self.LLimage then
-    --     self.LLimage:draw()
-    --     self.LLimage2:draw()
-    -- end
     self:drawStacks()
-    -- 拖拽区域图片
-    -- self.inputImage:draw()
+
+    if self.mode == "playlist" then
+        -- if nianAI then
+        --     local nianx, niany = nianAI:getNianPos()
+        --     drawTailStandard(self.playList.x + self.playList.w, self.playList.y + self.playList.h / 2,"y", nianx+20, niany-100)
+        -- end
+    elseif self.mode == "localplaylist" then
+        -- if nianAI then
+        --     local nianx, niany = nianAI:getNianPos()
+        --     drawTailStandard(self.playList.x + self.playList.w, self.playList.y + self.playList.h / 2,"y", nianx+20, niany-100)
+        -- end
+    end
 end
 
 function PlaylistUI:wheelmoved(x, y)

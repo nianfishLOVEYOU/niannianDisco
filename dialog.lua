@@ -64,7 +64,7 @@ function love.draw()
     love.graphics.rectangle("fill", 50, 50, love.graphics.getWidth() - 100, love.graphics.getHeight() - 180)
 
     -- 绘制聊天内容 (只渲染可见部分)
-    drawVisibleMessages()
+    drawvisiableMessages()
 
     -- 绘制输入框
     love.graphics.setColor(0.3, 0.3, 0.3)
@@ -179,20 +179,20 @@ function sendEmojiMessage(emojiFilename)
 end
 
 -- 只绘制可见区域的消息
-function drawVisibleMessages()
+function drawvisiableMessages()
     local chatAreaX = 50
     local chatAreaY = 50
     local chatAreaW = love.graphics.getWidth() - 100
     local chatAreaH = love.graphics.getHeight() - 180
 
     -- 计算可见的消息范围
-    local firstVisibleIndex = math.floor(scrollOffset / messageHeight) + 1
-    local lastVisibleIndex = math.floor((scrollOffset + chatAreaH) / messageHeight) + 1
-    firstVisibleIndex = math.max(1, firstVisibleIndex)
-    lastVisibleIndex = math.min(#messages, lastVisibleIndex)
+    local firstvisiableIndex = math.floor(scrollOffset / messageHeight) + 1
+    local lastvisiableIndex = math.floor((scrollOffset + chatAreaH) / messageHeight) + 1
+    firstvisiableIndex = math.max(1, firstvisiableIndex)
+    lastvisiableIndex = math.min(#messages, lastvisiableIndex)
 
     -- 绘制可见的消息
-    for i = firstVisibleIndex, lastVisibleIndex do
+    for i = firstvisiableIndex, lastvisiableIndex do
         local msg = messages[i]
         local yPos = chatAreaY + (i - 1) * messageHeight - scrollOffset
 

@@ -6,12 +6,12 @@ local widget = item:extend()
 -- is widget
 function widget:init()
     Glove.widgets[self] = self
-    self.visible = true
+    self.visiable = true
     self.color = {1, 1, 1, 1}
 end
 
-function widget:setVisible(v)
-    self.visible = v
+function widget:setvisiable(v)
+    self.visiable = v
 end
 
 -- 设置裁剪,只是裁剪掉isover ，显示还是需要统一来裁剪

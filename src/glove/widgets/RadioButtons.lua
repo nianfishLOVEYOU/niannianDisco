@@ -41,7 +41,7 @@ function RadioButtons:init(choices, onChange)
     self.font = font
     self.table = {}
     self.key = "key"
-    self.visible = true
+    self.visiable = true
     self.onChange = onChange
     self.vertical = true
     local fontHeight = font:getHeight()

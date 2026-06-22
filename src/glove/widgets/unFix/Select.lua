@@ -162,7 +162,7 @@ local function Select(choices, t, key, options)
   instance.open = false
   instance.table = t
   instance.key = key
-  instance.visible = true
+  instance.visiable = true
 
   -- Find the widest choice label.
   instance.maxWidth = fun.max(choices, function(choice)

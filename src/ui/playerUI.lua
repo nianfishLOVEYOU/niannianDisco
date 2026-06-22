@@ -62,6 +62,8 @@ local per = function()
 end
 
 local list = function()
+    print ("显示播放列表")
+
     -- if not uiManager:getUI("playlistUI") then
     --     local playlistUI = require("src.ui.playlistUI"):new()
     --     uiManager:addUI("playlistUI", playlistUI)
@@ -85,9 +87,10 @@ function PlayerUI:buildStack()
     local perButton = Glove.Button_img:new("", "res/image/ui/per.png", per)
     perButton:setScale(2, 2)
     perButton.color={0.4,0.4,0.4}
-    -- local listButton = Glove.Button_img:new("", "res/image/ui/listbutton.png", list)
-    -- listButton:setScale(2, 2)
-    -- local openMusicDirButton = Glove.Button:new("打开音乐文件夹", fileManager.openMusicDirectory)
+    local listButton = Glove.Button_img:new("", "res/image/ui/listbutton.png", list)
+    listButton:setScale(2, 2)
+    listButton.color={0.4,0.4,0.4}
+    local openMusicDirButton = Glove.Button:new("打开音乐文件夹", fileManager.openMusicDirectory)
 
     -- openMusicDirButton.color ={0.5,0.8,0.5}
 
@@ -118,7 +121,7 @@ function PlayerUI:buildStack()
     --右边对其
     local musiVoiceHStack = Glove.HStack:new({infoText, progressText, volumeText, volumeSlider })
     local sliderHStack = Glove.HStack:new({ playSlider })
-    local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton} )
+    local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton,listButton} )
     local stack = Glove.VStack:new({ musiVoiceHStack, buttonHStack, sliderHStack },10,"center")
 
     local sw, sh = stack:getSize()
@@ -166,11 +169,11 @@ function PlayerUI:update(dt)
             if(not self.playSlider.isDrag)then
                 self.playSlider.progress=progress
             end
-            --self.playSlider:setVisible(true)
+            --self.playSlider:setvisiable(true)
         else
             self.infoText:setText("没有正在播放的音乐 ")
             self.playSlider.progress=0
-            --self.playSlider:setVisible(false)
+            --self.playSlider:setvisiable(false)
         end
     end
 end

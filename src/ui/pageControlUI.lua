@@ -32,12 +32,10 @@ function pageControlUI:buildPage()
     self.pages[1] = page1UI
 
     local page2UI = require("src.ui.page2UI"):new()
+    page2UI.visiable = false
     uiManager:addUI("page2UI", page2UI)
     self.pages[2] = page2UI
 
-    page2UI:setVisiable(false)
-    print("build page",page2UI.visiable)
-    
     -- 加载切换页面的按钮
     -- local leftButton = Glove.Button_img:new("", "res/image/ui/left.png", {
     --     mousePressed = function()
@@ -57,7 +55,7 @@ function pageControlUI:turnPage(direction)
     if not animationIsOver then
         return
     end
-    
+
     local newPage = self.currentPage + direction
     if newPage < 1 or newPage > #self.pages then
         return
@@ -67,7 +65,9 @@ function pageControlUI:turnPage(direction)
     -- 播放切换页面动画
     local width = love.graphics.getWidth()
     for k, v in pairs(self.pages) do
-        animation:addAnimation(v, {localX=v.localX-width*direction}, 0.3, {
+        animation:addAnimation(v, {
+            localX = v.localX - width * direction
+        }, 0.3, {
             onComplete = function()
                 animationIsOver = true
             end

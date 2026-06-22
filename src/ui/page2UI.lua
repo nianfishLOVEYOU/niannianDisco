@@ -17,11 +17,6 @@ function page2UI:init()
     self:addChild(dialog)
 end
 
-function page2UI:setVisiable(visiable)
-    self.visiable = visiable
-    
-end
-
 -- 更新播放列表显示
 function page2UI:refresh()
     self:clearStacks()
@@ -33,7 +28,6 @@ end
 
 function page2UI:destroy()
     page2UI.super.destroy(self)
-
     uiManager:removeUI("dialog")
 end
 

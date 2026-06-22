@@ -117,7 +117,7 @@ end
 
 -- event forwarding only for points inside content area
 function Window:onClick(x, y)
-    if not self.visible then return end
+    if not self.visiable then return end
     -- close button
     local cs = self.closeSize
     local bx = self.x + self.w - cs - 6
@@ -129,11 +129,11 @@ function Window:onClick(x, y)
 end
 
 function Window:onClickOver(x, y)
-    if not self.visible then return end
+    if not self.visiable then return end
 end
 
 function Window:onDrag(x, y, dx, dy)
-    if not self.visible then return end
+    if not self.visiable then return end
     if self.draggable then
         -- use item:setPos so child global positions refresh correctly
         self:setPos(self.x + dx, self.y + dy)

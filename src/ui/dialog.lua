@@ -16,6 +16,7 @@ function dialog.keyboard(key)
 end
 
 function dialog:init()
+    self.name="dialog"
     self.message = ""
     self:refresh()
     self.keyboardEvent= systemManager:keypressed_regester(function(key)
@@ -106,7 +107,7 @@ function dialog:draw()
     -- love.graphics.setColor(1, 1, 1, 0.5)
     -- love.graphics.rectangle("fill", 50, 20, love.graphics.getWidth() - 100, 200)
     -- love.graphics.setColor(1, 1, 1)
-
+    
     dialog.super.draw(self)
 end
 

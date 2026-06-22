@@ -324,3 +324,139 @@ function drawOutlinedText(t, x, y, w, color, outlineColor)
     --love.graphics.print(t, x, y)
 end
 
+
+local drawTailFillColor = {1, 1, 1, 1} -- 尾巴填充颜色（白色）
+local drawTailLineColor = {0, 0, 0, 1} -- 尾巴边框颜色（黑色）
+local drawTailBorderWidth = 1 -- 尾巴边框宽度（像素
+local drawTailSize = 20 -- 尾巴大小（像素，控制宽度和长度）
+-- 绘制对话框尾巴
+-- x, y, boxW, boxH, self.targetX, self.targetY, self.config.tailSize, self.config.borderWidth, self.config.bgColor, self.config.borderColor)
+function drawTail(anchorX, anchorY, targetX, targetY, size, borderWidth, fillColor, lineColor)
+    fillColor=fillColor or drawTailFillColor
+    lineColor=lineColor or drawTailLineColor
+    borderWidth=borderWidth or drawTailBorderWidth
+    size=size or drawTailSize
+
+
+    local vx = targetX - anchorX -- 尾巴向量X分量
+    local vy = targetY - anchorY -- 尾巴向量Y分量
+
+    local len = math.sqrt(vx * vx + vy * vy)
+    if len < 1e-5 then
+        return
+    end
+
+    local dx = vx / len
+    local dy = vy / len
+
+    -- 法线方向用于控制尾巴宽度
+    local nx = -dy
+    local ny = dx
+
+    local baseHalfWidth = size
+    local tipHalfWidth = math.max(1, size * 0.01)
+    local tipBackOffset = math.min(len * 0.35, math.max(4, size * 0.8))
+    local tipArcSegments = 8
+
+    local baseLeftX = anchorX + nx * baseHalfWidth
+    local baseLeftY = anchorY + ny * baseHalfWidth
+    local baseRightX = anchorX - nx * baseHalfWidth
+    local baseRightY = anchorY - ny * baseHalfWidth
+
+    local tipCenterX = targetX - dx * tipBackOffset
+    local tipCenterY = targetY - dy * tipBackOffset
+    local tipLeftX = tipCenterX + nx * tipHalfWidth
+    local tipLeftY = tipCenterY + ny * tipHalfWidth
+    local tipRightX = tipCenterX - nx * tipHalfWidth
+    local tipRightY = tipCenterY - ny * tipHalfWidth
+
+
+    local points = {
+        baseLeftX, baseLeftY,
+        tipLeftX, tipLeftY
+    }
+
+
+
+    table.insert(points, tipRightX)
+    table.insert(points, tipRightY)
+    table.insert(points, baseRightX)
+    table.insert(points, baseRightY)
+
+    -- 填充与边框共用同一条外轮廓
+    love.graphics.setColor(fillColor)
+    love.graphics.polygon("fill", points)
+
+    love.graphics.setColor(lineColor)
+    love.graphics.setLineWidth(borderWidth)
+    love.graphics.polygon("line", points)
+end
+
+
+-- 绘制对话框尾巴
+-- x, y, boxW, boxH, self.targetX, self.targetY, self.config.tailSize, self.config.borderWidth, self.config.bgColor, self.config.borderColor)
+function drawTailStandard(anchorX, anchorY,type, targetX, targetY, size, borderWidth, fillColor, lineColor)
+    fillColor=fillColor or drawTailFillColor
+    lineColor=lineColor or drawTailLineColor
+    borderWidth=borderWidth or drawTailBorderWidth
+    size=size or drawTailSize
+
+    
+    local vx = targetX - anchorX -- 尾巴向量X分量
+    local vy = targetY - anchorY -- 尾巴向量Y分量
+
+    local len = math.sqrt(vx * vx + vy * vy)
+    if len < 1e-5 then
+        return
+    end
+
+    local dx = vx / len
+    local dy = vy / len
+
+    -- 根部宽度方向：x=水平，y=垂直；其他值回退为默认（跟随方向法线）
+    local nx, ny
+    if type == "x" then
+        nx, ny = 1, 0
+    elseif type == "y" then
+        nx, ny = 0, 1
+    else
+        nx, ny = -dy, dx
+    end
+
+    local baseHalfWidth = size
+    local tipHalfWidth = math.max(1, size * 0.01)
+    local tipBackOffset = math.min(len * 0.35, math.max(4, size * 0.8))
+
+    local baseLeftX = anchorX + nx * baseHalfWidth
+    local baseLeftY = anchorY + ny * baseHalfWidth
+    local baseRightX = anchorX - nx * baseHalfWidth
+    local baseRightY = anchorY - ny * baseHalfWidth
+
+    local tipCenterX = targetX - dx * tipBackOffset
+    local tipCenterY = targetY - dy * tipBackOffset
+    local tipLeftX = tipCenterX + nx * tipHalfWidth
+    local tipLeftY = tipCenterY + ny * tipHalfWidth
+    local tipRightX = tipCenterX - nx * tipHalfWidth
+    local tipRightY = tipCenterY - ny * tipHalfWidth
+
+
+    local points = {
+        baseLeftX, baseLeftY,
+        tipLeftX, tipLeftY
+    }
+
+
+
+    table.insert(points, tipRightX)
+    table.insert(points, tipRightY)
+    table.insert(points, baseRightX)
+    table.insert(points, baseRightY)
+
+    -- 填充与边框共用同一条外轮廓
+    love.graphics.setColor(fillColor)
+    love.graphics.polygon("fill", points)
+
+    love.graphics.setColor(lineColor)
+    love.graphics.setLineWidth(borderWidth)
+    love.graphics.polygon("line", points)
+end

@@ -1,8 +1,195 @@
 {
-  "start_node": null,
-  "nodes": {
-    "1": {
-      "text": "22"
-    }
+  "first": {
+    "id": "first",
+    "speaker": "nian",
+    "text": "初次见面!",
+    "text_variants": [
+      "first2",
+      "greeting"
+    ],
+    "options": "",
+    "options_resoult": "",
+    "next": [
+      "secend"
+    ],
+    "effects": "",
+    "condition": "",
+    "waitTime": "5",
+    "type": "plot"
+  },
+  "greeting": {
+    "id": "greeting",
+    "speaker": "nian",
+    "text": "hello!",
+    "text_variants": "",
+    "options": "",
+    "options_resoult": "",
+    "next": "",
+    "effects": "",
+    "condition": {
+      "type": "weight",
+      "value": "3"
+    },
+    "waitTime": "5",
+    "type": "plot"
+  },
+  "secend": {
+    "id": "secend",
+    "speaker": "nian",
+    "text": "拖入音乐文件就可以听歌了哦",
+    "text_variants": "",
+    "options": "",
+    "options_resoult": "",
+    "next": "",
+    "effects": "",
+    "condition": "",
+    "waitTime": "5",
+    "type": "plot"
+  },
+  "first2": {
+    "id": "first2",
+    "speaker": "nian",
+    "text": "hi，又见面了呀！",
+    "text_variants": "",
+    "options": "",
+    "options_resoult": "",
+    "next": "",
+    "effects": "",
+    "condition": {
+      "type": "weight",
+      "value": "3"
+    },
+    "waitTime": "5",
+    "type": "plot"
+  },
+  "time": {
+    "id": "time",
+    "speaker": "nian",
+    "text": "现在时间{{time}}",
+    "text_variants": "",
+    "options": "",
+    "options_resoult": "",
+    "next": "",
+    "effects": "",
+    "condition": {
+      "type": "manual",
+      "value": "time<7:00"
+    },
+    "waitTime": "5",
+    "type": "plot"
+  },
+  "topicTest": {
+    "id": "topicTest",
+    "speaker": "nian",
+    "text": ":3",
+    "text_variants": [
+      "xvx",
+      "ovo",
+      ":3"
+    ],
+    "options": "",
+    "options_resoult": "",
+    "next": "",
+    "effects": "",
+    "condition": {
+      "type": "weight",
+      "value": "3"
+    },
+    "waitTime": "3",
+    "type": "topic"
+  },
+  "xvx": {
+    "id": "xvx",
+    "speaker": "nian",
+    "text": "xvx",
+    "text_variants": "",
+    "options": "",
+    "options_resoult": "",
+    "next": "",
+    "effects": "",
+    "condition": {
+      "type": "weight",
+      "value": "3"
+    },
+    "waitTime": "3",
+    "type": ""
+  },
+  "ovo": {
+    "id": "ovo",
+    "speaker": "nian",
+    "text": "ovo",
+    "text_variants": "",
+    "options": "",
+    "options_resoult": "",
+    "next": "",
+    "effects": "",
+    "condition": {
+      "type": "weight",
+      "value": "3"
+    },
+    "waitTime": "3",
+    "type": ""
+  },
+  ":3": {
+    "id": ":3",
+    "speaker": "nian",
+    "text": ":3",
+    "text_variants": "",
+    "options": "",
+    "options_resoult": "",
+    "next": "",
+    "effects": "",
+    "condition": {
+      "type": "weight",
+      "value": "3"
+    },
+    "waitTime": "3",
+    "type": ""
+  },
+  "hello": {
+    "id": "hello",
+    "speaker": "nian",
+    "text": "hello",
+    "text_variants": "",
+    "options": "",
+    "options_resoult": "",
+    "next": [
+      "hello2"
+    ],
+    "effects": "",
+    "condition": {
+      "type": "weight",
+      "value": "3"
+    },
+    "waitTime": "-1",
+    "type": "topic"
+  },
+  "hello2": {
+    "id": "hello2",
+    "speaker": "nian",
+    "text": "有没有兴趣来听下一首",
+    "text_variants": "",
+    "options": "",
+    "options_resoult": "",
+    "next": [
+      "hello3"
+    ],
+    "effects": "",
+    "condition": "",
+    "waitTime": "-1",
+    "type": ""
+  },
+  "hello3": {
+    "id": "hello3",
+    "speaker": "nian",
+    "text": "我也很感兴趣呢",
+    "text_variants": "",
+    "options": "",
+    "options_resoult": "",
+    "next": "",
+    "effects": "",
+    "condition": "",
+    "waitTime": "-1",
+    "type": ""
   }
 }

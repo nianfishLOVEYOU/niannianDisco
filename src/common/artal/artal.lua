@@ -401,7 +401,7 @@ local function defaultLoadImageFunction(artalLayer,layerLoadData,folderStack,lay
 	end
 
 	layer.transparencyProtected = artalLayer.transparencyProtected
-	layer.isVisible = artalLayer.isVisible
+	layer.isvisiable = artalLayer.isvisiable
 	layer.obsoleteFlag = artalLayer.obsoleteFlag
 	layer.pixelIrrelevant = artalLayer.pixelIrrelevant
 	layer.maskIrrelevant = artalLayer.maskIrrelevant
@@ -594,7 +594,7 @@ function artalFunction.newPSD(fileNameOrData, structureFlagOrNumber)
 		artal.layer[LC].betterCliping = artal.layer[LC].clipping
 		-- Flags
 		artal.layer[LC].transparencyProtected = bit.band(artal.layer[LC].flags, 0x01) ~= 0
-		artal.layer[LC].isVisible              = bit.band(artal.layer[LC].flags, 0x02) == 0
+		artal.layer[LC].isvisiable              = bit.band(artal.layer[LC].flags, 0x02) == 0
 		artal.layer[LC].obsoleteFlag           = bit.band(artal.layer[LC].flags, 0x04) ~= 0
 		artal.layer[LC].pixelIrrelevant        = bit.band(artal.layer[LC].flags, 0x08) ~= 0
 		artal.layer[LC].maskIrrelevant         = bit.band(artal.layer[LC].flags, 0x10) ~= 0

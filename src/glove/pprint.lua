@@ -201,7 +201,7 @@ function pprint.pformat(obj, option, printer)
 
   local cache
   if option.object_cache == 'global' then
-    -- steal the cache into a local var so it's not visible from _G or anywhere
+    -- steal the cache into a local var so it's not visiable from _G or anywhere
     -- still can't avoid user explicitly referentce pprint._cache but it shouldn't happen anyway
     cache = pprint._cache or {}
     pprint._cache = nil

@@ -105,7 +105,7 @@ local function Checkbox(label, t, key, options)
   instance.label = label
   instance.table = t
   instance.key = key
-  instance.visible = true
+  instance.visiable = true
 
   setmetatable(instance, mt)
 

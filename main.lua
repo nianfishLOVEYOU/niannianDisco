@@ -66,6 +66,9 @@ local function keypressed(k)
     if k == "n" then -- N 键 - 关闭网络线程
         network:closeNetThread()
     end
+    if k == "p" then -- p 键 #
+        systemManager:quit() -- 先正常退出，触发资源清理
+    end
 end
 -- debug输入方案
 systemManager:keypressed_regester(function(key)

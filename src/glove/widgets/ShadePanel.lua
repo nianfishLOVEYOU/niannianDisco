@@ -42,7 +42,7 @@ end
 -- end
 
 function ShadePanel:draw()
-    if not self.visible then return end
+    if not self.visiable then return end
     local sx, sy, sw, sh = g.getScissor()
     g.setScissor(self.x, self.y, self.w, self.h)
     for _, entry in ipairs(self.contents) do

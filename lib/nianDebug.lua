@@ -42,6 +42,9 @@ local function debugPrintUi()
         if widget.type == "HStack" then
             love.graphics.setColor(0, 1, 1, 0.3)
         end
+        if widget:getRealVisiable() == false then
+            love.graphics.setColor(1, 0, 0, 0.1) -- 红色轮廓
+        end
         local x, y = widget:getPos()
         local w, h = widget:getSize()
         if not w or not h then

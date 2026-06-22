@@ -36,7 +36,7 @@ local function checkAABB(l,t,w,h)
   checkPositiveNumber(h, "h")
 end
 
-local function getVisibleArea(self, scale)
+local function getvisiableArea(self, scale)
   scale = scale or self.scale
   local sin, cos = abs(self.sin), abs(self.cos)
   local w,h = self.w / scale, self.h / scale
@@ -53,7 +53,7 @@ end
 
 local function adjustPosition(self)
   local wl,wt,ww,wh = self.wl, self.wt, self.ww, self.wh
-  local w,h = getVisibleArea(self)
+  local w,h = getvisiableArea(self)
   local w2,h2 = w*0.5, h*0.5
 
   local left, right  = wl + w2, wl + ww - w2
@@ -64,7 +64,7 @@ end
 
 local function adjustScale(self)
   local w,h,ww,wh = self.w, self.h, self.ww, self.wh
-  local rw,rh     = getVisibleArea(self, 1)      -- rotated frame: area around the window, rotated without scaling
+  local rw,rh     = getvisiableArea(self, 1)      -- rotated frame: area around the window, rotated without scaling
   local sx,sy     = rw/ww, rh/wh                 -- vert/horiz scale: minimun scales that the window needs to occupy the world
   local rscale    = max(sx,sy)
 
@@ -153,12 +153,12 @@ function gamera:getAngle()
   return self.angle
 end
 
-function gamera:getVisible()
-  local w,h = getVisibleArea(self)
+function gamera:getvisiable()
+  local w,h = getvisiableArea(self)
   return self.x - w*0.5, self.y - h*0.5, w, h
 end
 
-function gamera:getVisibleCorners()
+function gamera:getvisiableCorners()
   local x,y,w2,h2 = self.x, self.y, self.w2, self.h2
 
   local x1,y1 = cornerTransform(self, x-w2,y-h2)
@@ -181,7 +181,7 @@ function gamera:draw(f)
     love.graphics.rotate(-self.angle)
     love.graphics.translate(-self.x, -self.y)
     
-    f(self:getVisible())
+    f(self:getvisiable())
 
   love.graphics.pop()
 

@@ -10,7 +10,7 @@ end
 function item:init()
     self.name = "n_name"
     self.id = ""
-    self.type     = "item"
+    self.type = "item"
 
     self.x, self.y = 10, 10
     self.z = 0
@@ -25,7 +25,7 @@ function item:init()
     -- 点击边界缩放
     self.overPadding = 0
     -- 自身颜色
-    self.color = { 1, 1, 1 }
+    self.color = {1, 1, 1}
     -- 组件
     self.component = {}
     self.componentMap = {}
@@ -35,7 +35,7 @@ function item:init()
     -- 子对象
     self.children = {}
     -- 改动是否保存到地图
-    self.isSaveInMap = false 
+    self.isSaveInMap = false
     -- 清理方法
 
     -- 可交互
@@ -47,13 +47,23 @@ function item:setVisiable(visiable)
 end
 
 function item:getRealVisiable()
-    if not self.visiable then
-        return false
+    local p = self
+    local visiable = p.visiable
+    while p.parent do
+        if not p.visiable then
+            return false
+        end
+        p = p.parent
     end
-    if self.parent then
-        return self.parent:getRealVisiable()
+    return p.visiable and self.visiable -- 最后一层parent的visiable也要考虑上
+end
+
+function item:printParentTree()
+    local p = self
+    while p do
+        print("Parent:",p.type, p.name ,"visiable:", p.visiable)
+        p = p.parent
     end
-    return true
 end
 
 function item:setName(name)
@@ -71,7 +81,7 @@ function item:serialize()
         z = self.z,
         w = self.w,
         h = self.h,
-        visiable = self.visiable,
+        visiable = self.visiable
     }
 end
 
@@ -95,7 +105,7 @@ function item:setParentInit()
 end
 
 function item:addChild(child)
-    --避免循环嵌套，要遍历自己的父亲的父亲。。。有没有这个孩子
+    -- 避免循环嵌套，要遍历自己的父亲的父亲。。。有没有这个孩子
 
     -- prevent creating cycles: ensure 'child' is not an ancestor of self
     if child == self then
@@ -120,7 +130,9 @@ function item:addChild(child)
 end
 
 function item:removeChild(child)
-    if #self.children == 0 then return end
+    if #self.children == 0 then
+        return
+    end
     for i = #self.children, 1, -1 do
         if self.children[i] == child then
             table.remove(self.children, i)
@@ -130,7 +142,9 @@ function item:removeChild(child)
 end
 
 function item:clearChild()
-    if #self.children == 0 then return end
+    if #self.children == 0 then
+        return
+    end
     for i = #self.children, 1, -1 do
         self.children[i].parent = nil
         table.remove(self.children, i)
@@ -153,10 +167,14 @@ function item:addComponent(name)
             comp = mod
         end
     end
-    if type(comp) ~= "table" then return end
+    if type(comp) ~= "table" then
+        return
+    end
 
     -- prevent duplicate
-    if comp.name and self.componentMap[comp.name] then return end
+    if comp.name and self.componentMap[comp.name] then
+        return
+    end
 
     -- if comp already has different owner, remove from it
     if comp.owner and comp.owner ~= self and comp.owner.removeComponent then
@@ -166,14 +184,18 @@ function item:addComponent(name)
     -- set owner and register
     comp.owner = self
     table.insert(self.component, comp)
-    if comp.name then self.componentMap[comp.name] = comp end
+    if comp.name then
+        self.componentMap[comp.name] = comp
+    end
 
     -- call attach hook if present
     if comp.onAttach then
         comp:onAttach(self)
     end
     -- if component has enable flag, keep it; otherwise default true
-    if comp.enabled == nil then comp.enabled = true end
+    if comp.enabled == nil then
+        comp.enabled = true
+    end
 end
 
 function item:removeComponent(name)
@@ -183,14 +205,18 @@ function item:removeComponent(name)
     if type(name) == "string" then
         comp = self.componentMap[name]
     end
-    if not comp then return end
+    if not comp then
+        return
+    end
 
     for i = #self.component, 1, -1 do
         if self.component[i] == comp then
             table.remove(self.component, i)
         end
     end
-    if comp.name then self.componentMap[comp.name] = nil end
+    if comp.name then
+        self.componentMap[comp.name] = nil
+    end
 
     -- call detach/destroy hooks
     if comp.onDetach then
@@ -201,8 +227,6 @@ function item:removeComponent(name)
     end
     comp.owner = nil
 end
-
-
 
 function item:mousePressed(x, y, button)
 
@@ -215,7 +239,6 @@ end
 function item:wheelmoved(x, y)
 
 end
-
 
 -- 被拖拽
 function item:onDrag(x, y, dx, dy)
@@ -230,7 +253,7 @@ function item:onClick(x, y, button)
 
 end
 
-function item:onClickOver(x, y,button)
+function item:onClickOver(x, y, button)
 
 end
 
@@ -273,7 +296,7 @@ end
 function item:isOver(mouseX, mouseY)
     local width, height = self:getSize()
     return self.x - self.overPadding <= mouseX and mouseX <= self.x + width and self.y <= mouseY and mouseY <= self.y +
-        height
+               height
 end
 
 function item:setPos(x, y, z)
@@ -317,11 +340,12 @@ function item:update(dt)
 end
 
 function item:draw()
-    if not self.visiable then return end
+    if not self.visiable then
+        return
+    end
     local x, y = self:getPos()
     love.graphics.setColor(self.color)
-    love.graphics.rectangle('fill', x - self.w / 2, y - self.h / 2, self.w,
-        self.h)
+    love.graphics.rectangle('fill', x - self.w / 2, y - self.h / 2, self.w, self.h)
 end
 
 -- 确保没有被引用了
@@ -340,7 +364,9 @@ function item:destroy()
         if comp and comp.onDetach then
             comp:onDetach(self)
         end
-        if comp then comp.owner = nil end
+        if comp then
+            comp.owner = nil
+        end
     end
 end
 
