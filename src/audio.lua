@@ -9,7 +9,7 @@ local Audio = {
     currentIndex = 0,
     volume = 1,
     stuck = false,
-    downloadProgress = 100,
+    downloadProgress = 100
 }
 
 systemManager:init_regester(function()
@@ -86,8 +86,8 @@ function Audio:play(position)
     self.currentSource:setLooping(false)
     self.currentSource:play()
     uiManager:refresh("playerUI")
-    
-    eventManager:emit("audio_state_changed","play")
+
+    eventManager:emit("audio_state_changed", "play")
     return true
 end
 
@@ -95,7 +95,7 @@ end
 function Audio:pause()
     if self.currentSource then
         self.currentSource:pause()
-        eventManager:emit("audio_state_changed","pause")
+        eventManager:emit("audio_state_changed", "pause")
     end
 end
 
@@ -103,17 +103,16 @@ end
 function Audio:resume()
     if self.currentSource and not self:isPlaying() then
         self.currentSource:play()
-        eventManager:emit("audio_state_changed","resume")
+        eventManager:emit("audio_state_changed", "resume")
     end
 end
 
 function Audio:stop()
     if self.currentSource then
         self.currentSource:stop()
-        eventManager:emit("audio_state_changed","stop")
+        eventManager:emit("audio_state_changed", "stop")
     end
 end
-
 
 function Audio:setStuck(stuck)
 
@@ -157,7 +156,6 @@ function Audio:next(index)
     else
         self:sendRequestFile(index)
         self:setStuck(true)
-        uiManager:refresh("playlistUI")
     end
 
 end
@@ -181,7 +179,6 @@ function Audio:receiveToNext(index)
         self:setStuck(true)
         self.downloadProgress = 0
     end
-    uiManager:refresh("playlistUI")
 end
 
 -- 发送回去
@@ -215,11 +212,10 @@ function Audio:automusicNext()
         self:tryNext(nextId)
     end
 
-
 end
 
 function Audio:tryNext(nextId)
-        -- 如果当前正在播放的音乐没有结束，就不自动下一首
+    -- 如果当前正在播放的音乐没有结束，就不自动下一首
     if self.playlist[nextId] then
         if nextId ~= 0 and network.userid == self.playlist[nextId].userid then
             self:next(nextId)
@@ -238,7 +234,7 @@ function Audio:update(dt)
     else
         -- 不是定时的逻辑
     end
-    
+
     self:automusicNext()
     -- 音乐资源等待下载
     if self.stuck then
@@ -252,16 +248,13 @@ function Audio:update(dt)
 
 end
 
-
-
 -- 开启音乐播放（带淡入）
 function Audio:MusicStart(path, delay)
-        self:loadMusic(path)
-        if self.currentSource then
-            --self:setVolume(0)
-            self:play(0)
-        end
-        uiManager:refresh("playlistUI")
+    self:loadMusic(path)
+    if self.currentSource then
+        -- self:setVolume(0)
+        self:play(0)
+    end
 end
 
 function Audio:setVolume(vol)
@@ -295,9 +288,12 @@ function Audio:addPlayMusic(path, duration, name)
         name = name
     }
     table.insert(self.playlist, stack)
+    local playlistUI = uiManager:getUI("playlistUI")
+    if playlistUI then
+        playlistUI:addPlayListItem(name)
+    end
     self:sendUpdatePlayList()
     self:savePlaylist()
-    uiManager:refresh("playlistUI")
 end
 
 function Audio:removePlayMusic(name)
@@ -309,11 +305,14 @@ function Audio:removePlayMusic(name)
     for index, value in ipairs(self.playlist) do
         if value.name == name then
             table.remove(self.playlist, index)
+            local playlistUI = uiManager:getUI("playlistUI")
+            if playlistUI then
+                playlistUI:removePlayListItem(name)
+            end
         end
     end
     self:sendUpdatePlayList()
     self:savePlaylist()
-    uiManager:refresh("playlistUI")
 end
 
 -- 发送列表信息

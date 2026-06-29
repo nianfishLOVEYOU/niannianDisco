@@ -95,6 +95,6 @@ end
 
 function MusicInputUI:destroy()
     eventManager:off("fileDrop", musicInput)
-    self.stack:destroy()
+    --self.stack:destroy()
 end
 return MusicInputUI

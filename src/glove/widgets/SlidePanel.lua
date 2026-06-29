@@ -86,23 +86,46 @@ function SlidePanel:add(child)
     self:getContent():layout()
 end
 
-function SlidePanel:remove(child)
-    local content = self:getContent()
-    if content then
-        for i, c in ipairs(content) do
-            if c == child then
-                table.remove(content, i)
+function SlidePanel:remove(name)
+    local contents = self:getContents()
+    if contents then
+        for i, c in ipairs(contents) do
+            if c.name == name then
+                table.remove(contents, i)
+                self:getContent():layout()
                 break
             end
         end
-        content:layout()
     end
+end
+
+function SlidePanel:removeIndex(index)
+    local contents = self:getContents()
+    if contents then
+        if index < 1 or index > #contents then
+            return
+        end
+        table.remove(contents, index)
+        self:getContent():layout()
+    end
+end
+
+function SlidePanel:get(name)
+
+end
+
+function SlidePanel:getContents()
+    local content = self:getContent()
+    if content then
+        return content.children
+    end
+    return {}
 end
 
 function SlidePanel:setTitle(str)
     self.title = Glove.Text:new(str)
     self.title:setSize(200, 0)
-    self.title:setLocalPos(self.spacingX+self.x, self.spacingY+self.y)
+    self.title:setLocalPos(self.spacingX + self.x, self.spacingY + self.y)
 end
 
 -- 设置滑页内的内容

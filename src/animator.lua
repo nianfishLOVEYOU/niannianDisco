@@ -2,16 +2,26 @@ local Animator = {}
 Animator.__index = Animator
 
 local Easing = {
-    linear    = function(t) return t end,
-    easeIn    = function(t) return t * t end,
-    easeOut   = function(t) return 1 - (1 - t) * (1 - t) end,
-    easeInOut = function(t) return t < 0.5 and 2*t*t or 1-2*(1-t)*(1-t) end
+    linear = function(t)
+        return t
+    end, -- 线性
+    easeIn = function(t)
+        return t * t
+    end, -- 加速
+    easeOut = function(t)
+        return 1 - (1 - t) * (1 - t)
+    end, -- 减速
+    easeInOut = function(t)
+        return t < 0.5 and 2 * t * t or 1 - 2 * (1 - t) * (1 - t)
+    end -- 加速减速
 }
 
 local function getNestedValue(root, path)
     local val = root
     for _, key in ipairs(path) do
-        if val == nil then break end
+        if val == nil then
+            break
+        end
         val = val[key]
     end
     return val
@@ -20,9 +30,11 @@ end
 local function setNestedValue(root, path, value)
     local cur = root
     local len = #path
-    for i = 1, len-1 do
+    for i = 1, len - 1 do
         local key = path[i]
-        if cur[key] == nil then cur[key] = {} end
+        if cur[key] == nil then
+            cur[key] = {}
+        end
         cur = cur[key]
     end
     cur[path[len]] = value
@@ -67,8 +79,11 @@ function Animator.new()
 end
 
 function Animator:addTrack(trackName, target, pathInput, enable, loop, pingpong, ease)
-    if self.tracks[trackName] then return end
-    local path = type(pathInput)=="string" and strToPath(pathInput) or pathInput
+    if self.tracks[trackName] then
+        print("!!!  Track already exists: " .. trackName)
+        return
+    end
+    local path = type(pathInput) == "string" and strToPath(pathInput) or pathInput
 
     self.tracks[trackName] = {
         target = target,
@@ -87,8 +102,10 @@ end
 
 function Animator:clearKeyframes(trackName)
     local tr = self.tracks[trackName]
-    if not tr then return end
-    tr.keyframes = {}
+    if not tr then
+        return
+    end
+    self.tracks[trackName] = nil
 end
 
 function Animator:clearAllKeyframes()
@@ -99,19 +116,32 @@ end
 
 function Animator:addKeyframe(trackName, time, value)
     local tr = self.tracks[trackName]
-    if not tr then return end
-    for i=#tr.keyframes,1,-1 do
-        if tr.keyframes[i].time == time then table.remove(tr.keyframes, i) end
+    if not tr then
+        return
     end
-    table.insert(tr.keyframes, {time=time, value=value})
-    table.sort(tr.keyframes, function(a,b) return a.time < b.time end)
+    for i = #tr.keyframes, 1, -1 do
+        if tr.keyframes[i].time == time then
+            table.remove(tr.keyframes, i)
+        end
+    end
+    table.insert(tr.keyframes, {
+        time = time,
+        value = value
+    })
+    table.sort(tr.keyframes, function(a, b)
+        return a.time < b.time
+    end)
 end
 
 function Animator:removeKeyframe(trackName, time)
     local tr = self.tracks[trackName]
-    if not tr then return end
-    for i=#tr.keyframes,1,-1 do
-        if tr.keyframes[i].time == time then table.remove(tr.keyframes, i) end
+    if not tr then
+        return
+    end
+    for i = #tr.keyframes, 1, -1 do
+        if tr.keyframes[i].time == time then
+            table.remove(tr.keyframes, i)
+        end
     end
 end
 
@@ -119,8 +149,12 @@ end
 function Animator:sampleTrack(track)
     local f = track.keyframes
     local n = #f
-    if n == 0 then return nil end
-    if n == 1 then return f[1].value end
+    if n == 0 then
+        return nil
+    end
+    if n == 1 then
+        return f[1].value
+    end
 
     local startTime = f[1].time
     local endTime = f[#f].time
@@ -147,9 +181,9 @@ function Animator:sampleTrack(track)
 
     -- 查找关键帧区间
     local k1, k2 = f[1], f[#f]
-    for i=1, n-1 do
+    for i = 1, n - 1 do
         local curr = f[i]
-        local nextf = f[i+1]
+        local nextf = f[i + 1]
         if t >= curr.time and t <= nextf.time then
             k1, k2 = curr, nextf
             break
@@ -157,19 +191,27 @@ function Animator:sampleTrack(track)
     end
 
     local dt = k2.time - k1.time
-    if dt <= 0 then return k1.value end
+    if dt <= 0 then
+        return k1.value
+    end
     local ratio = (t - k1.time) / dt
     local ease = Easing[track.easeType] or Easing.linear
     return lerpValue(k1.value, k2.value, ratio, ease)
 end
 
 function Animator:update(dt)
-    if not self.globalPlaying then return end
+    if not self.globalPlaying then
+        return
+    end
     for _, tr in pairs(self.tracks) do
-        if not tr.enabled or not tr.playing then goto cont end
+        if not tr.enabled or not tr.playing then
+            goto cont
+        end
         tr.time = tr.time + dt * self.globalSpeed * tr.speed
         local val = self:sampleTrack(tr)
-        if val ~= nil then setNestedValue(tr.target, tr.path, val) end
+        if val ~= nil then
+            setNestedValue(tr.target, tr.path, val)
+        end
         ::cont::
     end
 end
@@ -178,25 +220,34 @@ end
 function Animator:saveToFile(path)
     local json = require "lib.json"
     local data = {
-        globalSpeed=self.globalSpeed,
-        globalPlaying=self.globalPlaying,
-        tracks={}
+        globalSpeed = self.globalSpeed,
+        globalPlaying = self.globalPlaying,
+        tracks = {}
     }
-    for n,tr in pairs(self.tracks) do
+    for n, tr in pairs(self.tracks) do
         data.tracks[n] = {
-            path=tr.path, enabled=tr.enabled,
-            loop=tr.loop, pingpong=tr.pingpong,
-            easeType=tr.easeType, keyframes=tr.keyframes
+            path = tr.path,
+            enabled = tr.enabled,
+            loop = tr.loop,
+            pingpong = tr.pingpong,
+            easeType = tr.easeType,
+            keyframes = tr.keyframes
         }
     end
-    return love.filesystem.write(path, json.encode(data, {indent=true}))
+    return love.filesystem.write(path, json.encode(data, {
+        indent = true
+    }))
 end
 
 function Animator:loadFromFile(path)
-    if not love.filesystem.getInfo(path) then return false end
+    if not love.filesystem.getInfo(path) then
+        return false
+    end
     local dkjson = require("dkjson")
     local data = dkjson.decode(love.filesystem.read(path))
-    if not data then return false end
+    if not data then
+        return false
+    end
     self.globalSpeed = data.globalSpeed or 1
     self.globalPlaying = data.globalPlaying ~= nil and data.globalPlaying
     for n, td in pairs(data.tracks or {}) do
@@ -212,12 +263,22 @@ function Animator:loadFromFile(path)
     return true
 end
 
-function Animator:setTrackEnable(n, e) if self.tracks[n] then self.tracks[n].enabled = e end end
-function Animator:resetAll() for _,t in pairs(self.tracks) do t.time=0 t.reverse=false end end
-function Animator:setGlobalPlay(p) self.globalPlaying = p end
+function Animator:setTrackEnable(n, e)
+    if self.tracks[n] then
+        self.tracks[n].enabled = e
+    end
+end
+function Animator:resetAll()
+    for _, t in pairs(self.tracks) do
+        t.time = 0
+        t.reverse = false
+    end
+end
+function Animator:setGlobalPlay(p)
+    self.globalPlaying = p
+end
 
 return Animator
-
 
 -----------------说明书----------------
 
@@ -246,9 +307,6 @@ return Animator
 
 -- anim:setGlobalPlay(false) -- 全局暂停
 -- anim:resetAll()           -- 重置所有轨道时间到起点
-
-
-
 
 ------------生命周期演示----------------
 
@@ -348,7 +406,4 @@ return Animator
 --         anim:resetAll()
 --     end
 -- end
-
-
-
 

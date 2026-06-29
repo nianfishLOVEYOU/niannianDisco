@@ -125,7 +125,7 @@ function PlayerUI:buildStack()
     local stack = Glove.VStack:new({ musiVoiceHStack, buttonHStack, sliderHStack },10,"center")
 
     local sw, sh = stack:getSize()
-    stack:setPos(width / 2 - sw / 2, height - sh -50)
+    stack:setPos(width / 2 - sw / 2, height - sh -20)
     
     self:addStack(stack)
     self.playerStack=stack

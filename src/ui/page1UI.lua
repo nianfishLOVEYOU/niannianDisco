@@ -23,6 +23,9 @@ function page1UI:init()
     -- self:addChild(roomUI)
     
 
+    local wheelSelectionUI = require("src.ui.wheelSelectionUI"):new()
+    uiManager:addUI("wheelSelectionUI", wheelSelectionUI)
+    self:addChild(nianocUI)
 
     self:refresh()
 end

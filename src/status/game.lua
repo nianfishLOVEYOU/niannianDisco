@@ -14,6 +14,7 @@ function Game:init()
     --左右切换页面系统
     local pageControlUI = require("src.ui.pageControlUI"):new()
     uiManager:addUI("pageControlUI",pageControlUI)
+
     
     
 end
@@ -47,6 +48,7 @@ function Game:leave()
 
     uiManager:removeUI("floatUI")
     uiManager:removeUI("pageControlUI")
+    uiManager:removeUI("wheelSelectionUI")
 end
 
 return Game

@@ -6,6 +6,9 @@ local PlaylistUI = ui:extend() -- 子类继承父类
 
 local slideW = love.graphics.getWidth() - 200
 local slideH = 160
+local inPlaylistColor = {0.15, 0.50, 0.1, 1}
+local normalColor = {0, 0, 0, 1}
+local playingColor = {0.80, 0.3, 0.12, 1}
 
 local state = {
     playlist = "playlist",
@@ -55,7 +58,6 @@ local musicInput = function(file, name, fullname, extend)
     local music = love.audio.newSource(tmpPath, "stream")
     playlistManager:addMusic(name, tmpPath, "tmp", music:getDuration(), "self")
     audio:addPlayMusic(tmpPath, music:getDuration(), name)
-    uiManager:refresh("playlistUI")
     music = nil
 end
 
@@ -70,13 +72,17 @@ function PlaylistUI:init()
     eventManager:on("fileDrop", musicInput)
     self.scrollPosition = 0
     self.itemHeight = 30
+    self.playListItemMap = {}
+    self.localPlayListItemMap = {}
     self:refresh()
 end
 
 function PlaylistUI:refresh()
-
+    nianDebug.printStackTrace("刷新播放列表UI222222222222222222222222")
     -- 创建本地列表
     self:clearStacks()
+    self.playListItemMap = {}
+    self.localPlayListItemMap = {}
     self:_buildPlayListStack()
     self:_buildLocalPlayListStack()
 
@@ -92,12 +98,13 @@ function PlaylistUI:refresh()
         self.LLimage2.rotation = 0.8
     end
 
-    self:open("playlist")
+    self:open(self.mode or "playlist")
 end
 
 ---------------播放列表------------
 function PlaylistUI:update(dt)
-
+    self:updatePlayListStateText()
+    self:updateLocalPlayListStateText()
 end
 
 -- 刷新按钮状态和音乐提示,或者记录之前的拖动数据
@@ -111,17 +118,24 @@ function PlaylistUI:open(mode)
     self.mode = mode
 end
 
-function PlaylistUI:addPlayListItem(name)
-    local iswaitstr = audio.stuck and "[ ↓ing " .. audio.downloadProgress .. "%]" or "[√]"
-    local musicInfo = i == audio.currentIndex and "[播放]" .. iswaitstr or ""
-    local nameText = Glove.Text:new(musicInfo .. name)
+function PlaylistUI:addPlayListItem(name, index)
+    if not index then
+        for i, v in ipairs(audio.playlist) do
+            if v.name == name then
+                index = i
+                break
+            end
+        end
+    end
+
+    local nameText = Glove.Text:new(name)
     nameText:setSize(120, 30)
     nameText:setOmit(true)
-    nameText.color = {0, 0, 0}
+    nameText.color = inPlaylistColor
     -- 删除按钮
     local button = Glove.Button:new("删除", function()
         audio:removePlayMusic(name)
-        self:removePlayListItem(name)
+        -- self:removePlayListItem(name)
     end)
     button.padding = 5
     button:setSize(0, 0)
@@ -131,29 +145,24 @@ function PlaylistUI:addPlayListItem(name)
     hstack.color = {0, 0, 0, 0.3}
     hstack:setName(name)
     self.playList:add(hstack)
+
+    self.playListItemMap[name] = {
+        textWidget = nameText,
+        stack = hstack,
+        index = index
+    }
+
+    self:updatePlayListStateText()
 end
 
 function PlaylistUI:removePlayListItem(name)
-    for i, v in ipairs(self.playList.children) do
-        if v.name == name then
-            table.remove(self.playList.children, i)
-            break
-        end
-    end
+    print("111111111 removePlayListItem", name)
+    self.playList:remove(name)
+    self.playListItemMap[name] = nil
 end
 
 -- 获得播放列表ui
 function PlaylistUI:_buildPlayListStack()
-    -- local tT = Glove.Text:new("播放列表:")
-    -- tT.color = {1, 1, 1}
-    -- local tT2 = Glove.Text:new(">拖拽音乐.mp3文件加入歌单<")
-    -- tT2.color = {1, 0, 0}
-    -- tT2:setSize(200, 20)
-    -- local title = Glove.HStack:new({tT, tT2})
-    -- title:setName("title")
-    -- self:addStack(title)
-    -- title:setLocalPos(0, 20, self.z)
-
     local vstack = Glove.VStack:new({}, 10)
     vstack:setName("playerlistui vstack _buildPlayListStack")
     -- 滑动条
@@ -165,12 +174,14 @@ function PlaylistUI:_buildPlayListStack()
     slidePanel:setSize(state.playlistSize.w, state.playlistSize.h)
     slidePanel.color = {1, 1, 1, 1} -- 设置滑动面板的颜色为白色
     for i, v in ipairs(audio.playlist) do
-        self:addPlayListItem(v.name)
+        self:addPlayListItem(v.name, i)
     end
 end
 
 -- 获得本地播放列表ui
 function PlaylistUI:addLocalPlayListItem(path, name, duration)
+    -- local stateText = Glove.Text:new("tmp")
+
     local nameText = Glove.Text:new(name)
     nameText:setSize(120, 30)
     nameText:setOmit(true)
@@ -186,16 +197,16 @@ function PlaylistUI:addLocalPlayListItem(path, name, duration)
     hstack.color = {0, 0, 0, 0.3}
     hstack:setName(name)
     self.LocalPlayList:add(hstack)
+
+    self.localPlayListItemMap[name] = {
+        textWidget = nameText,
+        stack = hstack,
+        path = path,
+        duration = duration
+    }
 end
 
 function PlaylistUI:_buildLocalPlayListStack()
-    -- local tT = Glove.Text:new("tmp本地列表:")
-    -- tT.color = {1, 1, 1}
-    -- tT:setSize(200, 20)
-    -- local title = Glove.HStack:new({tT})
-    -- self:addStack(title)
-    -- title:setLocalPos(0, 230, self.z)
-
     -- 本地音乐列表
     local vstack = Glove.VStack:new({}, 10)
     vstack:setName("playerlistui vstack _buildLocalPlayListStack")
@@ -206,12 +217,68 @@ function PlaylistUI:_buildLocalPlayListStack()
     slidePanel.color = {1, 1, 1, 1} -- 设置滑动面板的颜色为白色
     self:addStack(slidePanel)
     slidePanel:setSize(state.localplaylistSize.w, state.localplaylistSize.h)
-    slidePanel:setLocalPos(0, 250, self.z)
+    slidePanel:setLocalPos(state.localplaylistPos.x, state.localplaylistPos.y, self.z)
     for i, v in ipairs(playlistManager.localPlaylist["tmp"].list) do
         self:addLocalPlayListItem(v.path, v.name, v.duration)
     end
 
     -- vstack:setPos(0, 0) --大概是拖拽条的限制归为问题
+end
+
+-- 更新状态，绿色表示在歌单，黄色表示在播放
+function PlaylistUI:updatePlayListStateText()
+    if not self.playListItemMap then
+        return
+    end
+
+    local currentIndex = audio.currentIndex or 0
+    local isStuck = audio.stuck and currentIndex > 0
+    local waitingText = isStuck and (" [缓冲 " .. (audio.downloadProgress or 0) .. "%]") or ""
+
+    for i, info in ipairs(audio.playlist) do
+        local itemInfo = self.playListItemMap[info.name]
+        if itemInfo and itemInfo.textWidget then
+            local isCurrent = (i == currentIndex)
+            local prefix = isCurrent and "[播放中] " or ""
+            itemInfo.textWidget:setText(prefix .. info.name .. (isCurrent and waitingText or ""))
+            if isCurrent then
+                itemInfo.textWidget.color = playingColor
+            else
+                itemInfo.textWidget.color = inPlaylistColor
+            end
+            itemInfo.index = i
+        end
+    end
+end
+
+-- 更新状态，绿色表示在歌单，黄色表示在播放
+function PlaylistUI:updateLocalPlayListStateText()
+    if not self.localPlayListItemMap then
+        return
+    end
+
+    local currentTrack = audio:getCurrentTrack()
+    local currentName = currentTrack and currentTrack.name or nil
+
+    local inPlaylist = {}
+    for _, info in ipairs(audio.playlist) do
+        inPlaylist[info.name] = true
+    end
+
+    for name, itemInfo in pairs(self.localPlayListItemMap) do
+        if itemInfo and itemInfo.textWidget then
+            if currentName and name == currentName then
+                itemInfo.textWidget.color = playingColor
+                itemInfo.textWidget:setText("[播放中] " .. name)
+            elseif inPlaylist[name] then
+                itemInfo.textWidget.color = inPlaylistColor
+                itemInfo.textWidget:setText(name)
+            else
+                itemInfo.textWidget.color = normalColor
+                itemInfo.textWidget:setText(name)
+            end
+        end
+    end
 end
 
 function PlaylistUI:draw()

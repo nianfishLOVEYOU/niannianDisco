@@ -5,7 +5,7 @@ local NianocUI = ui:extend()
 nianAI = require "src.common.nianAI.nianAI"
 
 function NianocUI:init()
-    nianocUI=self
+    nianocUI = self
     nianAI:init()
     self:refresh()
     self.ani = animator.new()
@@ -13,6 +13,8 @@ function NianocUI:init()
     self.stateType = ""
     self.state = {}
     self.states = self:_createStates()
+    self.isClickAniOver = true
+    self.clickNianZoom =5 --点击缩放比例
 
     -- self.nianImage = love.graphics.newImage("res/image/nianPlayer.png")
     -- 自己的位置跟着父亲走
@@ -24,9 +26,10 @@ end
 
 function NianocUI:_newNian()
     self.psdData = psdData:new("res/image/nian/nian.psd")
+    -- self.psdData:setSize(100, 100)
     self.psdData:setPos(self.x, self.y)
     self:changeState("idle")
-    --添加播放按钮
+    -- 添加播放按钮
 end
 
 function NianocUI:changeState(state)
@@ -57,6 +60,7 @@ function NianocUI:_createStates()
 
     states["idle"] = {
         start = function(self)
+
             -- 图层开关
             self:_defaultPsd()
             self:_eyeAction("right")
@@ -73,7 +77,6 @@ function NianocUI:_createStates()
                 wait = 0
             end
 
-            -- print("11")
         end,
         leave = function(self)
             self.ani:clearKeyframes("psdy")
@@ -118,7 +121,7 @@ function NianocUI:_createStates()
             self:_mouseAction("open")
             -- 动画
             self:_musicAni()
-            self.ani.globalSpeed=3
+            self.ani.globalSpeed = 3
         end,
         update = function(self, dt)
 
@@ -129,12 +132,35 @@ function NianocUI:_createStates()
             end
         end,
         leave = function(self)
-
-            self.ani.globalSpeed=1
+            self.ani.globalSpeed = 1
         end
     }
 
     states["click"] = {
+        start = function(self)
+
+        end,
+        update = function(self, dt)
+
+        end,
+        leave = function(self)
+
+        end
+    }
+
+    states["clickDown"] = {
+        start = function(self)
+
+        end,
+        update = function(self, dt)
+
+        end,
+        leave = function(self)
+
+        end
+    }
+
+    states["clickUp"] = {
         start = function(self)
 
         end,
@@ -210,11 +236,9 @@ function NianocUI:_clearAni()
     self.ani:clearAllKeyframes()
 end
 
-
 function NianocUI:_defaultAni()
 
     self:_clearAni()
-
     -- defaultEnable 默认启用 loop 循环 pinpon 来回
     self.ani:addTrack("psdy", self.psdData, "y", true, true, false, "easeInOut")
     self.ani:addKeyframe("psdy", 0, self.psdData.y - 4)
@@ -251,11 +275,10 @@ function NianocUI:_defaultAni()
     self.ani:addKeyframe("hand_Left", 2, self.psdData.imgs.hand_Left.y - 1)
     self.ani:addKeyframe("hand_Left", 4, self.psdData.imgs.hand_Left.y + 1)
 
-
 end
 
 function NianocUI:_musicAni()
-        self:_clearAni()
+    self:_clearAni()
 
     -- defaultEnable 默认启用 loop 循环 pinpon 来回
     self.ani:addTrack("psdy", self.psdData, "y", true, true, false, "easeInOut")
@@ -276,7 +299,7 @@ function NianocUI:_musicAni()
     self.ani:addKeyframe("hear_Down", 0, self.psdData.imgs.hear_Down.y - 2)
     self.ani:addKeyframe("hear_Down", 1, self.psdData.imgs.hear_Down.y + 0)
     self.ani:addKeyframe("hear_Down", 2, self.psdData.imgs.hear_Down.y - 2)
-    
+
     self.ani:addTrack("head_fold", self.psdData, "imgsTree.head_fold.y", true, true, true, "easeInOut")
     self.ani:addKeyframe("head_fold", 0, self.psdData.imgsTree.head_fold.y + 1)
     self.ani:addKeyframe("head_fold", 1, self.psdData.imgsTree.head_fold.y - 1)
@@ -313,8 +336,6 @@ function NianocUI:_clickAni()
     self.ani:addKeyframe("clothes", 0.1, self.psdData.imgs.clothes.y + 4)
     self.ani:addKeyframe("clothes", 0.2, self.psdData.imgs.clothes.y - 1)
 
-
-    
     self.ani:addTrack("hear_Down", self.psdData, "imgs.hear_Down.y", true, false, false, "easeInOut")
     self.ani:addKeyframe("hear_Down", 0, self.psdData.imgs.hear_Down.y + 1)
     self.ani:addKeyframe("hear_Down", 0.2, self.psdData.imgs.hear_Down.y - 1)
@@ -340,8 +361,44 @@ function NianocUI:_clickAni()
     end)
 end
 
+function NianocUI:getClick()
+    if not self.isClickAniOver then
+        return
+    end
+    self.isClickAniOver=false
+    local w, h = self.psdData.w, self.psdData.h
+    self.ani:addTrack("getClick_W", self.psdData, "w", true, false, false, "easeIn")
+    self.ani:addKeyframe("getClick_W", 0, w)
+    self.ani:addKeyframe("getClick_W", 0.1, w + self.clickNianZoom)
+    self.ani:addKeyframe("getClick_W", 0.3, w)
 
+    self.ani:addTrack("getClick_H", self.psdData, "h", true, false, false, "easeIn")
+    self.ani:addKeyframe("getClick_H", 0, h)
+    self.ani:addKeyframe("getClick_H", 0.1, h + self.clickNianZoom)
+    self.ani:addKeyframe("getClick_H", 0.3, h)
 
+    timer:after(0.3, function()
+        print("")
+        self.ani:clearKeyframes("getClick_W")
+        self.ani:clearKeyframes("getClick_H")
+        self.isClickAniOver=true
+    end)
+
+end
+
+function NianocUI:getPress()
+    local w, h = self.psdData.w, self.psdData.h
+    self.psdData.w = w + self.clickNianZoom
+    self.psdData.h = h + self.clickNianZoom
+
+end
+
+function NianocUI:getleave()
+    
+    local w, h = self.psdData.w, self.psdData.h
+    self.psdData.w = w - self.clickNianZoom
+    self.psdData.h = h - self.clickNianZoom
+end
 -- 更新播放列表显示
 function NianocUI:refresh()
     self:clearStacks()

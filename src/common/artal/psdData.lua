@@ -29,8 +29,34 @@ function PsdData:init(path)
 
         --print("加载pad图片" .. name)
     end
-    -- self.w = self.img[2].image:getWidth()
-    -- self.h = self.img[2].image:getHeight()
+    self.baseW = self.sortimgs.width
+    self.baseH = self.sortimgs.height
+    self.w = self.baseW
+    self.h = self.baseH
+    print(self.w, self.h, "加载pad图片完成")
+    self.scale = 1
+end
+
+-- function PsdData:setScale(scaleW, scaleH)
+--     scaleW = scaleW or 1
+--     scaleH = scaleH or scaleW
+--     self.w = self.w * scaleW
+--     self.h = self.h * scaleH
+-- end
+
+function PsdData:getDrawScale()
+    local baseW = (self.baseW and self.baseW ~= 0) and self.baseW or self.w
+    local baseH = (self.baseH and self.baseH ~= 0) and self.baseH or self.h
+    if not baseW or baseW == 0 then
+        baseW = 1
+    end
+    if not baseH or baseH == 0 then
+        baseH = 1
+    end
+
+    local sx = (self.w and self.w ~= 0) and (self.w / baseW) or 1
+    local sy = (self.h and self.h ~= 0) and (self.h / baseH) or 1
+    return sx, sy
 end
 
 function PsdData:getLayer(layerName)
@@ -89,7 +115,12 @@ function PsdData:draw()
     --         layer.y) -- Offset Y
     --     end
     -- end
-    drawImgTree(self.x, self.y, self.sortTree)
+    local sx, sy = self:getDrawScale()
+    love.graphics.push()
+    love.graphics.translate(self.x, self.y)
+    love.graphics.scale(sx, sy)
+    drawImgTree(0, 0, self.sortTree)
+    love.graphics.pop()
 end
 
 return PsdData
