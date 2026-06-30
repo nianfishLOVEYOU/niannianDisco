@@ -6,7 +6,7 @@ local g = love.graphics
 
 local defaultValue = "Select ..."
 local padding = 4
-
+--下拉选择框
 local mt = {
   __index = {
     draw = function(self, parentX, parentY)

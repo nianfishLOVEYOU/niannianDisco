@@ -7,16 +7,18 @@ local ui = require "src.ui.ui"
 local page1UI = ui:extend()
 
 function page1UI:init()
+
+    
+    -- 立绘ui
+    local nianocUI = require("src.ui.nianocUI"):new()
+    uiManager:addUI("nianocUI",nianocUI)
+    self:addChild(nianocUI)
     local playerUI = require("src.ui.playerUI"):new()
     uiManager:addUI("playerUI", playerUI)
     self:addChild(playerUI)
     local playlistUI = require("src.ui.playlistUI"):new()
     uiManager:addUI("playlistUI", playlistUI)
     self:addChild(playlistUI)
-    -- 立绘ui
-    local nianocUI = require("src.ui.nianocUI"):new()
-    uiManager:addUI("nianocUI",nianocUI)
-    self:addChild(nianocUI)
     --切换频道
     -- local roomUI = require("src.ui.roomUI"):new()
     -- uiManager:addUI("roomUI", roomUI)
@@ -25,7 +27,7 @@ function page1UI:init()
 
     local wheelSelectionUI = require("src.ui.wheelSelectionUI"):new()
     uiManager:addUI("wheelSelectionUI", wheelSelectionUI)
-    self:addChild(nianocUI)
+    self:addChild(wheelSelectionUI)
 
     self:refresh()
 end

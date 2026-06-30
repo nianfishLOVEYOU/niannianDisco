@@ -28,7 +28,6 @@ function Button:draw()
   g.rectangle("fill", self.x, self.y, self.w, self.h, cornerRadius, cornerRadius)
 
   g.setColor(self.labelColor)
-  g.setFont(self.font)
 
   --减去字体宽度
   local fw, fh = self:getFontSize()

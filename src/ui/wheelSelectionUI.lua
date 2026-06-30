@@ -378,6 +378,7 @@ function WheelSelectionUI:onClick(x, y, button)
     if button ~= 1 then
         return
     end
+    print("onClick WheelSelectionUI", x, y, button)
     self:beginPress(x, y)
     if nianocUI and self:isInTriggerArea(x, y) then
         self.isNianClick = true

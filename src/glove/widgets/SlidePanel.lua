@@ -91,6 +91,7 @@ function SlidePanel:remove(name)
     if contents then
         for i, c in ipairs(contents) do
             if c.name == name then
+                contents[i]:destroy()
                 table.remove(contents, i)
                 self:getContent():layout()
                 break
@@ -105,6 +106,7 @@ function SlidePanel:removeIndex(index)
         if index < 1 or index > #contents then
             return
         end
+        contents[index]:destroy()
         table.remove(contents, index)
         self:getContent():layout()
     end

@@ -5,7 +5,7 @@ local Game = {}
 
 function Game:init()
     --ui
-    --mapManager:loadMap("res/maps/edited.json")
+    mapManager:loadMap("res/maps/edited.json")
 
     local floatUI = require("src.ui.floatUI"):new()
     uiManager:addUI("floatUI",floatUI)

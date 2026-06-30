@@ -12,9 +12,9 @@ function page2UI:init()
     self:refresh()
 
     -- 聊天界面
-    local dialog = require("src.ui.dialog"):new()
-    uiManager:addUI("dialog", dialog)
-    self:addChild(dialog)
+    -- local dialog = require("src.ui.dialog"):new()
+    -- uiManager:addUI("dialog", dialog)
+    -- self:addChild(dialog)
 end
 
 -- 更新播放列表显示

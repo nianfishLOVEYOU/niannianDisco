@@ -20,14 +20,16 @@ local widgets = {
   "RadioButtons",
   --"Select",
   "Spacer",
-  --"Tabs",
+  "Tabs",
   "Text",
   "Toggle",
   "VStack",
   --"ZStack"
   "SlidePanel",
+  "SlidePanelStructer",
   "Window",
   "ShadePanel",
+  
 }
 
 local mouseIsDown1 = false
@@ -94,7 +96,7 @@ Glove = {
     if clickWidget then
       clickWidget:onClick(mouseX, mouseY)
       Glove.setFocus(clickWidget)
-      print("'o'mouseInThe:", clickWidget.type, clickWidget.name)
+      print("       'o'mouseInThe:", clickWidget.type, clickWidget.name)
     else
       print(" mousePressed setFocus nil")
       --移除焦点
@@ -106,6 +108,7 @@ Glove = {
     local clickSlidePanel = Glove.getFirstWidget(mouseX, mouseY, "SlidePanel")
     if clickSlidePanel then
       Glove.clickSlidePanel = clickSlidePanel
+      clickSlidePanel:onClick(mouseX, mouseY)
     else
       --移除焦点
       Glove.clickSlidePanel = nil

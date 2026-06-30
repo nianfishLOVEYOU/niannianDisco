@@ -294,6 +294,7 @@ function Audio:addPlayMusic(path, duration, name)
     end
     self:sendUpdatePlayList()
     self:savePlaylist()
+    floatUI:addFloatText("添加入歌单：" .. name,20,40,{duration=2, vy=-5})
 end
 
 function Audio:removePlayMusic(name)
@@ -313,6 +314,7 @@ function Audio:removePlayMusic(name)
     end
     self:sendUpdatePlayList()
     self:savePlaylist()
+    floatUI:addFloatText("从歌单移除：" .. name,20,40,{duration=2, vy=-5})
 end
 
 -- 发送列表信息

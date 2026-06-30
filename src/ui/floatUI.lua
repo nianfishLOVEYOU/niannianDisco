@@ -46,10 +46,11 @@ end
 
 -- 创建一个渐隐并向上漂移的文字
 -- opts: {duration=1.5, vy= -30, color={1,1,1,1}, font=nil}
-function FloatUI:addFloatText(text, x, y)
-    local duration = 1.5
-    local vy = -30
-    local color = { 1, 1, 1, 1 }
+function FloatUI:addFloatText(text, x, y, opts)
+    opts = opts or {}
+    local duration = opts.duration or 1.5
+    local vy = opts.vy or -20
+    local color = opts.color or { 1, 1, 1, 1 }
     local gtext = Glove.Text:new(text)
     gtext:setPos(x, y, 0)
     gtext.color = color

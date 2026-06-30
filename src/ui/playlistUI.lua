@@ -78,7 +78,6 @@ function PlaylistUI:init()
 end
 
 function PlaylistUI:refresh()
-    nianDebug.printStackTrace("刷新播放列表UI222222222222222222222222")
     -- 创建本地列表
     self:clearStacks()
     self.playListItemMap = {}
@@ -148,6 +147,7 @@ function PlaylistUI:addPlayListItem(name, index)
 
     self.playListItemMap[name] = {
         textWidget = nameText,
+        button = button,
         stack = hstack,
         index = index
     }
@@ -166,7 +166,7 @@ function PlaylistUI:_buildPlayListStack()
     local vstack = Glove.VStack:new({}, 10)
     vstack:setName("playerlistui vstack _buildPlayListStack")
     -- 滑动条
-    local slidePanel = Glove.SlidePanel:new(vstack)
+    local slidePanel = Glove.SlidePanelStructer:new(vstack)
     slidePanel:setTitle("播放列表:>拖入音乐.mp3")
     self.playList = slidePanel
     self:addStack(slidePanel)
@@ -211,7 +211,7 @@ function PlaylistUI:_buildLocalPlayListStack()
     local vstack = Glove.VStack:new({}, 10)
     vstack:setName("playerlistui vstack _buildLocalPlayListStack")
 
-    local slidePanel = Glove.SlidePanel:new(vstack)
+    local slidePanel = Glove.SlidePanelStructer:new(vstack)
     slidePanel:setTitle("tmp本地列表:")
     self.LocalPlayList = slidePanel
     slidePanel.color = {1, 1, 1, 1} -- 设置滑动面板的颜色为白色
@@ -241,6 +241,10 @@ function PlaylistUI:updatePlayListStateText()
             local isCurrent = (i == currentIndex)
             local prefix = isCurrent and "[播放中] " or ""
             itemInfo.textWidget:setText(prefix .. info.name .. (isCurrent and waitingText or ""))
+            -- itemInfo.button.clickFunc = function()
+            --     audio:removePlayMusic(info.name)
+            --     -- self:removePlayListItem(name)
+            -- end
             if isCurrent then
                 itemInfo.textWidget.color = playingColor
             else
