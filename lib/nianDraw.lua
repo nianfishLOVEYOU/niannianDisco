@@ -102,6 +102,7 @@ function nianDraw:renderDepthCanvas()
     -- 深度绘制
     for _, obj in ipairs(self.drawObjects) do
         self.shader:send("deeptexture", self.depthCanvas)
+        --print("Rendering depth :",obj.drawInfo.name, obj.drawInfo.depth, "z:", obj.drawInfo.z, "layer:", obj.drawInfo.layer)
         self.shader:send("depth", obj.drawInfo.depth)
         self.shader:send("z", obj.drawInfo.z)
         self.shader:send("layer", obj.drawInfo.layer)
@@ -143,6 +144,7 @@ function nianDraw:drawFinal()
     self.drawByShaderObjects = {} -- 清空渲染列表
 end
 
+-- 注册绘制对象
 function nianDraw:drawReg(drawInfo)
     table.insert(nianDraw.drawObjects, {
         drawInfo = drawInfo,

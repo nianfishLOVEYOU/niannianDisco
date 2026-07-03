@@ -20,10 +20,10 @@ end
 
 function RoomUI:init()
     self.oldChannel = -1
-    audio.playlist = globleManager:getGameData("playlist") or {}
-    self:refresh()
-    eventManager:on("connectFail", connectFail)
-    eventManager:on("connectSeccess", connectSeccess)
+    -- audio.playlist = globleManager:getGameData("playlist") or {}
+    --self:refresh()
+    -- eventManager:on("connectFail", connectFail)
+    -- eventManager:on("connectSeccess", connectSeccess)
 
     -- 一开始连接0号
     --self:_ChangeRoom(0)
@@ -91,9 +91,9 @@ end
 
 function RoomUI:draw()
     -- 画一个长方形在底下
-    love.graphics.setColor(1, 1, 1, 1) -- 设置颜色为白色
-    local width, height = love.graphics.getDimensions()
-    love.graphics.rectangle("fill", 0, height - tall, width, tall) -- 在底部画一个长方形
+    -- love.graphics.setColor(1, 1, 1, 1) -- 设置颜色为白色
+    -- local width, height = love.graphics.getDimensions()
+    -- love.graphics.rectangle("fill", 0, height - tall, width, tall) -- 在底部画一个长方形
     self:drawStacks()
 end
 

@@ -15,10 +15,7 @@ systemManager:mousepressed_regester(function(x, y, button)
     NianAI:click(x, y, button)
 end)
 systemManager:mouseLeased_regester(function(x, y, button)
-    -- 处理鼠标释放事件
-    if floatUI then
-        floatUI:addFloatText("Hello, Nian!", x - 10, y - 10)
-    end
+
 end)
 systemManager:keypressed_regester(function(key)
     NianAI:keypressed(key)

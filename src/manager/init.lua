@@ -8,7 +8,6 @@ uiManager = require "src.manager.uiManager"
 globleManager = require "src.manager.globleManager"
 resourceManager = require "src.manager.resourceManager"
 
-gridManager = require "src.manager.gridManager"
 itemManager = require "src.manager.itemManager"
 
 playerManager = require "src.manager.playerManager"

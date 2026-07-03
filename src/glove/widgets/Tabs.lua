@@ -137,6 +137,10 @@ function Tabs:setSize(w, h)
 end
 
 function Tabs:onClick(x, y, button)
+    if self.interaction ==false then
+        return
+    end
+
     local currentTab = self.tabs[self.selectedTabIndex]
     local clicked = self:isOver(x, y)
     if clicked then
@@ -146,10 +150,14 @@ function Tabs:onClick(x, y, button)
             self.onChange(index)
         end
 
-        currentTab.widget.visiable = false
-        newTab.widget.visiable = true
+        if currentTab.widget  then
+            currentTab.widget.visiable = false
+        end
+        if newTab.widget then
+            newTab.widget.visiable = true
+        end
 
-        self.selectedTabIndex= index
+        self.selectedTabIndex = index
         print("从：", currentTab.label, "到：", newTab.label)
     end
 
@@ -159,7 +167,6 @@ end
 function Tabs:onClickOver(x, y, button)
     -- self.onChange()
 end
-
 
 function Tabs:getSelect(mouseX, mouseY)
     local x = self.x

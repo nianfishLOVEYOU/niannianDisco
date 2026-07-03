@@ -78,7 +78,7 @@ function WheelSelectionUI:init(options)
     self.ballRadius = 34
     self.ballInterval = 30
     self.iconSize = 42
-    self.psdindent=30 --点击范围缩入
+    self.psdindent=36 --点击范围缩入
     self.attractRadius = 100 -- 移动影响距离
     self.selectRadius = 48 -- 选择半径
     self.attractStrength = 20 -- 移动强度
@@ -152,7 +152,7 @@ function WheelSelectionUI:isInTriggerArea(x, y)
     local nianocUI = uiManager:getUI("nianocUI")
     if nianocUI then
         local nianocX, nianocY = nianocUI.psdData.x+self.psdindent, nianocUI.psdData.y
-        local nianocW, nianocH = nianocUI.psdData.w-self.psdindent, nianocUI.psdData.h
+        local nianocW, nianocH = nianocUI.psdData.w-self.psdindent, nianocUI.psdData.h-self.psdindent
         return x >= nianocX and x <= nianocX + nianocW and y >= nianocY and y <= nianocY + nianocH
     end
     return false
@@ -306,7 +306,7 @@ function WheelSelectionUI:drawTriggerArea()
     local nianocUI = uiManager:getUI("nianocUI")
     if nianocUI then
         local nianocX, nianocY = nianocUI.psdData.x+self.psdindent, nianocUI.psdData.y
-        local nianocW, nianocH = nianocUI.psdData.w-self.psdindent, nianocUI.psdData.h
+        local nianocW, nianocH = nianocUI.psdData.w-self.psdindent, nianocUI.psdData.h-self.psdindent
         love.graphics.setColor(1, 0, 0, 0.5)
         love.graphics.rectangle("line", nianocX, nianocY, nianocW, nianocH)
         if drawOutlinedText then

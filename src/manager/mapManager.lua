@@ -1,11 +1,17 @@
 -- src/map_loader.lua
 local json = require "lib.json" -- 需要放入 json.lua（常用的纯 Lua JSON 库）
 local Item = require "src.item.item"
+local itemFactory = require "src.map.itemFactory"
 
 local mapManager = {}
 
-local itemFactory = require "src.map.itemFactory"
-local gridFactory = require "src.map.gridFactory"
+
+function mapManager:init()
+    self.itemFactory = itemFactory:new("src/item/items")
+    self.gridFactory = itemFactory:new("src/item/grids")
+end
+
+mapManager:init()
 
 -- 转网格坐标
 function mapManager:toGridIndex(worldx, worldy)
@@ -43,103 +49,58 @@ function mapManager:getMapItem(indexx, indexy)
     return nil
 end
 
---- 读取并解析地图文件
---- @param mapFile 相对根目录的 JSON 路径，例如 "maps/map01.json"
---- @return table 包含 fields: backgroundImage (Image), items (list of Item)
-function mapManager:_loadMapFile(mapFile)
-    local raw = love.filesystem.read(mapFile)
-    if not raw then
-        error("无法读取地图文件：" .. mapFile .. "，创建一个空地图")
-        return nil
-    end
-    print("加载地图文件:", mapFile)
-    local data = json.decode(raw)
-
-    self.map = data
-
-    local w = data.size.width
-    local h = data.size.height
-    print("地图大小：", w, h)
-
-    -- 解析 items
-    if self.map.items and #self.map.items > 0 then
-        for x, itemsCol in ipairs(self.map.items) do
-            for y, itemdata in ipairs(itemsCol) do
-                if itemdata ~= 0 then
-                    
-                    print("load 创建物体：", itemdata.type, "坐标：", x, y)
-                    self:addItem(itemdata.type, x, y,true)
-                end
-            end
-        end
-    end
-
-    -- 解析 grids
-    if self.map.grids and #self.map.grids > 0 then
-        for x, gridCol in ipairs(self.map.grids) do
-            for y, gridType in ipairs(gridCol) do
-                if gridType ~= 0 then
-                    print("load 创建地块：", gridType, "坐标：", x, y)
-                    self:addGrid(gridType, x, y,true)
-                end
-            end
-        end
-    end
-
-    -- 解析背景图片
-    if self.map.background and self.map.background ~= "" then
-        self.map.background = love.graphics.newImage(self.map.background)
-    end
-
-end
-
 -- 添加物体
 function mapManager:addItem(type, indexx, indexy, isLoading)
     local itemType = type
-    local x, y = mapManager:toGridPos(indexx, indexy)
+    local x, y = self:toGridPos(indexx, indexy)
 
-    if not isLoading and  mapManager:getMapItem(indexx, indexy) then
+    if not isLoading and self:getMapItem(indexx, indexy) then
         return
     end
     print("addItem xy:", indexx, indexy, "物体类型：", itemType)
-    local newItem = itemFactory:newItem(itemType)
+    local newItem = self.itemFactory:newItem(itemType)
     newItem:setPos(x, y)
     newItem.type = itemType
     itemManager:addItem(newItem)
-    mapManager.map.items[indexx][indexy] = newItem
+    self.map.items[indexx][indexy] = newItem
 
 end
 
 -- 删除物体
 function mapManager:removeItem(indexx, indexy)
-    local item = mapManager:getMapItem(indexx, indexy)
+    local item = self:getMapItem(indexx, indexy)
     if item then
         itemManager:removeItem(item.id)
-        mapManager.map.items[indexx][indexy]:destroy()
-        mapManager.map.items[indexx][indexy] = 0
+        self.map.items[indexx][indexy]:destroy()
+        self.map.items[indexx][indexy] = 0
     end
 end
 
 -- 地块添加
 function mapManager:addGrid(type, indexx, indexy, isLoading)
-    local px, py = mapManager:toGridPos(indexx, indexy)
-    if not isLoading and mapManager:getMapItem(px, py) then
+    local itemType = type
+    local x, y = self:toGridPos(indexx, indexy)
+
+    if not isLoading and self:getMapGrid(indexx, indexy) then
         return
     end
-    print("addGrid xy:", indexx, indexy, "地块类型：", type)
-    local image = gridFactory:newGrid(type)
-    image:setPos(px, py)
-    image:setSize(mapManager.map.gridSize, mapManager.map.gridSize)
-    image:setAnchor(0.5, 1)
-    image.type = type
-    gridManager:addGrid(image, indexx, indexy)
-    mapManager.map.grids[indexx][indexy] = image
+    print("addItem xy:", indexx, indexy, "地板类型：", itemType)
+    local newItem = self.gridFactory:newItem(itemType)
+    newItem:setPos(x, y)
+    newItem.type = itemType
+    itemManager:addItem(newItem)
+    self.map.grids[indexx][indexy] = newItem
+
 end
 
 -- 地块删除
 function mapManager:removeGrid(indexx, indexy)
-    mapManager.map.grids[indexx][indexy] = 0
-    gridManager:removeGrid(indexx, indexy)
+    local item = self:getMapGrid(indexx, indexy)
+    if item then
+        itemManager:removeItem(item.id)
+        self.map.grids[indexx][indexy]:destroy()
+        self.map.grids[indexx][indexy] = 0
+    end
 end
 
 function mapManager:creatMap(w, h)
@@ -163,9 +124,9 @@ end
 function mapManager:loadMap(mapPath)
     self:closeMap()
     if love.filesystem.getInfo(mapPath) then
-        print("地图文件存在，加载地图：", mapPath)
         self:_loadMapFile(mapPath)
-        cameraManager.cam:setPosition(self.map.startPoint.x, self.map.startPoint.y)
+        --cameraManager.cam:setPosition(self.map.startPoint.x, self.map.startPoint.y)
+        print("地图文件存在，加载地图：", mapPath, "起始点：", self.map.startPoint.x, self.map.startPoint.y)
         return self.map
     else
         print("地图文件不存在，创建一个空地图")
@@ -173,6 +134,58 @@ function mapManager:loadMap(mapPath)
         return self.map
     end
 end
+
+
+--- 读取并解析地图文件
+--- @param mapFile 相对根目录的 JSON 路径，例如 "maps/map01.json"
+--- @return table 包含 fields: backgroundImage (Image), items (list of Item)
+function mapManager:_loadMapFile(mapFile)
+    local raw = love.filesystem.read(mapFile)
+    if not raw then
+        error("无法读取地图文件：" .. mapFile .. "，创建一个空地图")
+        return nil
+    end
+    print("加载地图文件:", mapFile)
+    local data = json.decode(raw)
+
+    self.map = data
+
+    local w = data.size.width
+    local h = data.size.height
+    print("地图大小：", w, h)
+
+    -- 解析 items
+    if self.map.items and #self.map.items > 0 then
+        for x, itemsCol in ipairs(self.map.items) do
+            for y, itemdata in ipairs(itemsCol) do
+                if itemdata ~= 0 then
+
+                    print("load 创建物体：", itemdata.type, "坐标：", x, y)
+                    self:addItem(itemdata.type, x, y, true)
+                end
+            end
+        end
+    end
+
+    -- 解析 grids
+    if self.map.grids and #self.map.grids > 0 then
+        for x, gridCol in ipairs(self.map.grids) do
+            for y, gridType in ipairs(gridCol) do
+                if gridType ~= 0 then
+                    print("load 创建地块：", gridType, "坐标：", x, y)
+                    self:addGrid(gridType, x, y, true)
+                end
+            end
+        end
+    end
+
+    -- 解析背景图片
+    if self.map.background and self.map.background ~= "" then
+        self.map.background = love.graphics.newImage(self.map.background)
+    end
+
+end
+
 
 function mapManager:closeMap()
     -- self.map = nil
@@ -183,6 +196,7 @@ function mapManager:saveMap(outFile)
     print("保存地图到:", outFile)
     self._save(self.map, outFile)
 end
+
 
 --- mapTable 包含items  startPoint
 --- 将地图对象保存为 JSON（编辑器使用）

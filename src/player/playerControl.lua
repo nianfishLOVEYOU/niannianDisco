@@ -1,10 +1,19 @@
 local playerControl = {
-    interactItem=nil
+    interactItem = nil,
+    playerAction = true
 }
 
 function playerControl:update(dt)
-
-    --self:interact(itemManager.items)
+    if not self.playerAction then
+        return
+    end
+    -- 通过 setPosition 把新位置写回摄像机
+    if playerManager.player then
+        local playerx = playerManager.player.x + playerManager.player.w / 2
+        local playery = playerManager.player.y + playerManager.player.h / 2
+        cameraManager:setTarget(playerx, playery)
+    end
+    -- self:interact(itemManager.items)
 end
 
 -- AABB 检查在范围内
@@ -12,7 +21,6 @@ local function checkInrange(ax, ay, aw, ah, bx, by, bw, bh)
     local range = 90
     return (ax - bx) * (ax - bx) + (ay - by + bw / 2) * (ay - by + bw / 2) <= range * range
 end
-
 
 -- 进入交互范围检测
 function playerControl:interactInter(type)
@@ -40,7 +48,7 @@ function playerControl:mousePressed(x, y, button)
         x, y = cameraManager.cam:toWorld(x, y)
         playerManager.player:gotoPos(x, y)
         local msg = {
-            userid=network.userid,
+            userid = network.userid,
             type = "playermove",
             x = x,
             y = y,
@@ -50,22 +58,21 @@ function playerControl:mousePressed(x, y, button)
     end
 end
 
-
 function playerControl:draw()
-    local player =playerManager.player
+    local player = playerManager.player
     if player.moveToTarget and player.targetX and player.targetY then
         -- love.graphics.setColor(1, 0, 0)
         -- love.graphics.circle("fill", player.targetX, player.targetY, 3)
-        local siny=math.sin(love.timer.getTime()*20)*5
-        local moveh =10
+        local siny = math.sin(love.timer.getTime() * 20) * 5
+        local moveh = 10
         love.graphics.setColor(0, 0, 0)
-        love.graphics.circle("fill", player.targetX, player.targetY+siny -moveh, 5)
-        love.graphics.circle("fill", player.targetX-3, player.targetY+siny -moveh-3, 5)
-        love.graphics.circle("fill", player.targetX+3, player.targetY+siny -moveh-3, 5)
+        love.graphics.circle("fill", player.targetX, player.targetY + siny - moveh, 5)
+        love.graphics.circle("fill", player.targetX - 3, player.targetY + siny - moveh - 3, 5)
+        love.graphics.circle("fill", player.targetX + 3, player.targetY + siny - moveh - 3, 5)
 
-        love.graphics.print("到这>a<", player.targetX-20, player.targetY+siny -50)
+        love.graphics.print("到这>a<", player.targetX - 20, player.targetY + siny - 50)
         love.graphics.setColor(1, 1, 1)
-        --love.graphics.line(self.x, self.y, self.targetX, self.targetY)
+        -- love.graphics.line(self.x, self.y, self.targetX, self.targetY)
     end
 
     -- 事件通知
@@ -74,6 +81,10 @@ function playerControl:draw()
         -- player.infoImage:draw()
         -- love.graphics.print("Q", x + player.w, player.y - player.h - 30)
     end
+end
+
+function playerControl:keydown(key)
+    
 end
 
 return playerControl

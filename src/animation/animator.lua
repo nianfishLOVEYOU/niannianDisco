@@ -78,6 +78,8 @@ function Animator.new()
     return self
 end
 
+--     -- 添加多条轨道：位置X、位置Y、缩放、颜色
+--     -- 参数：轨道名, 目标, 字段, 启用, 循环, 往返, 插值模式
 function Animator:addTrack(trackName, target, pathInput, enable, loop, pingpong, ease)
     if self.tracks[trackName] then
         print("!!!  Track already exists: " .. trackName)
@@ -105,6 +107,8 @@ function Animator:clearKeyframes(trackName)
     if not tr then
         return
     end
+    tr.playing = false
+    tr.time = 0
     self.tracks[trackName] = nil
 end
 
@@ -159,10 +163,14 @@ function Animator:sampleTrack(track)
     local startTime = f[1].time
     local endTime = f[#f].time
     local duration = endTime - startTime
-
     local t = track.time
 
-    -- 循环 + 往返（pingpong）逻辑修复
+    -- 不循环且播放超过结束时间：直接返回终点值，固定不动
+    if not track.loop and t >= endTime then
+        return f[#f].value
+    end
+
+    -- 循环 + 往返（pingpong）逻辑
     if track.loop and duration > 0 then
         local cycle = t / duration
         local integral = math.floor(cycle)
@@ -207,6 +215,15 @@ function Animator:update(dt)
         if not tr.enabled or not tr.playing then
             goto cont
         end
+
+        local f = tr.keyframes
+        local endTime = #f > 0 and f[#f].time or 0
+        -- 非循环轨道播放完成直接暂停
+        if not tr.loop and tr.time >= endTime then
+            tr.playing = false
+            goto cont
+        end
+
         tr.time = tr.time + dt * self.globalSpeed * tr.speed
         local val = self:sampleTrack(tr)
         if val ~= nil then

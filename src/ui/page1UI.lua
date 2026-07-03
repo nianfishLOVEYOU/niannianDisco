@@ -9,21 +9,19 @@ local page1UI = ui:extend()
 function page1UI:init()
 
     
-    -- 立绘ui
-    local nianocUI = require("src.ui.nianocUI"):new()
-    uiManager:addUI("nianocUI",nianocUI)
-    self:addChild(nianocUI)
-    local playerUI = require("src.ui.playerUI"):new()
-    uiManager:addUI("playerUI", playerUI)
-    self:addChild(playerUI)
+    
     local playlistUI = require("src.ui.playlistUI"):new()
     uiManager:addUI("playlistUI", playlistUI)
     self:addChild(playlistUI)
     --切换频道
-    -- local roomUI = require("src.ui.roomUI"):new()
-    -- uiManager:addUI("roomUI", roomUI)
-    -- self:addChild(roomUI)
+    local roomUI = require("src.ui.roomUI"):new()
+    uiManager:addUI("roomUI", roomUI)
+    self:addChild(roomUI)
     
+    -- 立绘ui
+    local nianocUI = require("src.ui.nianocUI"):new()
+    uiManager:addUI("nianocUI",nianocUI)
+    self:addChild(nianocUI)
 
     local wheelSelectionUI = require("src.ui.wheelSelectionUI"):new()
     uiManager:addUI("wheelSelectionUI", wheelSelectionUI)
@@ -45,6 +43,7 @@ end
 function page1UI:update(dt)
 
 end
+
 
 function page1UI:dragProgress(progress)
     local duration = audio:getCurrentDuration()

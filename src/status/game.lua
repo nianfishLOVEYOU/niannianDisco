@@ -2,7 +2,6 @@
 local Game = {}
 
 
-
 function Game:init()
     --ui
     mapManager:loadMap("res/maps/edited.json")
@@ -14,23 +13,16 @@ function Game:init()
     --左右切换页面系统
     local pageControlUI = require("src.ui.pageControlUI"):new()
     uiManager:addUI("pageControlUI",pageControlUI)
-
-    
+    playerManager:addPlayer(mapManager.map.startPoint.x,mapManager.map.startPoint.y)
     
 end
 
 
 
+
 function Game:update(dt)
 
-    -- 通过 setPosition 把新位置写回摄像机
-    if playerManager.player then
-        local playerx=playerManager.player.x+playerManager.player.w/2
-        local playery =playerManager.player.y+playerManager.player.h/2
-        local x,y =cameraManager.cam:getPosition()
-        local t=0.2
-        cameraManager.cam:setPosition(lerp(x,playerx,t),lerp(y,playery,t) )
-    end
+
 
     --设置地图
 

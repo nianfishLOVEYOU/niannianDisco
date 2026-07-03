@@ -180,6 +180,11 @@ function mapEditor:keyPressed(key)
         cameraManager.cam:setScale(cameraManager.cam:getScale() - 0.2)
     elseif key == "p" then
         cameraManager.cam:setScale(cameraManager.cam:getScale() + 0.2)
+    elseif key == "i" then
+        -- 设置出身点
+        local worldX, worldY = cameraManager.cam:toWorld(love.mouse.getX(), love.mouse.getY())
+        mapManager.map.startPoint.x = worldX
+        mapManager.map.startPoint.y = worldY
     elseif key == "delete" then
         if mapEditor.selected then
             self:removeItem(mapEditor.selected)
@@ -253,6 +258,8 @@ function mapEditor:draw()
     -- 绘制物体中心点
     mapEditor:printItemCenter()
     -- 画完辅助框后恢复颜色
+    lg.setColor(1, 0, 0, 1)
+    lg.rectangle("fill", mapManager.map.startPoint.x, mapManager.map.startPoint.y, 10, 10)
     lg.setColor(1, 1, 1, 1)
 end
 

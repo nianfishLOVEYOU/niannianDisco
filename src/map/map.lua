@@ -1,8 +1,8 @@
 local Map={
     name="map-1",
     startPoint={
-        x=100,
-        y=100
+        x=600,
+        y=600
     },
     gridSize=100, --网格大小，默认32像素
     size = {
@@ -18,8 +18,8 @@ local function createMap()
     return {
         name="map-1",
         startPoint={
-            x=100,
-            y=100
+            x=600,
+            y=600
         },
         gridSize=100, --网格大小，默认32像素
         size = {

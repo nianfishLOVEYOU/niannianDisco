@@ -1,11 +1,12 @@
 local player = require("src.player.player")
 local remotePlayer = require("src.player.remotePlayer")
-local playerControl = require("src.player.playerControl")
+local bonfireArea = require("src.map.bonfireArea") --限制玩家位置
 
 local PlayerManager = {
     name = "我!",
     player = nil,
-    remotePlayers = {}
+    remotePlayers = {},
+    playerControl = require("src.player.playerControl")
 }
 
 systemManager:update_regester(function(dt)
@@ -45,7 +46,7 @@ end
 
 function PlayerManager:keypressed(key)
     if self.player then
-        playerControl:keydown(key)
+        self.playerControl:keydown(key)
     end
 end
 
@@ -64,7 +65,7 @@ function PlayerManager:mousePressed(x, y, button)
     end
 
     if self.player then
-        playerControl:mousePressed(x, y, button)
+        self.playerControl:mousePressed(x, y, button)
     end
 end
 
@@ -83,19 +84,22 @@ function PlayerManager:removeRemotePlayer(id)
 end
 
 function PlayerManager:update(dt)
+
     if self.player then
-        playerControl:update(dt)
+        self.playerControl:update(dt)
         self.player:update(dt)
     end
     for k, rp in pairs(self.remotePlayers) do
         rp:update(dt)
     end
+
+
 end
 
 function PlayerManager:draw()
     if self.player then
         self.player:draw()
-        playerControl:draw()
+        self.playerControl:draw()
     end
     for k, rp in pairs(self.remotePlayers) do
         rp:draw()

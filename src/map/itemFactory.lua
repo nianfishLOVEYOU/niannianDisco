@@ -1,23 +1,28 @@
-local ItemFactory = {
-    types = {},
-    news = {}
-}
+-- Item.lua
+local object = require "src.common.object"
+local ItemFactory = object:extend()
 
--- 自动加载 src/item 目录下的所有 Lua 文件，注册为可用的 item 类型
-local itemFiles = love.filesystem.getDirectoryItems("src/item")
-table.sort(itemFiles)
-local excludedModules = {
-    item = true,
-    bodyItem = true,
-    imageItem = true
-}
+--path要是/格式的
+function ItemFactory:init(path)
+    self.types = {}
+    self.news = {}
 
-for _, file in ipairs(itemFiles) do
-    if file:match("%.lua$") then
-        local module = file:gsub("%.lua$", "")
-        if not excludedModules[module] then
-            table.insert(ItemFactory.types, module)
-            ItemFactory.news[module] = require("src.item." .. module)
+    -- 自动加载 src/item/items 目录下的所有 Lua 文件，注册为可用的 item 类型
+    local itemFiles = love.filesystem.getDirectoryItems(path)
+    table.sort(itemFiles)
+    local excludedModules = {
+        item = true,
+        bodyItem = true,
+        imageItem = true
+    }
+
+    for _, file in ipairs(itemFiles) do
+        if file:match("%.lua$") then
+            local module = file:gsub("%.lua$", "")
+            if not excludedModules[module] then
+                table.insert(self.types, module)
+                self.news[module] = require(path .. "/" .. module)
+            end
         end
     end
 end

@@ -13,7 +13,7 @@ function item:init()
     self.type = "item"
 
     self.x, self.y = 10, 10
-    self.z = 0
+    self.z = 1 --0是地板，1是普通
 
     self.localX, self.localY = 0, 0 -- 和父母的相对位置，用来区别普通位置
     self.localZ = 0
@@ -39,7 +39,7 @@ function item:init()
     -- 清理方法
 
     -- 可交互
-    self.interaction = false
+    self.interaction = true
 end
 
 function item:setVisiable(visiable)

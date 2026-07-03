@@ -7,7 +7,13 @@ local pageControlUI = ui:extend()
 function pageControlUI:init()
     self.currentPage = 1
     self.pages = {}
+
+    local playerUI = require("src.ui.playerUI"):new()
+    uiManager:addUI("playerUI", playerUI)
+    self:addChild(playerUI)
+
     self:refresh()
+
 end
 
 function pageControlUI:update(dt)
@@ -36,31 +42,39 @@ function pageControlUI:buildPage()
     self.pages[2] = page2UI
 
     local tabList = {{
-        label = "首页",
-        widget = page1UI
+        label = "一起听"
+        -- widget = page1UI
     }, {
-        label = "篝火堆",
-        widget = page2UI
+        label = "篝火堆"
+        -- widget = page2UI
     }}
 
     -- 3. 创建Tabs控件实例
     local tabWidget = Glove.Tabs:new(tabList, {
-        color = {1,1,1}, -- 标签条颜色
-        backgroundColor = {0,0,0}, -- 标签条背景颜色
-        lineColor = {1,1,1}, -- 标签条下划线颜色
+        color = {1, 1, 1}, -- 标签条颜色
+        backgroundColor = {0, 0, 0}, -- 标签条背景颜色
+        lineColor = {1, 1, 1}, -- 标签条下划线颜色
         onChange = function(newIndex)
-            --self:turnPage(newIndex)
+            self:turnPage(newIndex)
         end
     })
+    self.tab = tabWidget
 
     local stack = Glove.VStack:new({tabWidget}, 10)
-    stack:setPos( love.graphics.getWidth()/2 -50, love.graphics.getHeight()-150)
+    stack:setPos(love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() - 140)
     self:addStack(stack)
+
+    self:turnPage(1)
 end
 
 local animationIsOver = true
 function pageControlUI:turnPage(index)
-    if true then 
+
+    if index == 1 then
+        self:_toUi()
+        return
+    elseif index == 2 then
+        self:_toPlayer()
         return
     end
 
@@ -88,6 +102,38 @@ function pageControlUI:turnPage(index)
     animationIsOver = false
 
     -- self:refresh()
+end
+
+function pageControlUI:_toPlayer()
+    playerManager.playerControl.playerAction = true
+    if playerManager.player then --移动摄像机到玩家
+        cameraManager:setTarget(playerManager.player.x, playerManager.player.y)
+    end
+    self:_TurnP2Ani()
+end
+
+function pageControlUI:_toUi()
+    playerManager.playerControl.playerAction = false
+    if playerManager.player then --移动摄像机离开玩家
+        cameraManager:setTarget(-100, playerManager.player.y)
+    end
+    self:_TurnP1Ani()
+end
+
+function pageControlUI:_TurnP1Ani()
+    self.tab.interaction = false
+    aniExtend.uiLeftIn(self.pages[1], 0.8, 500, function()
+        self.tab.interaction = true
+    end)
+    -- aniExtend.uiLeftOut(self.pages[2], 0.3, 100)
+end
+
+function pageControlUI:_TurnP2Ani()
+    self.tab.interaction = false
+    aniExtend.uiLeftOut(self.pages[1], 0.8, 500, function()
+        self.tab.interaction = true
+    end)
+    -- aniExtend.uiLeftIn(self.pages[2], 0.3, 100)
 end
 
 function pageControlUI:destroy()

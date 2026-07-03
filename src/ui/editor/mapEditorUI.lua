@@ -1,13 +1,10 @@
 local ui = require "src.ui.ui"
 local MapEditorUI = ui:extend()
 
-local itemFactory = require "src.map.itemFactory"
-local gridFactory = require "src.map.gridFactory"
-
-local itemTypes = itemFactory.types
-local itemnews = itemFactory.news
-
 function MapEditorUI:init(editor)
+
+    self.itemFactory = mapManager.itemFactory
+    self.gridFactory = mapManager.gridFactory
     -- editor 是逻辑层的 mapEditor（src/map/mapEditor.lua）
     self.editor = editor
     self:refresh()
@@ -30,9 +27,13 @@ function MapEditorUI:draw()
     local width, height = love.graphics.getDimensions()
 
     love.graphics.setColor(1, 0, 0, 0.9)
+
+    love.graphics.setFont(smallFont)
     love.graphics.print(
-        "左键：选中  右键：创建/菜单  滚轮：切换  S：保存  Delete：删除选中块", 10,
+        "左键：添加/创建菜单  右键：删除   S：保存  OP：摄像机缩放  I：设置出身点", 6,
         height - 30)
+    love.graphics.setFont(myFont)
+
     love.graphics.setColor(1, 1, 1, 1)
 end
 
@@ -75,14 +76,14 @@ function MapEditorUI:_setBrush(value)
     print("选择笔刷类型：", value)
     if value == "item" then
         local burshTable = {}
-        for _, itemType in ipairs(itemFactory.types) do
+        for _, itemType in ipairs(self.itemFactory.types) do
             table.insert(burshTable, {
                 label = itemType,
                 value = itemType
             })
         end
         local burshRadioButtons = Glove.RadioButtons:new(burshTable, function(value)
-            self.editor.selectItemBrushType  = value
+            self.editor.selectItemBrushType = value
             print("当前物体笔刷：", value)
         end)
         local stack = Glove.VStack:new({burshRadioButtons}, 10)
@@ -92,7 +93,7 @@ function MapEditorUI:_setBrush(value)
         print("当前笔刷：物体")
     elseif value == "grid" then
         local burshTable = {}
-        for _, gridType in ipairs(gridFactory.types) do
+        for _, gridType in ipairs(self.gridFactory.types) do
             table.insert(burshTable, {
                 label = gridType,
                 value = gridType
@@ -171,6 +172,5 @@ end
 function MapEditorUI:wheelmoved(x, y)
 
 end
-
 
 return MapEditorUI

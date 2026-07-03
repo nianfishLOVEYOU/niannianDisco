@@ -11,7 +11,7 @@ require "src.glove"
 
 network = require "src.network.network"
 audio = require "src.audio"
-
+animator = require "src.animation.animator".new()
 
 
 function love.load()
@@ -60,8 +60,8 @@ function love.focus(focus)
 end
 
 local function keypressed(k)
-    if k == "b" then -- B 键 - 切换地图编辑模式
-        --statusManager:statusChange("editor")
+    if k == "m" then -- B 键 - 切换地图编辑模式
+        statusManager:statusChange("editor")
     end
     if k == "n" then -- N 键 - 关闭网络线程
         network:closeNetThread()

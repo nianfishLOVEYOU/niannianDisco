@@ -1,6 +1,5 @@
 local ui = require "src.ui.ui"
 local psdData = require "src.common.artal.psdData"
-local animator = require("src.animator")
 local NianocUI = ui:extend()
 nianAI = require "src.common.nianAI.nianAI"
 
@@ -8,13 +7,12 @@ function NianocUI:init()
     nianocUI = self
     nianAI:init()
     self:refresh()
-    self.ani = animator.new()
-    print("NianocUI:init()", self.ani, animator)
+    self.ani = animator
     self.stateType = ""
     self.state = {}
     self.states = self:_createStates()
     self.isClickAniOver = true
-    self.clickNianZoom =5 --点击缩放比例
+    self.clickNianZoom = 5 -- 点击缩放比例
 
     -- self.nianImage = love.graphics.newImage("res/image/nianPlayer.png")
     -- 自己的位置跟着父亲走
@@ -27,7 +25,8 @@ end
 function NianocUI:_newNian()
     self.psdData = psdData:new("res/image/nian/nian.psd")
     -- self.psdData:setSize(100, 100)
-    self.psdData:setPos(self.x, self.y)
+    self:addChild(self.psdData)
+    self.psdData:setLocalPos(0, 0)
     self:changeState("idle")
     -- 添加播放按钮
 end
@@ -79,7 +78,7 @@ function NianocUI:_createStates()
 
         end,
         leave = function(self)
-            self.ani:clearKeyframes("psdy")
+            --self.ani:clearKeyframes("psdy")
         end
     }
 
@@ -121,7 +120,7 @@ function NianocUI:_createStates()
             self:_mouseAction("open")
             -- 动画
             self:_musicAni()
-            self.ani.globalSpeed = 3
+            self.ani.globalSpeed = 2
         end,
         update = function(self, dt)
 
@@ -163,6 +162,24 @@ function NianocUI:_createStates()
     states["clickUp"] = {
         start = function(self)
 
+        end,
+        update = function(self, dt)
+
+        end,
+        leave = function(self)
+
+        end
+    }
+
+    states["Leave"] = {
+        start = function(self)
+            -- 图层开关
+            self:_defaultPsd()
+            self:_eyeAction("right")
+            self:_mouseAction("happy")
+
+            -- 动画
+            self:_defaultAni()
         end,
         update = function(self, dt)
 
@@ -240,10 +257,10 @@ function NianocUI:_defaultAni()
 
     self:_clearAni()
     -- defaultEnable 默认启用 loop 循环 pinpon 来回
-    self.ani:addTrack("psdy", self.psdData, "y", true, true, false, "easeInOut")
-    self.ani:addKeyframe("psdy", 0, self.psdData.y - 4)
-    self.ani:addKeyframe("psdy", 2, self.psdData.y + 4)
-    self.ani:addKeyframe("psdy", 4, self.psdData.y - 4)
+    self.ani:addTrack("psdy", self.psdData, "localY", true, true, false, "easeInOut")
+    self.ani:addKeyframe("psdy", 0, self.psdData.localY - 4)
+    self.ani:addKeyframe("psdy", 2, self.psdData.localY + 4)
+    self.ani:addKeyframe("psdy", 4, self.psdData.localY - 4)
 
     self.ani:addTrack("clothes", self.psdData, "imgs.clothes.y", true, true, true, "easeInOut")
     self.ani:addKeyframe("clothes", 0, self.psdData.imgs.clothes.y - 1)
@@ -281,14 +298,14 @@ function NianocUI:_musicAni()
     self:_clearAni()
 
     -- defaultEnable 默认启用 loop 循环 pinpon 来回
-    self.ani:addTrack("psdy", self.psdData, "y", true, true, false, "easeInOut")
-    self.ani:addKeyframe("psdy", 0, self.psdData.y + 4)
-    self.ani:addKeyframe("psdy", 1, self.psdData.y - 4)
-    self.ani:addKeyframe("psdy", 2, self.psdData.y + 4)
-    self.ani:addTrack("psdx", self.psdData, "x", true, true, false, "easeInOut")
-    self.ani:addKeyframe("psdx", 0, self.psdData.x - 5)
-    self.ani:addKeyframe("psdx", 2, self.psdData.x + 5)
-    self.ani:addKeyframe("psdx", 4, self.psdData.x - 5)
+    self.ani:addTrack("psdy", self.psdData, "localY", true, true, false, "easeInOut")
+    self.ani:addKeyframe("psdy", 0, self.psdData.localY + 4)
+    self.ani:addKeyframe("psdy", 1, self.psdData.localY - 4)
+    self.ani:addKeyframe("psdy", 2, self.psdData.localY + 4)
+    self.ani:addTrack("psdx", self.psdData, "localX", true, true, false, "easeInOut")
+    self.ani:addKeyframe("psdx", 0, self.psdData.localX - 5)
+    self.ani:addKeyframe("psdx", 2, self.psdData.localX + 5)
+    self.ani:addKeyframe("psdx", 4, self.psdData.localX - 5)
 
     self.ani:addTrack("clothes", self.psdData, "imgs.clothes.y", true, true, true, "easeInOut")
     self.ani:addKeyframe("clothes", 0, self.psdData.imgs.clothes.y - 1)
@@ -326,10 +343,10 @@ function NianocUI:_clickAni()
     self:_clearAni()
 
     -- defaultEnable 默认启用 loop 循环 pinpon 来回
-    self.ani:addTrack("psdy", self.psdData, "y", true, false, false, "easeInOut")
-    self.ani:addKeyframe("psdy", 0, self.psdData.y - 5)
-    self.ani:addKeyframe("psdy", 0.1, self.psdData.y + 7)
-    self.ani:addKeyframe("psdy", 0.2, self.psdData.y - 5)
+    self.ani:addTrack("psdy", self.psdData, "localY", true, false, false, "easeInOut")
+    self.ani:addKeyframe("psdy", 0, self.psdData.localY - 5)
+    self.ani:addKeyframe("psdy", 0.1, self.psdData.localY + 7)
+    self.ani:addKeyframe("psdy", 0.2, self.psdData.localY - 5)
 
     self.ani:addTrack("clothes", self.psdData, "imgs.clothes.y", true, false, false, "easeInOut")
     self.ani:addKeyframe("clothes", 0, self.psdData.imgs.clothes.y - 1)
@@ -365,7 +382,7 @@ function NianocUI:getClick()
     if not self.isClickAniOver then
         return
     end
-    self.isClickAniOver=false
+    self.isClickAniOver = false
     local w, h = self.psdData.w, self.psdData.h
     self.ani:addTrack("getClick_W", self.psdData, "w", true, false, false, "easeIn")
     self.ani:addKeyframe("getClick_W", 0, w)
@@ -381,7 +398,7 @@ function NianocUI:getClick()
         print("")
         self.ani:clearKeyframes("getClick_W")
         self.ani:clearKeyframes("getClick_H")
-        self.isClickAniOver=true
+        self.isClickAniOver = true
     end)
 
 end
@@ -394,7 +411,7 @@ function NianocUI:getPress()
 end
 
 function NianocUI:getleave()
-    
+
     local w, h = self.psdData.w, self.psdData.h
     self.psdData.w = w - self.clickNianZoom
     self.psdData.h = h - self.clickNianZoom
@@ -409,12 +426,17 @@ function NianocUI:update(dt)
         self.states[self.state].update(self, dt)
     end
     self.ani:update(dt)
+    self.psdData:localPosRefresh() --从local位置刷新
 end
 
 function NianocUI:onClick(x, y, button)
     -- 点击图片位置
     if x >= self.x and x <= self.x + 400 * 0.5 and y >= self.y and y <= self.y + 500 * 0.5 then
         print("点击了nian接待员")
+    end
+    -- 处理鼠标释放事件
+    if floatUI then
+        floatUI:addFloatText("Hello, Nian!", x - 10, y - 10)
     end
 end
 

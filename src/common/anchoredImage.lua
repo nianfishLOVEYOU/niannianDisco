@@ -16,6 +16,7 @@ AnchoredImage.ANCHOR = {
 -- @param anchorX,anchorY 锚点比例（0~1，例如0.5,0.5是中心）
 function AnchoredImage:init(path, x, y, anchorX, anchorY)
     self.img = resourceManager.loadImage(path)
+    self.path = path
     if not self.img then
         print("!ERROR non path ! : " .. path)
 
@@ -139,10 +140,11 @@ function AnchoredImage:draw()
         self.depth = self.depth > 1 and 1 or self.depth
         self.depth = self.depth < 0 and 0 or self.depth
     end
-
+    --print("AnchoredImage:draw() depthByY:", self.depthByY, "depth:", self.depth, "y:", self.y)
     local drawInfo = {
         type = "draw",
         parameters = {},
+        name = self.path,
         depth = self.depth,
         color = self.color,
         z = self.z,
