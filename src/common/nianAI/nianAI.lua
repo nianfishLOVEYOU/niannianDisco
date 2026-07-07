@@ -70,8 +70,8 @@ end
 
 function NianAI:keypressed(key)
     if key == 'q' then
-        print("dialogebox create")
-        uiManager:getUI("floatUI"):addDialogeBox("hello world", playerManager.player)
+        print("DialogueBox create")
+        uiManager:getUI("floatUI"):addDialogueBox("hello world", playerManager.player)
         -- 创建一个对话
     end
 

@@ -46,7 +46,7 @@ function SlidePanel:init(content)
         self:setContent(content, self.spacingX, self.spacingY)
     else
         local vstack = Glove.VStack:new({}, 10)
-        vstack:setName("playerlistui vstack")
+        vstack:setName("slidePanel")
         self:setContent(vstack, self.spacingX, self.spacingY)
     end
 

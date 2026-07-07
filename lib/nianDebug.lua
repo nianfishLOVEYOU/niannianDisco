@@ -4,7 +4,7 @@ debugLogExtend.init()
 
 nianDebug = {}
 
--- 显示碰撞体积
+
 local function printCol()
     love.graphics.setColor(0, 1, 0, 0.3)
     love.graphics.setLineWidth(2)
@@ -15,17 +15,23 @@ local function printCol()
             local shapeType = shape:getType()
 
             if shapeType == "circle" then
-                -- 圆心在局部坐标 (0,0)，需要转成世界坐标
                 local x, y = body:getWorldPoints(shape:getPoint())
                 local radius = shape:getRadius()
                 love.graphics.circle("line", x, y, radius)
+
             elseif shapeType == "polygon" then
-                -- shape:getPoints() 返回局部坐标序列
                 local points = {body:getWorldPoints(shape:getPoints())}
                 love.graphics.polygon("line", points)
+
             elseif shapeType == "edge" then
                 local points = {body:getWorldPoints(shape:getPoints())}
                 love.graphics.line(points)
+
+            elseif shapeType == "chain" then
+                local localPoints = {shape:getPoints()}
+                local worldPoints = {body:getWorldPoints(unpack(localPoints))}
+                -- 直接用 polygon 绘制（自动闭合），适合闭环链
+                love.graphics.polygon("line", worldPoints)
             end
         end
     end

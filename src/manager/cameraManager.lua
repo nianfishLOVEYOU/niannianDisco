@@ -12,7 +12,8 @@ local t = 0.1
 cameraManager.cam = camera.new(-2000, -2000, 4000, 4000) -- 这里把整个游戏地图设为 2000×2000
 -- 若想让摄像机只占屏幕的一部分（比如 UI 区域），可以限制窗口：
 cameraManager.cam:setWindow(0, 0, love.graphics.getWidth(), love.graphics.getHeight()) -- 只在左上 800×600 区域绘制
-cameraManager.cam:setScale(0.7)
+
+cameraManager.cam:setScale(0.6)
 
 local targetPos = {
     x = 0,

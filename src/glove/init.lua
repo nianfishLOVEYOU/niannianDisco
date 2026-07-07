@@ -37,6 +37,8 @@ local mouseIsDown1 = false
 Glove = {
   widgets = {},
 
+  focusedWidget=nil,--有没有点到ui
+
   getAvailableHeight = function()
     return g.getHeight() - Glove.margin * 2
   end,
@@ -49,7 +51,7 @@ Glove = {
 
   margin = 20, -- inside window
 
-  isFocused = function(widget)
+  isFocused = function(widget) 
     return widget == focusedWidget
   end,
 
@@ -59,7 +61,7 @@ Glove = {
     local clickWidget = nil
     for _, widget in pairs(Glove.widgets) do
       
-      if widget:getRealVisiable() then
+      if widget:getRealVisiable() and widget.active then
         local _, _, z = widget:getPos()
         if widget:isOver(mouseX, mouseY) and not (nottype and widget.type == nottype) then
           -- 如果控件提供 isOver 方法，则让控件决定该点是否可被点击（用于裁剪区域内外判定）

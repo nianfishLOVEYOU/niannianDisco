@@ -455,6 +455,15 @@ function NianocUI:_defaultPsd() -- 无脸基础体
     self.psdData:getLayer("eyebrow").visiable = true
 end
 
+function NianocUI:addMessage()
+    floatUI:addDialogueBox("Hello, Nian!", self.x + 100, self.y - 50, {
+        typeSpeed = 10,
+        autoClose = 4,
+        tailX = self.x + 100,
+        tailY = self.y
+    })
+end
+
 function NianocUI:draw()
     -- 画一个自己的正方体
     -- love.graphics.setColor(1,0,0)

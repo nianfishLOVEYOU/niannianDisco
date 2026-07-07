@@ -65,9 +65,6 @@ function mapEditor:update(dt)
     end
 end
 
-local function floorToPixSize(x)
-    return math.floor(x / pixSize) * pixSize
-end
 
 
 
@@ -117,6 +114,14 @@ end
 
 function mapEditor:onClick(x, y, button)
     local worldX, worldY = cameraManager.cam:toWorld(x, y)
+    -- if Glove.focusedWidget then
+    --     return
+    -- end
+    local w = Glove.getFirstWidget(x, y)
+    if w then
+        return
+    end
+
     if button == 1 then -- 左键：选中
         mapEditor.selected = nil
         -- for _, item in pairs(itemManager.items) do
@@ -168,18 +173,20 @@ function mapEditor:mouseMoved(x, y, dx, dy, istouch)
 end
 
 function mapEditor:wheelMoved(dx, dy)
-
+    if dy < 0 then
+        cameraManager.cam:setScale(cameraManager.cam:getScale() - 0.1)
+    elseif dy > 0 then
+        cameraManager.cam:setScale(cameraManager.cam:getScale() + 0.1)
+    end
 end
+
 
 function mapEditor:keyPressed(key)
 
     if key == "s" then
         mapManager:saveMap("res/maps/edited.json")
         print("地图已保存到 res/maps/edited.json")
-    elseif key == "o" then
-        cameraManager.cam:setScale(cameraManager.cam:getScale() - 0.2)
-    elseif key == "p" then
-        cameraManager.cam:setScale(cameraManager.cam:getScale() + 0.2)
+
     elseif key == "i" then
         -- 设置出身点
         local worldX, worldY = cameraManager.cam:toWorld(love.mouse.getX(), love.mouse.getY())
@@ -244,7 +251,6 @@ function mapEditor:draw()
             lg.rectangle("line", posx, posy, sizeS, sizeS)
         end
     end
-
     -- 世界坐标中线
     lg.setColor(1, 0, 0, 1)
     local cam = cameraManager.cam

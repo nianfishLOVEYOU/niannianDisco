@@ -70,6 +70,7 @@ function uiManager:visiable(name, visiable)
     end
 end
 
+-- 排序
 function uiManager:addUI(name, ui)
     if (not self:getUI(name)) then
         self.nextOrder = self.nextOrder + 1

@@ -15,6 +15,7 @@ function Game:init()
     uiManager:addUI("pageControlUI",pageControlUI)
     playerManager:addPlayer(mapManager.map.startPoint.x,mapManager.map.startPoint.y)
     
+    --love.graphics.setBackgroundColor(0.7, 0.7, 0.7)
 end
 
 

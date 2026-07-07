@@ -30,6 +30,7 @@ end
 -- 确保没有被引用了
 function object:destroy()
     if self.__destroyed then
+        --nianDebug.printStackTrace("destory object: " .. tostring(self.type))
         print("! duble destory !",self.type, self.id)
         return
     end

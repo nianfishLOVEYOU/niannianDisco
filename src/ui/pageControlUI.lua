@@ -8,12 +8,20 @@ function pageControlUI:init()
     self.currentPage = 1
     self.pages = {}
 
+    self:refresh()
+    
     local playerUI = require("src.ui.playerUI"):new()
     uiManager:addUI("playerUI", playerUI)
     self:addChild(playerUI)
 
-    self:refresh()
+        -- 聊天界面 放在右下角
+    local dialogUI = require("src.ui.dialogUI"):new()
+    uiManager:addUI("dialog", dialogUI)
+    self:addChild(dialogUI)
+    dialogUI:setPos(300,playerUI.y+20)
 
+
+    self:buildPage()
 end
 
 function pageControlUI:update(dt)
@@ -25,7 +33,6 @@ end
 function pageControlUI:refresh()
     -- 创建本地列表
     self:clearStacks()
-    self:buildPage()
 
 end
 
@@ -40,6 +47,7 @@ function pageControlUI:buildPage()
     page2UI.visiable = false
     uiManager:addUI("page2UI", page2UI)
     self.pages[2] = page2UI
+
 
     local tabList = {{
         label = "一起听"
@@ -64,7 +72,12 @@ function pageControlUI:buildPage()
     stack:setPos(love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() - 140)
     self:addStack(stack)
 
-    self:turnPage(1)
+
+    
+
+    timer:after(0.1, function()
+        self:turnPage(1)
+    end)
 end
 
 local animationIsOver = true
@@ -98,6 +111,7 @@ function pageControlUI:turnPage(index)
             end
         })
     end
+    
     self.currentPage = newPage
     animationIsOver = false
 
@@ -115,29 +129,31 @@ end
 function pageControlUI:_toUi()
     playerManager.playerControl.playerAction = false
     if playerManager.player then --移动摄像机离开玩家
-        cameraManager:setTarget(-100, playerManager.player.y)
+        cameraManager:setTarget(-600, playerManager.player.y)
     end
     self:_TurnP1Ani()
 end
 
 function pageControlUI:_TurnP1Ani()
-    self.tab.interaction = false
-    aniExtend.uiLeftIn(self.pages[1], 0.8, 500, function()
-        self.tab.interaction = true
+    self.tab.active = false
+    aniExtend.uiRightIn(self.pages[1], 0.5, 400, function()
+        self.tab.active = true
     end)
     -- aniExtend.uiLeftOut(self.pages[2], 0.3, 100)
 end
 
 function pageControlUI:_TurnP2Ani()
-    self.tab.interaction = false
-    aniExtend.uiLeftOut(self.pages[1], 0.8, 500, function()
-        self.tab.interaction = true
+    self.tab.active = false
+    aniExtend.uiLeftOut(self.pages[1], 0.5, 400, function()
+        self.tab.active = true
     end)
-    -- aniExtend.uiLeftIn(self.pages[2], 0.3, 100)
+    -- aniExtend.uiRightIn(self.pages[2], 0.3, 100)
 end
 
 function pageControlUI:destroy()
     pageControlUI.super.destroy(self)
+    uiManager:removeUI("playerUI")
+    uiManager:removeUI("dialogUI")
 
 end
 

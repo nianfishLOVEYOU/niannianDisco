@@ -156,7 +156,6 @@ function PlaylistUI:addPlayListItem(name, index)
 end
 
 function PlaylistUI:removePlayListItem(name)
-    print("111111111 removePlayListItem", name)
     self.playList:remove(name)
     self.playListItemMap[name] = nil
 end

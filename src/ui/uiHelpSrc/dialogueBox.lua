@@ -14,6 +14,16 @@ local defaultConfig = {
     maxWidth = 100                -- 最大宽度
 }
 
+local function clamp(value, minValue, maxValue)
+    if value < minValue then
+        return minValue
+    end
+    if value > maxValue then
+        return maxValue
+    end
+    return value
+end
+
 -- 创建新的对话框实例
 function DialogueBox:new(text, x, y, targetX, targetY, config)
     local self = setmetatable({}, DialogueBox)
@@ -44,7 +54,13 @@ end
 -- 绘制对话框
 function DialogueBox:draw()
     local font = myFont or love.graphics.getFont()
-    local maxTextWidth = math.max(1, self.config.maxWidth)
+    local screenW = love.graphics.getWidth()
+    local screenH = love.graphics.getHeight()
+    local margin = 8
+    local padding = self.config.padding
+
+    -- 气泡宽度不能超过屏幕可用宽度，避免文字或背景超出屏幕
+    local maxTextWidth = math.max(1, math.min(self.config.maxWidth, screenW - margin * 2 - padding * 2))
 
     -- 按最大宽度换行并计算实际文本块尺寸
     local _, wrappedLines = font:getWrap(self.text or "", maxTextWidth)
@@ -55,25 +71,30 @@ function DialogueBox:draw()
     local boxW = maxTextWidth + 2 * self.config.padding
     local boxH = textH + 2 * self.config.padding
     -- self.y 作为气泡底边，文本增多时仅向上扩展，避免向下覆盖尾巴
-    local boxBottomY = self.y
+    local boxBottomY = clamp(self.y, margin + boxH, screenH - margin)
     local boxY = boxBottomY - boxH
+
+    -- 横向也做屏幕内约束，避免气泡整体跑出右侧或左侧
+    local drawX = clamp(self.x, margin, screenW - margin - boxW)
+    local drawBoxW = boxW
+    local drawBoxH = boxH
     
     -- 保存绘图状态
     love.graphics.push()
 
 
     -- 漫画风格尾巴：粗端贴在气泡边缘，细端指向目标点
-    local sideThreshold = self.x + boxW * 0.5
+    local sideThreshold = drawX + drawBoxW * 0.5
     local edgeInset = math.max(self.config.tailSize +  self.config.borderWidth, 2)
     local anchorX -- 尾巴根部X坐标，根据目标点位置决定贴在左边还是右边
     if self.targetX <= sideThreshold then
         -- 根部固定在左下
-        anchorX = self.x + edgeInset
+        anchorX = drawX + edgeInset
     else
         -- 根部固定在右下
-        anchorX = self.x + boxW - edgeInset
+        anchorX = drawX + drawBoxW - edgeInset
     end
-    local anchorY = boxY + boxH
+    local anchorY = boxY + drawBoxH
 
     -- 2. 绘制尾巴
     drawTail(anchorX, anchorY, self.targetX, self.targetY, 
@@ -82,14 +103,14 @@ function DialogueBox:draw()
 
     -- 1. 绘制背景
     love.graphics.setColor(self.config.bgColor)
-    drawRoundedRect("fill", self.x, boxY, boxW, boxH, self.config.borderRadius)
+    drawRoundedRect("fill", drawX, boxY, drawBoxW, drawBoxH, self.config.borderRadius)
 
 
 
     -- 3. 绘制边框
     love.graphics.setColor(self.config.borderColor)
     love.graphics.setLineWidth(self.config.borderWidth)
-    drawRoundedRect("line", self.x, boxY, boxW, boxH, self.config.borderRadius)
+    drawRoundedRect("line", drawX, boxY, drawBoxW, drawBoxH, self.config.borderRadius)
     
 
     
@@ -98,7 +119,7 @@ function DialogueBox:draw()
     love.graphics.setFont(font)
     love.graphics.printf(
         self.text or "",
-        self.x + self.config.padding,
+        drawX + self.config.padding,
         boxY + self.config.padding,
         maxTextWidth,
         "left"

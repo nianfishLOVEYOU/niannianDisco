@@ -15,15 +15,15 @@ function imageItem:init(imgPath)
         self.image = spriteAnimation:new(imgPath, 0, 0, 0.5, 1)
         -- 如果w h都为0则使用图片尺寸
         if self.w == 0 then
-            self.w = self.image.originalW * pixSize
+            self.w = self.image.originalW 
         end
         if self.h == 0 then
-            self.h = self.image.originalH * pixSize
+            self.h = self.image.originalH 
         end
     else
         self.image = spriteAnimation:new("res/image/nian.png", 0, 0, 0.5, 1)
-        self.w = self.image.originalW * pixSize
-        self.h = self.image.originalH * pixSize
+        self.w = self.image.originalW 
+        self.h = self.image.originalH 
     end
 end
 
@@ -61,8 +61,8 @@ function imageItem:setImage(imgPath, w, h)
     self.isQuid=false
     if imgPath ~= "" then
         self.image = spriteAnimation:new(imgPath, self.x, self.y, 0.5, 1)
-        self.w = w or self.image.originalW * pixSize
-        self.h = h or self.image.originalH * pixSize
+        self.w = w or self.image.originalW 
+        self.h = h or self.image.originalH 
     end
 end
 

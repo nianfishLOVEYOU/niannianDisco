@@ -7,6 +7,10 @@ function PlayerUI:init()
     audio.playlist = globleManager:getGameData("playlist") or {}
     self.playerStack=nil
     self:refresh()
+
+    local width, height = love.graphics.getDimensions()
+    local sw, sh = self.playerStack:getSize()
+    self:setPos(width / 2 - sw / 2, height - sh -20)
 end
 
 -- 更新播放列表显示
@@ -74,8 +78,8 @@ end
 
 function PlayerUI:buildStack()
     
-
     local width, height = love.graphics.getDimensions()
+
     ------playbutton------
     local playimg = audio.isPlaying and "res/image/ui/resume.png" or "res/image/ui/pase.png"
     local playButton = Glove.Button_img:new("", playimg, click)
@@ -124,10 +128,8 @@ function PlayerUI:buildStack()
     local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton,listButton} )
     local stack = Glove.VStack:new({ musiVoiceHStack, buttonHStack, sliderHStack },10,"center")
 
-    local sw, sh = stack:getSize()
-    stack:setPos(width / 2 - sw / 2, height - sh -20)
-    
     self:addStack(stack)
+    stack:setLocalPos(0,0)
     self.playerStack=stack
 end
 
@@ -204,6 +206,7 @@ end
 function PlayerUI:destroy()
     PlayerUI.super.destroy(self)
     -- uiManager:removeUI("playlistUI")
+    
 end
 
 return PlayerUI

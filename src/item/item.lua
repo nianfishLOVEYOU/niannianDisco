@@ -13,7 +13,7 @@ function item:init()
     self.type = "item"
 
     self.x, self.y = 10, 10
-    self.z = 1 --0是地板，1是普通
+    self.z = 1 -- 0是地板，1是普通
 
     self.localX, self.localY = 0, 0 -- 和父母的相对位置，用来区别普通位置
     self.localZ = 0
@@ -38,8 +38,10 @@ function item:init()
     self.isSaveInMap = false
     -- 清理方法
 
+    -- 活动
+    self.active = true --用来判断ui点击
     -- 可交互
-    self.interaction = true
+    self.interaction = false --用来做其他事情
 end
 
 function item:setVisiable(visiable)
@@ -61,7 +63,7 @@ end
 function item:printParentTree()
     local p = self
     while p do
-        print("Parent:",p.type, p.name ,"visiable:", p.visiable)
+        print("Parent:", p.type, p.name, "visiable:", p.visiable)
         p = p.parent
     end
 end
@@ -301,12 +303,16 @@ end
 
 function item:setPos(x, y, z)
     if self.parent then
+        self.localX = x - self.parent.x
+        self.localY = y - self.parent.y
+        self.z = z
         self:localPosRefresh()
+    else
+        self.x = x or self.x
+        self.y = y or self.y
+        self.z = z or self.z
     end
 
-    self.x = x or self.x
-    self.y = y or self.y
-    self.z = z or self.z
 end
 
 function item:getPos()

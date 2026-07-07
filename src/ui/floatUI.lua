@@ -40,7 +40,10 @@ function FloatUI:init()
     } -- floating items (tables with update/draw)
     self.floatTexts = {}
     self.dialogBoxs = {}
-    self.currentDialogState = nil
+    self.dialogStates = {}
+    self.dialogOrder = {}
+    self.nextDialogId = 1
+    self.maxDialogBoxes = 3
     self.z = 1000
 end
 
@@ -67,8 +70,25 @@ function FloatUI:addFloatText(text, x, y, opts)
     })
 end
 
-function FloatUI:closeDialogeBox()
-    self.currentDialogState = nil
+local function removeDialogById(dialogMap, dialogOrder, id)
+    dialogMap[id] = nil
+    for i = #dialogOrder, 1, -1 do
+        if dialogOrder[i] == id then
+            table.remove(dialogOrder, i)
+            break
+        end
+    end
+end
+
+function FloatUI:closeDialogeBox(id)
+    if id ~= nil then
+        removeDialogById(self.dialogStates, self.dialogOrder, id)
+        self.dialogBoxs[id] = nil
+        return
+    end
+
+    self.dialogStates = {}
+    self.dialogOrder = {}
     self.dialogBoxs = {}
 end
 
@@ -81,8 +101,16 @@ function FloatUI:addDialogeBox(text, x, y, opts)
     x = x or 200
     y = y or 300
 
-    -- 场景内同时只保留一个对话框
-    self:closeDialogeBox()
+    local maxCount = math.max(1, math.floor(opts.maxCount or self.maxDialogBoxes or 1))
+    self.maxDialogBoxes = maxCount
+
+    while #self.dialogOrder >= maxCount do
+        local oldestId = table.remove(self.dialogOrder, 1)
+        if oldestId then
+            self.dialogStates[oldestId] = nil
+            self.dialogBoxs[oldestId] = nil
+        end
+    end
 
     local fullText = text or ""
     local totalChars = getTextLength(fullText)
@@ -97,8 +125,12 @@ function FloatUI:addDialogeBox(text, x, y, opts)
         tailX, tailY
     )
 
-    self.dialogBoxs[1] = dialog1
-    self.currentDialogState = {
+    local dialogId = self.nextDialogId
+    self.nextDialogId = self.nextDialogId + 1
+
+    self.dialogBoxs[dialogId] = dialog1
+    self.dialogStates[dialogId] = {
+        id = dialogId,
         dialog = dialog1,
         fullText = fullText,
         shownChars = isInstant and totalChars or 0,
@@ -109,10 +141,21 @@ function FloatUI:addDialogeBox(text, x, y, opts)
         autoClose = opts.autoClose or 0, -- opts.autoClose: 全文显示完成后，多少秒自动关闭；0 表示不自动关闭
         autoCloseTimer = 0
     }
+
+    table.insert(self.dialogOrder, dialogId)
+    return dialogId
 end
 
 function FloatUI:addDialogueBox(text, x, y, opts)
-    self:addDialogeBox(text, x, y, opts)
+    return self:addDialogeBox(text, x, y, opts)
+end
+
+function FloatUI:removeDialogeBox(id)
+    self:closeDialogeBox(id)
+end
+
+function FloatUI:removeDialogueBox(id)
+    self:closeDialogeBox(id)
 end
 
 -- 创建一个简单的弹窗（若 Glove.Window 可用则使用之）
@@ -180,8 +223,12 @@ function FloatUI:update(dt)
         end
     end
 
-    local dialogState = self.currentDialogState
-    if dialogState then
+    for i = #self.dialogOrder, 1, -1 do
+        local dialogId = self.dialogOrder[i]
+        local dialogState = self.dialogStates[dialogId]
+        if not dialogState then
+            table.remove(self.dialogOrder, i)
+        else
         if not dialogState.finished then
             dialogState.charProgress = dialogState.charProgress + dt * dialogState.typeSpeed
             local addCount = math.floor(dialogState.charProgress)
@@ -198,8 +245,9 @@ function FloatUI:update(dt)
         elseif dialogState.autoClose > 0 then
             dialogState.autoCloseTimer = dialogState.autoCloseTimer + dt
             if dialogState.autoCloseTimer >= dialogState.autoClose then
-                self:closeDialogeBox()
+                self:closeDialogeBox(dialogId)
             end
+        end
         end
     end
 end
@@ -212,8 +260,11 @@ function FloatUI:draw()
         if it.draw then it:draw() end
     end
 
-    for i, d in ipairs(self.dialogBoxs) do
-        d:draw()
+    for _, id in ipairs(self.dialogOrder) do
+        local d = self.dialogBoxs[id]
+        if d then
+            d:draw()
+        end
     end
 
     for i, t in ipairs(self.floatTexts) do

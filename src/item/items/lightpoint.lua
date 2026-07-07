@@ -8,6 +8,8 @@ function LightPoint:init(x, y)
     if lightShader.isCreatShader then
        self.light = lightShader.addPointLight({ radius = 350, intensity = 0.8 })
     end
+    self.w=32 
+    self.h=32
 end
 
 function LightPoint:setPos(x,y,z)
@@ -20,6 +22,6 @@ function LightPoint:update(dt)
     self.light.r,self.light.g,self.light.b=self.color[1],self.color[2],self.color[3]
     --父类的方法执行
     LightPoint.super.update(self,dt)
-    
 end
+
 return LightPoint

@@ -104,7 +104,8 @@ function DialogueEngine:nodePrint(dialog, node, WaitTimeMode)
             waitTime = 0
         end
         print("waitTime:", waitTime)
-        floatUI:addDialogeBox(text, 130, 280, {
+        nianDebug.printStackTrace("当前节点ID:", node.id)
+        floatUI:addDialogueBox(text, 130, 280, {
             typeSpeed = 10,
             autoClose = waitTime,
             tailX = 250,
@@ -249,7 +250,7 @@ function DialogueEngine:new(json_Path)
     end
 
     self:reNew() -- 加载状态
-    self:reset("first") -- 初始化当前节点
+    --self:reset("first") -- 初始化当前节点
     self.history = {} -- 可选：记录选择历史
     return self
 end
@@ -436,7 +437,7 @@ end
 
 -- 加载状态
 function DialogueEngine:reNew()
-    local state = globleManager:getGameData("dialogeState")
+    local state = globleManager:getGameData("DialogueBoxState")
 
     if  globleManager.getConfig("debug","dialogue_new") then
         print("对话状态重置")
@@ -448,7 +449,7 @@ function DialogueEngine:reNew()
         self.state = state
         self.state.lastTime = os.time()
         self.state.cumulativeToday = 0 -- 累计听歌时间今日
-        globleManager:saveGameData("dialogeState", self.state)
+        globleManager:saveGameData("DialogueBoxState", self.state)
     else -- 没有就创建
         self.state = {}
         self.state.lastTime = os.time()
@@ -460,7 +461,7 @@ function DialogueEngine:reNew()
         -- self.state.musicName = audio.currentMusicName() -- 当前音乐
         self.state.cumulative = 0 -- 累计听歌时间
         self.state.cumulativeToday = 0 -- 累计听歌时间今日
-        globleManager:saveGameData("dialogeState", self.state)
+        globleManager:saveGameData("DialogueBoxState", self.state)
     end
 end
 
@@ -474,7 +475,7 @@ end
 
 function DialogueEngine:stop()
     self.start=false
-    floatUI:closeDialogeBox()
+    floatUI:closeDialogueBox()
 end
 
 function DialogueEngine:start()
@@ -486,7 +487,7 @@ function DialogueEngine:continue()
     dialogWaitTime = 0
     WaitTimeMode = true
     -- self.current_node_id = nil
-    floatUI:closeDialogeBox()
+    floatUI:closeDialogueBox()
 end
 
 function DialogueEngine:update(dt)
@@ -523,7 +524,7 @@ end
 
 function DialogueEngine:saveState()
     self.state.lastTime = self.state.time
-    globleManager:saveGameData("dialogeState", self.state)
+    globleManager:saveGameData("DialogueBoxState", self.state)
 end
 
 function DialogueEngine:destroy()

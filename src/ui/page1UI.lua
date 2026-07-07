@@ -9,14 +9,25 @@ local page1UI = ui:extend()
 function page1UI:init()
 
     
-    
+    self:refresh()
+
+
+    local page1BGUI = require("src.ui.page1BGUI"):new()
+    uiManager:addUI("page1BGUI", page1BGUI)
+    self:addChild(page1BGUI)
+
     local playlistUI = require("src.ui.playlistUI"):new()
     uiManager:addUI("playlistUI", playlistUI)
     self:addChild(playlistUI)
+
     --切换频道
     local roomUI = require("src.ui.roomUI"):new()
     uiManager:addUI("roomUI", roomUI)
     self:addChild(roomUI)
+
+    local playerlistUI = require("src.ui.playerlistUI"):new()
+    uiManager:addUI("playerlistUI", playerlistUI)
+    self:addChild(playerlistUI)
     
     -- 立绘ui
     local nianocUI = require("src.ui.nianocUI"):new()
@@ -27,7 +38,6 @@ function page1UI:init()
     uiManager:addUI("wheelSelectionUI", wheelSelectionUI)
     self:addChild(wheelSelectionUI)
 
-    self:refresh()
 end
 
 -- 更新播放列表显示
@@ -35,6 +45,7 @@ function page1UI:refresh()
     self:clearStacks()
     self:buildCurrentInfo()
 end
+
 
 function page1UI:buildCurrentInfo()
 
@@ -59,7 +70,7 @@ function page1UI:destroy()
     uiManager:removeUI("nianocUI")
     uiManager:removeUI("roomUI")
 
-    -- uiManager:removeUI("playerlistUI")
+    uiManager:removeUI("playerlistUI")
 end
 
 return page1UI

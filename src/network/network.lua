@@ -5,7 +5,7 @@ local Network = {
     peers = {},
     musicTransfering = 0,
     enterRoom = false,
-    signalKey =nil
+    signalKey = nil
 }
 
 -- 初始化挂起
@@ -49,10 +49,10 @@ function Network:startNetThread(code)
             cmd = "start",
             code = code,
             key = self.signalKey,
-            localmod = globleManager.getConfig("debug","local_Mod")
+            localmod = globleManager.getConfig("debug", "local_Mod")
         }
         self.netThreadIsStart = true
-        
+
         -- print("网络线程已启动")
     end
 end
@@ -110,9 +110,9 @@ end
 
 -- 网络线程回调
 function Network:info()
-    --必须要0.01没有数据就跳过，不然是阻塞的
-    --窗口焦点切换会降低 Love2D 主线程的调度优先级，系统不再「宽容」这个阻塞请求，而是强制等待 pop() 返回
-    
+    -- 必须要0.01没有数据就跳过，不然是阻塞的
+    -- 窗口焦点切换会降低 Love2D 主线程的调度优先级，系统不再「宽容」这个阻塞请求，而是强制等待 pop() 返回
+
     local pktCh = infoNetworkCh:pop(0.01)
     if pktCh then
         -- print("pktCh type : "..pktCh.type )
@@ -157,7 +157,6 @@ function Network:info()
                 end
             end
 
-            uiManager:refresh("playerlistUI")
         elseif pktCh.type == "disconnectPeer" then
             print("[getdisconnectPeer]---", pktCh.address)
             -- 删除这个角色 如果有角色的话
@@ -165,6 +164,11 @@ function Network:info()
             if id then
                 playerManager:removeRemotePlayer(id)
                 self.connects[id] = nil
+
+                local playerlistUI = uiManager:getUI("playerlistUI")
+                if playerlistUI then
+                    playerlistUI:removePlayer(id)
+                end
             end
         elseif pktCh.type == "connectFail" then
             eventManager:emit("connectFail")
@@ -212,10 +216,15 @@ function Network:handleMessage(message, address)
     elseif message.type == "playerConnectInfo" then
         -- 收到玩家生成信息
         playerManager:addRemotePlayer(message.userid, message.name, message.x, message.y)
-
+        local playerlistUI = uiManager:getUI("playerlistUI")
+        if playerlistUI then
+            playerlistUI:addPlayer(message.userid, message.name)
+        end
     elseif message.type == "chatMessage" then
-        uiManager:getUI("dialog"):addMessage( message.content,message.userid)
-
+        if message.userid== network.userid then
+            uiManager:getUI("nianocUI"):addMessage(message.message, message.userid)
+        end
+            uiManager:getUI("dialog"):addMessage(message.message, message.userid)
     else
         print("## no handle by: " .. message.type)
     end

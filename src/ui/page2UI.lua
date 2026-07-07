@@ -11,10 +11,7 @@ local page2UI = ui:extend()
 function page2UI:init()
     self:refresh()
 
-    -- 聊天界面
-    -- local dialog = require("src.ui.dialog"):new()
-    -- uiManager:addUI("dialog", dialog)
-    -- self:addChild(dialog)
+
 end
 
 -- 更新播放列表显示
@@ -28,7 +25,6 @@ end
 
 function page2UI:destroy()
     page2UI.super.destroy(self)
-    uiManager:removeUI("dialog")
 end
 
 return page2UI

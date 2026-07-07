@@ -137,7 +137,7 @@ function Tabs:setSize(w, h)
 end
 
 function Tabs:onClick(x, y, button)
-    if self.interaction ==false then
+    if self.active == false then
         return
     end
 

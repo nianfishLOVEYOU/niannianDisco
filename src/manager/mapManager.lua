@@ -103,20 +103,18 @@ function mapManager:removeGrid(indexx, indexy)
     end
 end
 
-function mapManager:creatMap(w, h)
+function mapManager:creatMap()
     local createMap = require "src.map.map"
     local map = createMap()
-    map.size.width = w
-    map.size.height = h
-    for x = 1, w do
+    for x = 1, map.size.width do
         table.insert(map.grids, {})
         table.insert(map.items, {})
-        for y = 1, h do
+        for y = 1, map.size.height do
             map.items[x][y] = 0
             map.grids[x][y] = 0
         end
     end
-    print("创建新地图，大小：", w, h)
+    print("创建新地图，大小：", map.size.width , map.size.height)
     return map
 end
 

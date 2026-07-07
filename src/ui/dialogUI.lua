@@ -1,22 +1,22 @@
 local ui = require "src.ui.ui"
 
-local dialog = ui:extend()
+local dialogUI = ui:extend()
 
 local dialogW=love.graphics.getWidth() - 100
 local dialogH=200
 
-function dialog.keyboard(key)
+function dialogUI.keyboard(key)
     if key == "enter" then
-        if dialog.message ~= "" then
-            dialog:_sendMessage(dialog.message)
-            dialog.message = ""
-            dialog.inputMessageBox:setText("")
+        if dialogUI.message ~= "" then
+            dialogUI:_sendMessage(dialogUI.message)
+            dialogUI.message = ""
+            dialogUI.inputMessageBox:setText("")
         end
     end
 end
 
-function dialog:init()
-    self.name="dialog"
+function dialogUI:init()
+    self.name="dialogUI"
     self.message = ""
     self:refresh()
     self.keyboardEvent= systemManager:keypressed_regester(function(key)
@@ -30,10 +30,11 @@ function dialog:init()
         end
     end
     end)
+    self.z=100
 end
 
 -- 更新播放列表显示
-function dialog:refresh()
+function dialogUI:refresh()
     self:clearStacks()
     self:_buildChatRoom()
     self:_buildInputBox()
@@ -42,7 +43,7 @@ end
 
 
 -- 聊天历史记录
-function dialog:_buildChatRoom()
+function dialogUI:_buildChatRoom()
     --滑动条
     local slidePanel = Glove.SlidePanel:new()
     self:addStack(slidePanel)
@@ -54,11 +55,11 @@ function dialog:_buildChatRoom()
 end
 
 -- 输入框
-function dialog:_buildInputBox()
+function dialogUI:_buildInputBox()
     self.inputMessageBox = Glove.Input:new(self.message, function(input)
         self.message = input
     end)
-    self.inputMessageBox:setSize(100, 20)
+    self.inputMessageBox:setSize(60, 20)
     local sendButton = Glove.Button:new("send", function()
         print("got click", self.message)
         if self.message ~= "" then
@@ -67,14 +68,15 @@ function dialog:_buildInputBox()
             self.inputMessageBox:setText("")
         end
     end)
-    sendButton:setSize(50, 20)
-    local hstack = Glove.HStack:new({self.inputMessageBox, sendButton}, 5)
+    sendButton.color={1,0,0}
+    sendButton:setSize(40, 20)
+    local hstack = Glove.VStack:new({self.inputMessageBox, sendButton}, 5)
     hstack:setName("dialog input hstack")
-    hstack:setPos(love.graphics.getWidth() - 200, 240)
     self:addStack(hstack)
+    hstack:setLocalPos(0, 0)
 end
 
-function dialog:_sendMessage(string)
+function dialogUI:_sendMessage(string)
     -- 发送列表
     local msg = {
         type = "chatMessage",
@@ -86,38 +88,39 @@ function dialog:_sendMessage(string)
 end
 
 -- 玩家头像
-function dialog:_getPlayerHead(id)
+function dialogUI:_getPlayerHead(id)
     --local image = Glove.Image:new("res/image/head.png")
     local name = Glove.Text:new("玩家"..id)
     return name
 end
 
 -- 添加消息hstack
-function dialog:addMessage(string, playerId)
+function dialogUI:addMessage(string, playerId)
     print ("addMessage", string, playerId)
     --左边是消息，右边是玩家头像
     local message = Glove.Text:new(": ".. string)
     message:setSize(200,0)
     local hstack = Glove.HStack:new({self:_getPlayerHead(playerId),message}, 10)
+
+    local playerListUI = uiManager:getUI("playerlistUI")
+    if playerListUI then
+        playerListUI:playerTalk(playerId, string)
+    end
     self.ChatRoomSlidePanel:add(hstack)
 end
 
-function dialog:draw()
+function dialogUI:draw()
     -- 画一个底色方块
-    -- love.graphics.setColor(1, 1, 1, 0.5)
-    -- love.graphics.rectangle("fill", 50, 20, love.graphics.getWidth() - 100, 200)
-    -- love.graphics.setColor(1, 1, 1)
-    
-    dialog.super.draw(self)
+    dialogUI.super.draw(self)
 end
 
-function dialog:update(dt)
+function dialogUI:update(dt)
 
 end
 
-function dialog:destroy()
+function dialogUI:destroy()
     systemManager:removeFunc(self.keyboardEvent)
-    dialog.super.destroy(self)
+    dialogUI.super.destroy(self)
 end
 
-return dialog
+return dialogUI
