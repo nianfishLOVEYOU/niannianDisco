@@ -10,7 +10,7 @@ function PlayerUI:init()
 
     local width, height = love.graphics.getDimensions()
     local sw, sh = self.playerStack:getSize()
-    self:setPos(width / 2 - sw / 2, height - sh -20)
+    --self:setPos(width / 2 - sw / 2, height - sh -20)
 end
 
 -- 更新播放列表显示
@@ -102,7 +102,6 @@ function PlayerUI:buildStack()
     local playSlider = Glove.Slider:new(0, function(value)
         PlayerUI:dragProgress(value)
     end)
-    playSlider:setSize(width - 80, 10)
     self.playSlider=playSlider
     ------ musicvoice slider------
 
@@ -127,28 +126,15 @@ function PlayerUI:buildStack()
     local sliderHStack = Glove.HStack:new({ playSlider })
     local buttonHStack = Glove.HStack:new({ perButton, playButton, nextButton,listButton} )
     local stack = Glove.VStack:new({ musiVoiceHStack, buttonHStack, sliderHStack },10,"center")
-
+    self.buttonHStack=buttonHStack
     self:addStack(stack)
-    stack:setLocalPos(0,0)
+    playSlider:setSize(stack.w - 80, 10)
+    stack:setAlign("center-bottom", 50, {x = 0, y = 0})
+    --stack:setLocalPos(0,0)
     self.playerStack=stack
 end
 
-function PlayerUI:getBackStack()
-    local width, height = love.graphics.getDimensions()
-    local c = {}
-    for i = 1, 12, 1 do
-        local ima = Glove.Image:new("res/image/ui/blackdrag.png")
-        ima:setSize(50, 100)
-        table.insert(c, ima)
-    end
 
-
-    local backstuck = Glove.HStack:new(c, 0)
-    backstuck:setPos(0, height - 100)
-    backstuck:setLocalPos(nil, nil, -1)
-
-    return backstuck
-end
 
 function PlayerUI:update(dt)
     -- 当前播放信息
@@ -181,13 +167,13 @@ function PlayerUI:update(dt)
 end
 
 function PlayerUI:draw()
+    local width, height = love.graphics.getDimensions()
     --画一个白色背景
     love.graphics.setColor(1, 1, 1)
     if self.playerStack then
-        love.graphics.rectangle("fill", self.playerStack.x,self.playerStack.y,self.playerStack.w,self.playerStack.h,10)
+        love.graphics.rectangle("fill",  40, self.playerStack.y, width - 80, self.playerStack.h, 10)
     end
     self:drawStacks()
-    local width, height = love.graphics.getDimensions()
     -- if network.musicTransfering > 0 then
     --     love.graphics.setColor(0.2, 0.2, 0.2, 0.5)
     --     love.graphics.rectangle("fill", 0, height - 100, width, 100)

@@ -19,7 +19,7 @@ function AnchoredImage:init(path, x, y, anchorX, anchorY)
     self.path = path
     if not self.img then
         print("!ERROR non path ! : " .. path)
-
+        self.img= resourceManager.loadImage("res/image/nian.png")
         self.color = {1, 0, 0, 1}
         self.w, self.h = 32, 32
         self.originalW, self.originalH = self.w, self.h
@@ -139,6 +139,10 @@ function AnchoredImage:draw()
         self.depth = sy / love.graphics.getHeight()
         self.depth = self.depth > 1 and 1 or self.depth
         self.depth = self.depth < 0 and 0 or self.depth
+    end
+    if not self.depth then 
+        self.depth = 1
+        print("!!!AnchoredImage:draw() depth is nil, set to 1!!! :", self.path)
     end
     --print("AnchoredImage:draw() depthByY:", self.depthByY, "depth:", self.depth, "y:", self.y)
     local drawInfo = {

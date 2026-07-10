@@ -19,7 +19,7 @@ local connectSeccess = function()
 end
 
 function RoomUI:init()
-    self.oldChannel = -1
+    --self.oldChannel = -1
     -- audio.playlist = globleManager:getGameData("playlist") or {}
     --self:refresh()
     -- eventManager:on("connectFail", connectFail)
@@ -30,14 +30,14 @@ function RoomUI:init()
 end
 
 function RoomUI:update(dt)
-    local waitingUI = uiManager:getUI("waitingUI")
-    if waitingUI then
-        -- 超出等待上限
-        if waitingUI.time > 10 then
-            uiManager:removeUI("waitingUI")
-            network:closeNetThread()
-        end
-    end
+    -- local waitingUI = uiManager:getUI("waitingUI")
+    -- if waitingUI then
+    --     -- 超出等待上限
+    --     if waitingUI.time > 10 then
+    --         uiManager:removeUI("waitingUI")
+    --         network:closeNetThread()
+    --     end
+    -- end
 end
 
 -- 更新播放列表显示

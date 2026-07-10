@@ -31,7 +31,7 @@ function MenuUI:refresh()
     -- 创建本地列表
 
     self:clearStacks()
-    self:addStack(self:getvstack())
+    self:buildVstack()
 end
 
 function MenuUI:update(dt)
@@ -54,7 +54,7 @@ end
 
 
 --主要的输入进入房间
-function MenuUI:getvstack()
+function MenuUI:buildVstack()
     local linkButton = Glove.Button:new("link", function()
         print("got click")
         if (string.len(self.code) == 4 and self.playername ~= "") then
@@ -96,10 +96,12 @@ function MenuUI:getvstack()
     -- end)
     local bt = Glove.HStack:new({ linkButton ,showFileButton})
 
-    local stack = Glove.VStack:new({first,second,bt,Toggle},10)
+    local stack = Glove.VStack:new({first,second,bt},10)
     stack.spacing = 10
-
-    stack:setPos(self.posx, self.posy,self.z)
+    
+    self:addStack(stack)
+    stack:setAlign("center-top", 0, {x = 0, y = 100})
+    --stack:setPos(self.posx, self.posy,self.z)
     return stack
 end
 

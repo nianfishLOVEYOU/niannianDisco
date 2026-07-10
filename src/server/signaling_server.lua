@@ -28,8 +28,16 @@ local rooms = {}
 local addressToRooms = {}
 --local peers = {}
 
-local function roomAddPeer(code, ip, port,peer,peerKey)
-    local key =peerKey
+local function removeAddressIndexByRoomAndId(code, id)
+    for addr, info in pairs(addressToRooms) do
+        if info.code == code and info.id == id then
+            addressToRooms[addr] = nil
+        end
+    end
+end
+
+local function roomAddPeer(code, ip, port, peer, peerKey)
+    local key = peerKey
     local addr = ip .. ":" .. port
     local roomPeers --房间成员列表
     if rooms[code] then
@@ -44,19 +52,24 @@ local function roomAddPeer(code, ip, port,peer,peerKey)
     end
 
     -- 查找是否之前在房间里面
-    local perpeer, perkey
-    for _, rp in pairs(roomPeers) do
+    local perpeer, perid
+    for id, rp in pairs(roomPeers) do
         if rp.key == key then
             perpeer = rp
-            perkey = key
+            perid = id
+            break
         end
     end
 
     --找到了
     if perpeer then
-        perpeer = peer
+        perpeer.peer = peer
+        perpeer.ip = ip
+        perpeer.port = tonumber(port)
+        perpeer.addr = addr
         perpeer.islive = true
-        print(string.format("[REGISTER BACK] id=%d, %s:%d ,room :%s", perkey, ip, port, code))
+        print(string.format("[REGISTER BACK] id=%d, %s:%d ,room :%s", perid, ip, port, code))
+        return perid
     else
         --没找到
         --设置这个成员信息
@@ -67,9 +80,11 @@ local function roomAddPeer(code, ip, port,peer,peerKey)
             ip = ip,
             port = tonumber(port),
             addr = addr,
+            key = key,
             islive = true
         }
         print(string.format("[REGISTER] id=%d, %s:%d ,room :%s", id, ip, port, code))
+        return id
     end
 end
 
@@ -108,7 +123,9 @@ local function reportRoomPeers(code)
 
     -- 向所有已注册的客户端发送（可靠发送，使用通道 0）
     for _, pinfo in pairs(roomPeers) do
-        pinfo.peer:send(payload, 0) -- 0 为通道号
+        if pinfo.islive then
+            pinfo.peer:send(payload, 0) -- 0 为通道号
+        end
     end
     print("[BROADCAST] 已发送 peer 列表给全部客户端")
 end
@@ -151,20 +168,21 @@ while true do
                         print("[WARN] 注册数据格式错误:", msg.addr)
                     elseif type(code) ~= "string" or string.len(code) ~= 4 then
                         print("[WARN] 房间code错误:", msg.addr)
+                    elseif type(key) ~= "string" or key == "" then
+                        print("[WARN] 玩家key错误:", tostring(key))
                     else
                         --房间成员列表
                         --如果没有这个房间就添加房间，添加成员
 
-                        roomAddPeer(code, ip, port,ev.peer,key)
+                        local id = roomAddPeer(code, ip, port, ev.peer, key)
+                        removeAddressIndexByRoomAndId(code, id)
 
                         --加入索引  --忘记这里干嘛的了
                         local addr = tostring(ev.peer)
-                        if not addressToRooms[addr] then
-                            addressToRooms[addr] = {
-                                code = code,
-                                id = id
-                            }
-                        end
+                        addressToRooms[addr] = {
+                            code = code,
+                            id = id
+                        }
 
                         reportRoomPeers(code)
                     end
@@ -191,8 +209,9 @@ while true do
             end
 
             -- 移除peer
-            if removed_id then
+            if removed_id and peers and peers[removed_id] then
                 peers[removed_id].islive = false
+                addressToRooms[addr] = nil
                 reportRoomPeers(code)
                 print(string.format("[DISCONNECT] id=%d 已移除", removed_id))
             else

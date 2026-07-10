@@ -20,9 +20,11 @@ function Network:init()
     ctrlNetworkCh = love.thread.getChannel("ctrlNetwork")
     infoNetworkCh = love.thread.getChannel("infoNetwork")
     self.signalKey = globleManager:getGameData("signalKey")
+    print("个人key:", self.signalKey)
     if not self.signalKey then
         self.signalKey = globleManager:guid()
         globleManager:saveGameData("signalKey", self.signalKey)
+        print("生成个人key:", self.signalKey)
     end
 end
 
@@ -120,12 +122,19 @@ function Network:info()
             -- 预缓冲 200ms，确保同步
             -- audio:loadMusic(pktCh.path)
             -- audio:play(0)
+            audio.downloadProgress = 100
+            local music = love.audio.newSource(pktCh.path, "stream")
+            playlistManager:addMusic(pktCh.name, pktCh.path, "tmp", music.duration, "self")
+
+            local playlistUI = uiManager:getUI("playlistUI")
+            playlistUI:addLocalPlayListItem(pktCh.path, pktCh.name, music.duration)
         elseif pktCh.type == "sendAudioOk" then
             -- 预缓冲 200ms，确保同步
             -- audio:loadMusic(pktCh.path)
             -- audio:play(0)
             self.musicTransfering = self.musicTransfering - 1
         elseif pktCh.type == "info_returnProgress" then
+            print("获得音乐进度:", pktCh.progress, pktCh.musicname)
             audio.downloadProgress = pktCh.progress
         elseif pktCh.type == "getPeers" then
             self.peers = pktCh.peers
@@ -221,9 +230,6 @@ function Network:handleMessage(message, address)
             playerlistUI:addPlayer(message.userid, message.name)
         end
     elseif message.type == "chatMessage" then
-        if message.userid== network.userid then
-            uiManager:getUI("nianocUI"):addMessage(message.message, message.userid)
-        end
             uiManager:getUI("dialog"):addMessage(message.message, message.userid)
     else
         print("## no handle by: " .. message.type)

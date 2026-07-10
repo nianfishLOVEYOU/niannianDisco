@@ -21,15 +21,17 @@ local DEFAULT_OPTIONS = {{
         local playlistUI = uiManager:getUI("playlistUI")
         playlistUI:open("playlist")
     end
-}, {
+}
+, {
     label = "角色",
     imagePath = "res/image/player1.png",
     action = function()
-        -- if not uiManager:getUI("playerSelectUI") then
-        --     uiManager:addUI("playerSelectUI", require("src.ui.playerSelectUI"):new())
-        -- end
+        if not uiManager:getUI("playerSelectUI") then
+            uiManager:addUI("playerSelectUI", require("src.ui.playerSelectUI"):new())
+        end
     end
-}}
+}
+}
 
 local function clamp(value, minValue, maxValue)
     if value < minValue then
@@ -78,7 +80,7 @@ function WheelSelectionUI:init(options)
     self.ballRadius = 34
     self.ballInterval = 30
     self.iconSize = 42
-    self.psdindent=36 --点击范围缩入
+    self.psdindent=65 --点击范围缩入
     self.attractRadius = 100 -- 移动影响距离
     self.selectRadius = 48 -- 选择半径
     self.attractStrength = 20 -- 移动强度
@@ -363,7 +365,7 @@ function WheelSelectionUI:nianChange()
 end
 
 function WheelSelectionUI:draw()
-    self:drawTriggerArea()
+    --self:drawTriggerArea()
     if not self.isOpen then
         return
     end
@@ -378,7 +380,6 @@ function WheelSelectionUI:onClick(x, y, button)
     if button ~= 1 then
         return
     end
-    print("onClick WheelSelectionUI", x, y, button)
     self:beginPress(x, y)
     if nianocUI and self:isInTriggerArea(x, y) then
         self.isNianClick = true

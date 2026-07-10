@@ -21,9 +21,9 @@ function page1UI:init()
     self:addChild(playlistUI)
 
     --切换频道
-    local roomUI = require("src.ui.roomUI"):new()
-    uiManager:addUI("roomUI", roomUI)
-    self:addChild(roomUI)
+    -- local roomUI = require("src.ui.roomUI"):new()
+    -- uiManager:addUI("roomUI", roomUI)
+    -- self:addChild(roomUI)
 
     local playerlistUI = require("src.ui.playerlistUI"):new()
     uiManager:addUI("playerlistUI", playerlistUI)
@@ -68,7 +68,7 @@ function page1UI:destroy()
     uiManager:removeUI("playlistUI") -- 播放列表，是在ui内展开的，这里直接remove就行了
     uiManager:removeUI("playerUI")
     uiManager:removeUI("nianocUI")
-    uiManager:removeUI("roomUI")
+    -- uiManager:removeUI("roomUI")
 
     uiManager:removeUI("playerlistUI")
 end

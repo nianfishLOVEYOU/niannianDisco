@@ -6,7 +6,7 @@
 	或者 APK Editor Studio   游戏包重命名为game.love    安装 Java 运行时（JRE）
 
 打开 APK Editor Studio → 「文件」→「打开」，选中目标 APK
-左侧文件树找到assets文件夹，展开，删除里面默认的空game.love
+左侧文件树找到assets文件夹，展开，删除里面默认的空game.love  --点击打开内容
 右键assets → 「添加文件」，选择你自己的game.love
 改图标 / 应用名（可选）：
 图标：res/mipmap文件夹，替换对应尺寸 PNG
@@ -15,8 +15,12 @@
 构建完成，拿到新 APK，直接装手机就能用 —— 一个图标，点开直接进游戏
 
 
-
+.love名字 名字必须要是game.love
 Love2D 11.5
+
+打开AndroidMinifest.xml
+横屏，android:screenOrientation="landscape" 改为 "portrait"
+	把 landscape（横屏）改成 portrait（强制竖屏）
 
 
 

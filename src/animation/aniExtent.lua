@@ -65,8 +65,8 @@ function aniExtend.jump(item, time, jumpHeight, callback)
     local name = tostring(ui.id)
 
     -- 已有动画直接退出，防止叠加
-    if animator.tracks[name] then
-        return
+    if animator.tracks[name.."jump"] then
+        animator:clearKeyframes(name.."jump")
     end
 
     -- 初始坐标
@@ -86,23 +86,70 @@ function aniExtend.jump(item, time, jumpHeight, callback)
     -- animator:addKeyframe(name, time, originX)
 
     -- 2. Y轴跳跃动画，带重力缓动：先上升到最高点，再下落回原高度
-    animator:addTrack(name, ui, "y", true, false, false, "easeOut") -- 上升减速(重力拉扯)
-    animator:addKeyframe(name, 0, originY)
-    animator:addKeyframe(name, halfTime, originY - jumpHeight) -- 最高点
+    animator:addTrack(name.."jump", ui, "y", true, false, false, "easeOut") -- 上升减速(重力拉扯)
+    animator:addKeyframe(name.."jump", 0, originY)
+    animator:addKeyframe(name.."jump", halfTime, originY - jumpHeight) -- 最高点
 
-    animator:addTrack(name, ui, "y", true, false, false, "easeIn") -- 下落加速(重力加速)
-    animator:addKeyframe(name, halfTime, originY - jumpHeight)
-    animator:addKeyframe(name, time, originY) -- 落回初始高度
+    animator:addTrack(name.."jump", ui, "y", true, false, false, "easeIn") -- 下落加速(重力加速)
+    animator:addKeyframe(name.."jump", halfTime, originY - jumpHeight)
+    animator:addKeyframe(name.."jump", time, originY) -- 落回初始高度
 
     -- 动画结束清理
     timer:after(time, function()
         ui:setVisiable(true)
         ui:setPos(ui.x, originY) -- 强制归位，防止动画误差
-        animator:clearKeyframes(name)
+        animator:clearKeyframes(name.."jump")
         if callback then
             callback()
         end
     end)
 end
+
+--8字规律移动
+function aniExtend.move8(item, time, dis, callback)
+    local ui = item
+    local name = tostring(ui.id)
+
+    -- 已有动画直接退出，防止叠加
+    if animator.tracks[name.."y"] then
+        aniExtend.end_move8(item)
+    end
+
+    -- 标准8字（李萨如）轨迹：
+    -- x = originX + Ax * sin(t)
+    -- y = originY + Ay * sin(2t)
+    -- 一个完整周期使用 time，循环时平滑衔接
+    local originX = ui.x
+    local originY = ui.y
+    local ampX = dis
+    local ampY = dis
+    local samples = 24 -- 采样点越多轨迹越圆滑
+
+    animator:addTrack(name.."x", ui, "x", true, true, false, "linear")
+    animator:addTrack(name.."y", ui, "y", true, true, false, "linear")
+
+    for i = 0, samples do
+        local p = i / samples
+        local t = p * time
+        local theta = p * math.pi * 2
+        local x = originX + ampX * math.sin(theta)
+        local y = originY + ampY * math.sin(theta * 2)
+        animator:addKeyframe(name.."x", t, x)
+        animator:addKeyframe(name.."y", t, y)
+    end
+end
+
+--8字规律移动
+function aniExtend.end_move8(item)
+    local ui = item
+    local name = tostring(ui.id)
+
+    -- 已有动画直接退出，防止叠加
+    if animator.tracks[name.."y"] then
+        animator:clearKeyframes(name.."y")
+        animator:clearKeyframes(name.."x")
+    end
+end
+
 
 return aniExtend

@@ -90,6 +90,9 @@ end
 function DialogueEngine:nodePrint(dialog, node, WaitTimeMode)
     if node then
         -- 弹出窗口聊天
+        if self.lastDialogueId then --关闭上次
+            floatUI:closeDialogueBox(self.lastDialogueId)
+        end
 
         local nodeTime = dialog.state.dialogue_Record[node.id] and dialog.state.dialogue_Record[node.id].times or 0
         print("[当前节点]", node.id, "经历次数：", nodeTime, "文本:", node.text, "选项:", #node.options)
@@ -105,7 +108,7 @@ function DialogueEngine:nodePrint(dialog, node, WaitTimeMode)
         end
         print("waitTime:", waitTime)
         nianDebug.printStackTrace("当前节点ID:", node.id)
-        floatUI:addDialogueBox(text, 130, 280, {
+        self.lastDialogueId =floatUI:addDialogueBox(text, 130, 280, {
             typeSpeed = 10,
             autoClose = waitTime,
             tailX = 250,

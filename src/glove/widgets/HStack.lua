@@ -2,9 +2,10 @@ local fun = require "src.glove.fun"
 local widget = require "src.glove.widgets.widget"
 
 -- 排序方式，顶格，居中，垫底
-local aligtype = {"top", "center", "buttom"}
+local aligtype = {"top", "center", "bottom"}
 local HStack = widget:extend()
 
+-- align: "top" | "center" | "bottom"
 function HStack:init(childrenTB, spacing, align)
     self.type = "HStack"
 

@@ -5,10 +5,11 @@ local widget = require "src.glove.widgets.widget"
 local aligtype = {"left", "center", "right"}
 local VStack = widget:extend()
 
+-- align: "left" | "center" | "right"
 function VStack:init(childrenTB, spacing, align)
     self.type = "VStack"
 
-    self.align = align or "left"
+    self.align = align or "left" --内容对齐
     self.w = 0 -- computed in layout method
     self.h = 0
     self.haveSpacer = fun.some(childrenTB, isSpacerWithoutSize)

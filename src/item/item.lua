@@ -101,6 +101,7 @@ function item:deSerialize(data)
 
 end
 
+-- 设置父对象相关初始化
 function item:setParentInit()
     self.localX = self.x - self.parent.x
     self.localY = self.y - self.parent.y

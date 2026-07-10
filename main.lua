@@ -8,6 +8,7 @@ end
 require "lib.nianTool"
 require "src.manager"
 require "src.glove"
+--local CScreen = require "src.CScreen-master.cscreen"
 
 network = require "src.network.network"
 audio = require "src.audio"
@@ -15,6 +16,8 @@ animator = require "src.animation.animator".new()
 
 
 function love.load()
+    --CScreen.init(400, 600, true)
+
     love.keyboard.setTextInput(true, 50, 50, 400, 30)
     print("save path:", love.filesystem.getSaveDirectory())
     print("LÖVE version:", love.getVersion())
@@ -100,6 +103,8 @@ function love.draw()
     --     nianDebug.DebugPrint()
     --     return
     -- end
+	--CScreen.apply()
+	-- Draw all of your objects here!
 
     -- 相机深度绘制
     cameraManager.cam:draw(camDepth)
@@ -115,6 +120,12 @@ function love.draw()
 
     -- debug
     nianDebug.DebugPrint()
+
+	--CScreen.cease()
+end
+
+function love.resize(width, height)
+	--CScreen.update(width, height)
 end
 
 function love.quit()

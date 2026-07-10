@@ -119,14 +119,14 @@ function PlayerSelectUI:confirmSelection()
     globleManager:saveGameData("selectedPlayerImage", sel.path)
     -- also set playerManager preview
     playerManager.selectedImage = sel.path
-    --uiManager:removeUI("playerSelectUI")
+    uiManager:removeUI("playerSelectUI")
 end
 
 function PlayerSelectUI:draw()
     love.graphics.setColor(0,0,0,0.6)
     love.graphics.rectangle("fill", self.x, self.y, self.w, self.h, 8,8)
     love.graphics.setColor(1,1,1)
-    love.graphics.print("选择角色（可拖入图片）", self.x + 12, self.y + 8)
+    love.graphics.print("选择角色（下次进入生效）", self.x + 12, self.y + 8)
 
     local thumbW = 32
     local thumbH = 32

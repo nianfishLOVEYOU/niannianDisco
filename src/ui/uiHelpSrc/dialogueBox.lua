@@ -97,7 +97,7 @@ function DialogueBox:draw()
     local anchorY = boxY + drawBoxH
 
     -- 2. 绘制尾巴
-    drawTail(anchorX, anchorY, self.targetX, self.targetY, 
+    drawTailStandard(anchorX, anchorY,"x", self.targetX, self.targetY, 
              self.config.tailSize, self.config.borderWidth,
              self.config.bgColor, self.config.borderColor)
 

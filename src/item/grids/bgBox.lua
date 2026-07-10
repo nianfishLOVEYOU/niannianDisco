@@ -6,9 +6,9 @@ function bgBox:init(imgPath)
 
     self.type = "bgBox"
     self.z = 0
-    self.ground = spriteAnimation:new("res/image/scence/沙滩地面.png", 0, 0, 0.5, 0.5)
-    self.sea = spriteAnimation:new("res/image/scence/沙滩地毯.png", 0, 0, 0.5, 0.4)
-    self.skybox = spriteAnimation:new("res/image/scence/沙滩背景.png", 0, 0, 0.5, 0.9)
+    self.ground = spriteAnimation:new("res/image/scence/sand_ground.png", 0, 0, 0.5, 0.5)
+    self.sea = spriteAnimation:new("res/image/scence/sand_sea.png", 0, 0, 0.5, 0.4)
+    self.skybox = spriteAnimation:new("res/image/scence/sand_bg.png", 0, 0, 0.5, 0.9)
 
     self.ground:setScale(1.3,1.3)
     -- self.sea:setScale(0.5,0.5)  

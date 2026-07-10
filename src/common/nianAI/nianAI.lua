@@ -100,13 +100,6 @@ function NianAI:click(x, y, button)
 end
 
 function NianAI:draw()
-    -- 背景
-    -- love.graphics.setBackgroundColor(0.2, 0.2, 0.3)
-    love.graphics.setColor(0, 0, 0)
-    love.graphics.print("按 R 重新开始", 250 + 1, 20 + 1)
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.print("按 R 重新开始", 250, 20)
-    return
 
 end
 

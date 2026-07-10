@@ -4,7 +4,6 @@ local json = require "lib.json"
 local Audio = {
     currentSource = nil,
     playlist = {}, -- *{userid , path , duration, name }
-    localplaylist = {}, -- 指向本地的tmp文件夹内，也指向其他music文件夹
     currentMusicName = "",
     currentIndex = 0,
     volume = 1,
@@ -117,7 +116,7 @@ end
 function Audio:setStuck(stuck)
 
     self.stuck = stuck
-    self.downloadProgress = stuck and 0 or 100
+    self.downloadProgress = stuck and 0 or self.downloadProgress
 end
 
 function Audio:sendRequestFile(musicindex)
@@ -238,9 +237,9 @@ function Audio:update(dt)
     self:automusicNext()
     -- 音乐资源等待下载
     if self.stuck then
-        print("stuck!!")
+        --print("stuck!!")
         local musicpath = fileManager:getFilePathByName(self.playlist[self.currentIndex].name)
-        if musicpath then
+        if musicpath and self.downloadProgress>=100  then
             self:MusicStart(musicpath, 0)
             self.downloadProgress = 0
         end

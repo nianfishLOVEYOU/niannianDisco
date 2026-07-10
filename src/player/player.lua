@@ -7,8 +7,9 @@ function player:init(imgPath, bodyInfo)
     self.type = "player"
 
     self:setImage(imgPath)
-    self:setBody(self.w / 2, 10, 0, -0.5, { type = "dynamic" })
-
+    self:setBody(self.w / 2, 10, 0, -0.5, {
+        type = "dynamic"
+    })
 
     self.speed = 200
     self.direct = 1
@@ -53,7 +54,7 @@ function player:speak(speakInfo)
 end
 
 function player:update(dt)
-    --父类的方法执行
+    -- 父类的方法执行
     player.super.update(self, dt)
     local vx, vy = 0, 0
     -- 鼠标操作：按住左键直接人工控制，优先级高于目标点移动
@@ -88,7 +89,7 @@ function player:update(dt)
     end
 end
 
---走路动画
+-- 走路动画
 function player:Animaiton()
     if not self.isAnimation then
         return
@@ -106,11 +107,11 @@ function player:Animaiton()
         end
     else
         if self.aniidx then
-            --self.animationAttribute.w, self.animationAttribute.h = 1, 1.2
+            -- self.animationAttribute.w, self.animationAttribute.h = 1, 1.2
             w, h = 1, 0.9
         end
         if not self.aniidx then
-            --self.animationAttribute.w, self.animationAttribute.h = 1, 0.9
+            -- self.animationAttribute.w, self.animationAttribute.h = 1, 0.9
             w, h = 1, 1.1
         end
     end
@@ -128,7 +129,7 @@ function player:Animaiton()
 end
 
 function player:draw()
-    --有动画状态时候
+    -- 有动画状态时候
 
     self.image:setPos(self:getPos())
     self.image:setSize(self:getSize())
@@ -138,17 +139,15 @@ function player:draw()
     self.image:draw()
 
     -- 显示名字
-
-    love.graphics.setColor(0, 0, 0, 0.4)
-    love.graphics.rectangle('fill', self.x - self.w / 2, self.y - self.h - 30, self.w, 20)
-
-    love.graphics.setColor(1, 1, 1)
     local fw = myFont:getWidth(self.name)
-    love.graphics.print(self.name, self.x - fw / 2, self.y - self.h - 30)
+    love.graphics.setColor(0, 0, 0, 0.4)
+    love.graphics.rectangle('fill', self.x - fw / 2, self.y - self.h - 50, fw, 20)
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print(self.name, self.x - fw / 2, self.y - self.h - 50)
 end
 
 function player:destroy()
-    --父类的方法执行
+    -- 父类的方法执行
     player.super.destroy(self)
     self.isAnimation = false
 end

@@ -18,7 +18,7 @@ function pageControlUI:init()
     local dialogUI = require("src.ui.dialogUI"):new()
     uiManager:addUI("dialog", dialogUI)
     self:addChild(dialogUI)
-    dialogUI:setPos(300,playerUI.y+20)
+    
 
 
     self:buildPage()
@@ -69,7 +69,8 @@ function pageControlUI:buildPage()
     self.tab = tabWidget
 
     local stack = Glove.VStack:new({tabWidget}, 10)
-    stack:setPos(love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() - 140)
+    local playerUI = uiManager:getUI("playerUI")
+    stack:setPos(love.graphics.getWidth() / 2 - 50, playerUI.playerStack.y - stack.h)
     self:addStack(stack)
 
 
@@ -129,14 +130,14 @@ end
 function pageControlUI:_toUi()
     playerManager.playerControl.playerAction = false
     if playerManager.player then --移动摄像机离开玩家
-        cameraManager:setTarget(-600, playerManager.player.y)
+        cameraManager:setTarget(-600 -love.graphics.getWidth()/2, playerManager.player.y)
     end
     self:_TurnP1Ani()
 end
 
 function pageControlUI:_TurnP1Ani()
     self.tab.active = false
-    aniExtend.uiRightIn(self.pages[1], 0.5, 400, function()
+    aniExtend.uiRightIn(self.pages[1], 0.5, love.graphics.getWidth(), function()
         self.tab.active = true
     end)
     -- aniExtend.uiLeftOut(self.pages[2], 0.3, 100)
@@ -144,7 +145,7 @@ end
 
 function pageControlUI:_TurnP2Ani()
     self.tab.active = false
-    aniExtend.uiLeftOut(self.pages[1], 0.5, 400, function()
+    aniExtend.uiLeftOut(self.pages[1], 0.5, love.graphics.getWidth(), function()
         self.tab.active = true
     end)
     -- aniExtend.uiRightIn(self.pages[2], 0.3, 100)

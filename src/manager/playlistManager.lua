@@ -3,7 +3,7 @@ local playlistManager = {
     localPlaylist = {},
     localMusic = {}, --只是用来读减少cpu压力的
 }
-
+--管理本地音乐
 systemManager:init_regester(function()
     playlistManager:init()
 end)
@@ -164,6 +164,7 @@ function playlistManager.musicInfo(name, path, user)
     return musicInfo
 end
 
+-- 
 function playlistManager:musicTransfer(name, targetListName)
     if self.localPlaylist[targetListName] then
         local TransferMusic = self:removeMusic(name)

@@ -6,7 +6,7 @@ systemManager:update_regester(function(dt)
     cameraManager:update(dt)
 end)
 ---设置摄像机
-pixSize = 4
+pixSize = 5
 local t = 0.1
 -- 参数：left, top, width, height（世界边界）
 cameraManager.cam = camera.new(-2000, -2000, 4000, 4000) -- 这里把整个游戏地图设为 2000×2000

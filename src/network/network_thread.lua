@@ -10,6 +10,8 @@ local stun = require "src.network.nianStun"
 local ctrlNetworkCh = love.thread.getChannel("ctrlNetwork")
 local infoNetworkCh = love.thread.getChannel("infoNetwork")
 
+local serverIp = "101.37.36.12"
+
 -- 房间号
 local code = ""
 local key ="" --唯一辨识自己的id，避免被冒充或者重复登录
@@ -32,7 +34,7 @@ end
 
 ------------- 1. STUN 打洞 ----------
 local function getPublicAddr()
-    local STUN_HOST = "8.136.44.223"
+    local STUN_HOST = serverIp
     local STUN_PORT = 3478
     local success, publicIp, port, localPort = stun:getPublicIp(STUN_HOST, STUN_PORT)
     if success then
@@ -123,7 +125,7 @@ else
     print("enet port :" .. "*:" .. ENET_PORT, host, err)
 
     -- ---------- 3. 向信令服务器报告外网地址 ----------
-    local SIGNAL_HOST = "8.136.44.223"
+    local SIGNAL_HOST = serverIp
     local SIGNAL_PORT = 4000
     sigPeer = host:connect(SIGNAL_HOST .. ":" .. SIGNAL_PORT, 2) -- 多通道，来做发送文件，语音什么的  这里是2
     local eventConnect = host:service(2000)
@@ -261,6 +263,7 @@ local function fileReceiveTask(name)
     local f, err = love.filesystem.newFile(tmp)
     local ok, openErr = f:open("a")
     local msg
+    print("开始获得音乐")
 
     -- 发送进度计数
     local returnProgressCount = 200
@@ -287,6 +290,7 @@ local function fileReceiveTask(name)
                 musicname = msg.musicname
             }
             i = 1
+            print("获得音乐进度:", msg.progress, msg.musicname)
         end
 
         i = i + 1
@@ -296,6 +300,7 @@ local function fileReceiveTask(name)
     infoNetworkCh:push{
         type = "audioOk",
         path = tmp,
+        name=name,
         ts = msg.ts,
         seq = msg.seq
     }

@@ -14,7 +14,7 @@ end
 -- 更新播放列表显示
 function page1BGUI:refresh()
     self:clearStacks()
-    self:buildBg()
+    --self:buildBg()
 end
 
 function page1BGUI:buildBg()

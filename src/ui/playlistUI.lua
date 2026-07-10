@@ -5,7 +5,7 @@ local ui = require "src.ui.ui"
 local PlaylistUI = ui:extend() -- 子类继承父类
 
 local slideW = love.graphics.getWidth() - 200
-local slideH = 160
+local slideH =  love.graphics.getHeight() /2
 local inPlaylistColor = {0.15, 0.50, 0.1, 1}
 local normalColor = {0, 0, 0, 1}
 local playingColor = {0.80, 0.3, 0.12, 1}
@@ -19,7 +19,7 @@ local state = {
     },
     playlistSize = {
         w = 200,
-        h = 280
+        h = slideH
     },
     localplaylistPos = {
         x = 20,
@@ -27,7 +27,7 @@ local state = {
     },
     localplaylistSize = {
         w = 200,
-        h = 280
+        h = slideH
     }
 }
 
@@ -239,7 +239,7 @@ function PlaylistUI:updatePlayListStateText()
         if itemInfo and itemInfo.textWidget then
             local isCurrent = (i == currentIndex)
             local prefix = isCurrent and "[播放中] " or ""
-            itemInfo.textWidget:setText(prefix .. info.name .. (isCurrent and waitingText or ""))
+            itemInfo.textWidget:setText(((isCurrent and waitingText or prefix ).. info.name ))
             -- itemInfo.button.clickFunc = function()
             --     audio:removePlayMusic(info.name)
             --     -- self:removePlayListItem(name)
